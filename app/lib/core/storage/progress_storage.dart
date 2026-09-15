@@ -7,6 +7,7 @@ class ProgressStorage {
   static const String _levelBestMovesPrefix = 'level_best_moves_';
   static const String _hapticsKey = 'pref_haptics_enabled';
   static const String _soundKey = 'pref_sound_enabled';
+  static const String _localeKey = 'pref_locale_code';
 
   final SharedPreferences _prefs;
 
@@ -97,5 +98,11 @@ class ProgressStorage {
   bool get isSoundEnabled => _prefs.getBool(_soundKey) ?? true;
   Future<void> setSoundEnabled(bool enabled) async {
     await _prefs.setBool(_soundKey, enabled);
+  }
+
+  String? get localeCode => _prefs.getString(_localeKey);
+
+  Future<void> setLocaleCode(String localeCode) async {
+    await _prefs.setString(_localeKey, localeCode);
   }
 }

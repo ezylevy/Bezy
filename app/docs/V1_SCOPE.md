@@ -1,6 +1,7 @@
 # BEZY V1 Scope
 
-Status: approved working scope, pending visual-design consultation.
+Status: approved working scope. The Product Owner approved proceeding to the
+next phase with the recommended visual direction on 2026-09-16.
 
 ## Included
 
@@ -37,6 +38,11 @@ Status: approved working scope, pending visual-design consultation.
 No production visual design, final component system, mascot, illustration set,
 or redesigned gameplay screen begins before a consultation with the Product
 Owner and explicit approval of the chosen direction.
+
+Gate result: passed on 2026-09-16. The approved direction is a colorful,
+modern adventure with distinct worlds, a clear high-contrast board, concise
+rewarding motion, visible progression, and a child-friendly tone that does not
+feel childish.
 
 ## Definition of done
 
