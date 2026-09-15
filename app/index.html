@@ -1,0 +1,456 @@
+<meta charset="UTF-8">
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        background-color: #f5f5dc; /* Change from #f0f0f0 to cream color */
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: row-reverse; /* Right-to-left order */
+        align-items: flex-start;
+        gap: 10px; /* Reduced gap */
+        margin: 20px auto; /* Center the container */
+        justify-content: center; /* Center horizontally */
+        width: 100%;
+        max-width: 1000px; /* Add max-width to prevent stretching */
+    }
+
+    h1 {
+        color: #333;
+        margin: 20px 0 0 0;
+        font-size: 32px;
+        text-align: center;
+    }
+
+    .subtitle {
+        color: #666;
+        margin: 5px 0 20px 0;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .subtitle a {
+        color: #0066cc;
+        text-decoration: none;
+    }
+
+    .subtitle a:hover {
+        text-decoration: underline;
+    }
+
+    select {
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        background-color: white;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    select:hover {
+        border-color: #666;
+    }
+
+    #grid {
+        display: grid;
+        grid-template-columns: repeat(var(--grid-size, 7), 60px);
+        gap: 2px;
+    }
+
+    .stats {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Reduced gap */
+        margin-right: 10px; /* Add margin to push away from grid */
+    }
+
+    .cell {
+        width: 60px;
+        height: 60px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .cell:hover {
+        background-color: #e0e0e0;
+    }
+
+    .start-point {
+        background-color: #90EE90;
+    }
+
+    .selected {
+        background-color: #ADD8E6;
+    }
+
+    .center {
+        background-color: #FFB6C1 !important;
+        transition: background-color 0.3s ease;
+    }
+
+    .stat-box {
+        padding: 5px 10px; /* Reduced padding */
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        min-width: 150px; /* Reduced width */
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        align-items: center;
+        margin: 5px 0; /* Added margin */
+    }
+
+    .stat-label {
+        text-align: right;
+        font-size: 14px; /* Reduced font size */
+    }
+
+    .stat-value {
+        text-align: center;
+        min-width: 40px; /* Reduced width */
+        color: #0066cc; /* Blue color for numbers */
+        font-size: 14px; /* Reduced font size */
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        margin: 10px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .solution-path {
+        background-color: #FFD700 !important;
+        transition: background-color 0.3s ease;
+    }
+
+    .victory-path {
+        border: 3px solid #0000FF !important;
+        background-color: #90EE90 !important;
+    }
+
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .error-x {
+        color: red;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .instructions {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-top: 10px;
+        width: 150px;
+        font-size: 14px;
+        text-align: right;
+        line-height: 1.4;
+        direction: rtl;
+    }
+</style>
+</head>
+<body>
+    <h1>משחק מסלול החיבור</h1>
+    <div class="subtitle">נוצר על ידי <a href="http://www.ezylevy.com" target="_blank">עזי לוי</a> - מומחה בהטמעה פרקטית של בינה מלאכותית</div>
+    <div class="buttons">
+        <select id="gridSize" onchange="changeGridSize()">
+            <option value="3">3 x 3</option>
+            <option value="5">5 x 5</option>
+            <option value="7" selected>7 x 7</option>
+            <option value="9">9 x 9</option>
+        </select>
+        <button onclick="resetGame()">התחל מחדש</button>
+        <button onclick="showSolution()">הצג פתרון</button>
+        <button onclick="initializeGrid()">שחק לוח נוסף</button>
+    </div>
+    <div class="game-container">
+        <div class="stats">
+            <div class="stat-box">
+                <span class="stat-label">סכום נוכחי:</span>
+                <span class="stat-value" id="currentSum">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">הפרש:</span>
+                <span class="stat-value" id="difference">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">מספר צעדים:</span>
+                <span class="stat-value" id="moves">0</span>
+            </div>
+            <div class="instructions">
+                הוראות המשחק:
+                <br><br>
+                1. התחל ממשבצת ירוקה
+                <br>
+                2. התקדם למשבצת האדומה
+                <br>
+                3. סכום המספרים בדרך צריך להיות שווה למספר במסלול
+                <br>
+                4. ניתן לחזור אחורה על ידי לחיצה על משבצת במסלול
+                <br>
+                5. מותר לנוע רק שמאלה, ימינה, למעלה או למטה
+            </div>
+        </div>
+        <div id="grid"></div>
+    </div>
+
+<script>let currentSum = 0;
+let moves = 0;
+let previousCell = null;
+let targetNumber;
+let gridValues = [];
+let currentPath = [];
+let solutionPath = [];
+let currentGridSize = 7;
+function changeGridSize() {
+  const select = document.getElementById('gridSize');
+  currentGridSize = parseInt(select.value);
+  document.documentElement.style.setProperty('--grid-size', currentGridSize);
+  initializeGrid();
+}
+function findFirstRoute(startIndex, target) {
+  const n = currentGridSize;
+  const visited = new Set();
+  let foundRoute = null;
+  function isValid(row, col, visited) {
+    const index = row * n + col;
+    return row >= 0 && row < n && col >= 0 && col < n && !visited.has(index);
+  }
+  function dfs(currentIndex, pathSum, path) {
+    if (foundRoute) return;
+    if (pathSum > targetNumber) return;
+    const centerIndex = Math.floor(n * n / 2);
+    if (currentIndex === centerIndex) {
+      if (pathSum === targetNumber) {
+        foundRoute = [...path];
+      }
+      return;
+    }
+    const row = Math.floor(currentIndex / n);
+    const col = currentIndex % n;
+    const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    for (const [dr, dc] of directions) {
+      const newRow = row + dr;
+      const newCol = col + dc;
+      if (isValid(newRow, newCol, visited)) {
+        const newIndex = newRow * n + newCol;
+        visited.add(newIndex);
+        dfs(newIndex, pathSum + gridValues[currentIndex], [...path, newIndex]);
+        visited.delete(newIndex);
+      }
+    }
+  }
+  visited.add(startIndex);
+  dfs(startIndex, 0, [startIndex]);
+  return foundRoute;
+}
+function hasValidPath(startIndex, target) {
+  const solution = findFirstRoute(startIndex, target);
+  if (solution) {
+    solutionPath = solution;
+    return true;
+  }
+  return false;
+}
+function showModal(message, isError) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  if (isError) {
+    modal.innerHTML = `<span class="error-x">✕</span> ${message}`;
+  } else {
+    modal.textContent = message;
+  }
+  document.body.appendChild(modal);
+  setTimeout(() => modal.remove(), 2000);
+}
+function initializeGrid() {
+  const grid = document.getElementById('grid');
+  let validPathExists = false;
+  while (!validPathExists) {
+    gridValues = [];
+    targetNumber = Math.floor(Math.random() * 61) + 10;
+    const totalCells = currentGridSize * currentGridSize;
+    const centerIndex = Math.floor(totalCells / 2);
+    for (let i = 0; i < totalCells; i++) {
+      if (i === centerIndex) {
+        gridValues.push(targetNumber);
+      } else {
+        gridValues.push(Math.floor(Math.random() * 10));
+      }
+    }
+    const startPoints = calculateStartPoints(currentGridSize);
+    validPathExists = startPoints.some(point => hasValidPath(point, targetNumber));
+  }
+  grid.innerHTML = '';
+  const totalCells = currentGridSize * currentGridSize;
+  const centerIndex = Math.floor(totalCells / 2);
+  for (let i = 0; i < totalCells; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = gridValues[i];
+    cell.dataset.index = i;
+    if (i === centerIndex) {
+      cell.classList.add('center');
+    }
+    const startPoints = calculateStartPoints(currentGridSize);
+    if (startPoints.includes(i)) {
+      cell.classList.add('start-point');
+    }
+    cell.addEventListener('click', handleCellClick);
+    grid.appendChild(cell);
+  }
+  resetGameState();
+}
+function calculateStartPoints(size) {
+  const middle = Math.floor(size / 2);
+  return [middle, middle * size, middle * size + (size - 1), size * (size - 1) + middle];
+}
+function resetGame() {
+  const startPoints = calculateStartPoints(currentGridSize);
+  document.querySelectorAll('.cell').forEach(cell => {
+    cell.classList.remove('selected', 'solution-path', 'victory-path');
+    const index = parseInt(cell.dataset.index);
+    if (startPoints.includes(index)) {
+      cell.classList.add('start-point');
+    }
+  });
+  resetGameState();
+}
+function resetGameState() {
+  currentSum = 0;
+  moves = 0;
+  previousCell = null;
+  currentPath = [];
+  document.querySelectorAll('.cell').forEach(cell => {
+    cell.classList.remove('selected', 'solution-path', 'victory-path');
+  });
+  updateStats();
+}
+function showSolution() {
+  resetGame();
+  const startPoints = calculateStartPoints(currentGridSize);
+  let solution = null;
+  for (const startPoint of startPoints) {
+    solution = findFirstRoute(startPoint, targetNumber);
+    if (solution) break;
+  }
+  if (solution) {
+    solution.forEach((index, step) => {
+      setTimeout(() => {
+        const cell = document.querySelector(`[data-index="${index}"]`);
+        if (index === Math.floor(currentGridSize * currentGridSize / 2)) {
+          cell.classList.add('center');
+        } else {
+          cell.classList.add('solution-path');
+        }
+      }, step * 500);
+    });
+  } else {
+    showModal('No solution found!', true);
+  }
+}
+function handleCellClick(e) {
+  const clickedIndex = parseInt(e.target.dataset.index);
+  const row = Math.floor(clickedIndex / currentGridSize);
+  const col = clickedIndex % currentGridSize;
+  const centerIndex = Math.floor(currentGridSize * currentGridSize / 2);
+  if (!previousCell && e.target.classList.contains('start-point')) {
+    document.querySelectorAll('.start-point').forEach(cell => {
+      cell.classList.remove('start-point');
+    });
+    previousCell = e.target;
+    currentSum = parseInt(e.target.textContent);
+    currentPath = [clickedIndex];
+    e.target.classList.add('selected');
+    moves++;
+  } else if (previousCell) {
+    const prevIndex = parseInt(previousCell.dataset.index);
+    const prevRow = Math.floor(prevIndex / currentGridSize);
+    const prevCol = prevIndex % currentGridSize;
+    if (isValidMove(prevRow, prevCol, row, col)) {
+      if (currentPath.includes(clickedIndex)) {
+        const index = currentPath.indexOf(clickedIndex);
+        const removedCells = currentPath.splice(index + 1);
+        removedCells.forEach(cellIndex => {
+          document.querySelector(`[data-index="${cellIndex}"]`).classList.remove('selected', 'victory-path');
+          if (cellIndex !== centerIndex) {
+            currentSum -= gridValues[cellIndex];
+          }
+        });
+      } else {
+        if (clickedIndex !== centerIndex) {
+          currentSum += parseInt(e.target.textContent);
+        }
+        currentPath.push(clickedIndex);
+        e.target.classList.add('selected');
+        moves++;
+      }
+      previousCell = e.target;
+      if (clickedIndex === centerIndex) {
+        if (currentSum === targetNumber) {
+          showModal('כל הכבוד! ניצחת!', false);
+          currentPath.forEach(index => {
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            cell.classList.add('victory-path');
+          });
+        } else {
+          showModal('סכום לא נכון! נסה שוב!', true);
+        }
+      }
+    }
+  }
+  updateStats();
+}
+function isValidMove(prevRow, prevCol, newRow, newCol) {
+  const validForward = Math.abs(newRow - prevRow) === 1 && newCol === prevCol;
+  const validSide = newRow === prevRow && Math.abs(newCol - prevCol) === 1;
+  return validForward || validSide;
+}
+function updateStats() {
+  document.getElementById('currentSum').textContent = currentSum;
+  document.getElementById('difference').textContent = targetNumber - currentSum;
+  document.getElementById('moves').textContent = moves;
+}
+initializeGrid();
+</script>
+</body></html>
