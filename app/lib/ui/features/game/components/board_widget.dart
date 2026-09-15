@@ -70,7 +70,8 @@ class BoardWidget extends StatelessWidget {
                       child: IgnorePointer(
                         child: CustomPaint(
                           painter: EnergyConduitPainter(
-                            path: state.activeSolutionRoute ?? state.currentPath,
+                            path:
+                                state.activeSolutionRoute ?? state.currentPath,
                             gridSize: n,
                             pulsePhase: pulsePhase,
                             isSolution: state.activeSolutionRoute != null,
@@ -91,7 +92,8 @@ class BoardWidget extends StatelessWidget {
     final path = state.currentPath;
     final solution = state.activeSolutionRoute;
     final inPath = path.contains(index);
-    final inSolution = solution != null &&
+    final inSolution =
+        solution != null &&
         solution.take(state.solverStepIndex + 1).contains(index);
 
     int? pathStep;

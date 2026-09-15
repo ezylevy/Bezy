@@ -35,6 +35,17 @@ class AppLocalizations {
     en: 'Explore worlds with walls, launch pads, and smart gates',
     he: 'עולמות עם חומות, מקפצות ושערים חכמים',
   );
+  String get chooseMode => _value(en: 'Choose a mode', he: 'בחרו מצב משחק');
+  String get learningMode => _value(en: 'Learning', he: 'לימודי');
+  String get learningModeDescription => _value(
+    en: 'Learn at your pace with hints and guided solutions',
+    he: 'לומדים בקצב שלכם עם רמזים ופתרונות מודרכים',
+  );
+  String get challengeMode => _value(en: 'Challenge', he: 'אתגרי');
+  String get challengeModeDescription => _value(
+    en: 'Solve independently — no hints and no solutions',
+    he: 'פותרים באופן עצמאי — ללא רמזים וללא פתרונות',
+  );
   String get freePlayTitle => _value(en: 'Free Play', he: 'משחק חופשי');
   String get freePlaySubtitle => _value(
     en: 'Fresh boards from 3×3 to 9×9',

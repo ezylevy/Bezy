@@ -4,6 +4,7 @@ import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/campaign_levels.dart';
 import '../../../domain/models/level_model.dart';
+import '../../../domain/models/game_mode.dart';
 import '../game/game_screen.dart';
 
 /// Screen displaying the grid of levels for a specific world.
@@ -11,12 +12,14 @@ class LevelSelectScreen extends StatefulWidget {
   final WorldInfo world;
   final ProgressStorage storage;
   final SoundService sound;
+  final GameMode mode;
 
   const LevelSelectScreen({
     super.key,
     required this.world,
     required this.storage,
     required this.sound,
+    required this.mode,
   });
 
   @override
@@ -41,9 +44,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.world.title),
-        ),
+        appBar: AppBar(title: Text(widget.world.title)),
         body: ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           itemCount: _levels.length,
@@ -66,6 +67,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                               initialLevel: level,
                               storage: widget.storage,
                               sound: widget.sound,
+                              mode: widget.mode,
                             ),
                           ),
                         );
@@ -94,7 +96,9 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: isUnlocked
-                              ? Color(widget.world.colorHex).withValues(alpha: 0.2)
+                              ? Color(
+                                  widget.world.colorHex,
+                                ).withValues(alpha: 0.2)
                               : AppTheme.surfaceElevated,
                           shape: BoxShape.circle,
                         ),
@@ -165,7 +169,9 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                             return Icon(
                               Icons.star_rounded,
                               size: 20,
-                              color: isEarned ? AppTheme.gold : AppTheme.wallGray,
+                              color: isEarned
+                                  ? AppTheme.gold
+                                  : AppTheme.wallGray,
                             );
                           }),
                         ),

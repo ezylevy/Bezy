@@ -4,6 +4,7 @@ import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/campaign_levels.dart';
 import '../../../domain/models/game_state.dart';
+import '../../../domain/models/game_mode.dart';
 import '../../../domain/models/level_model.dart';
 import '../../../domain/solver/path_solver.dart';
 import '../victory/victory_dialog.dart';
@@ -16,12 +17,14 @@ class GameScreen extends StatefulWidget {
   final LevelModel initialLevel;
   final ProgressStorage storage;
   final SoundService sound;
+  final GameMode mode;
 
   const GameScreen({
     super.key,
     required this.initialLevel,
     required this.storage,
     required this.sound,
+    required this.mode,
   });
 
   @override
@@ -123,12 +126,15 @@ class _GameScreenState extends State<GameScreen>
     final clickedRow = clickedIndex ~/ n;
     final clickedCol = clickedIndex % n;
 
-    final isOrthogonal = (prevRow == clickedRow && (prevCol - clickedCol).abs() == 1) ||
+    final isOrthogonal =
+        (prevRow == clickedRow && (prevCol - clickedCol).abs() == 1) ||
         (prevCol == clickedCol && (prevRow - clickedRow).abs() == 1);
 
     if (!isOrthogonal) {
       widget.sound.invalidMove();
-      _showStatusSnackbar('ניתן לנוע רק למשבצת סמוכה (מעלה, מטה, ימינה או שמאלה)');
+      _showStatusSnackbar(
+        'ניתן לנוע רק למשבצת סמוכה (מעלה, מטה, ימינה או שמאלה)',
+      );
       return;
     }
 
@@ -190,7 +196,8 @@ class _GameScreenState extends State<GameScreen>
           );
         });
         _showStatusSnackbar(
-            'הסכום הנוכחי ($newSum) אינו תואם ליעד (${level.targetNumber})! חזרו אחורה');
+          'הסכום הנוכחי ($newSum) אינו תואם ליעד (${level.targetNumber})! חזרו אחורה',
+        );
         return;
       }
     }
@@ -260,8 +267,9 @@ class _GameScreenState extends State<GameScreen>
     var recalculatedSum = 0;
     for (final stepIndex in newPath) {
       if (stepIndex != _gameState.level.centerIndex) {
-        recalculatedSum =
-            _gameState.level.tiles[stepIndex].applyValue(recalculatedSum);
+        recalculatedSum = _gameState.level.tiles[stepIndex].applyValue(
+          recalculatedSum,
+        );
       }
     }
 
@@ -282,6 +290,8 @@ class _GameScreenState extends State<GameScreen>
   }
 
   void _requestHint() {
+    if (!widget.mode.allowsHints) return;
+
     final nextHint = PathSolver.getNextStepHint(
       level: _gameState.level,
       currentPath: _gameState.currentPath,
@@ -296,11 +306,15 @@ class _GameScreenState extends State<GameScreen>
       _showStatusSnackbar('רמז חכם: המשבצת המומלצת הבאה מהבהבת בזהב!');
     } else {
       widget.sound.invalidMove();
-      _showStatusSnackbar('אין מסלול תקף מהמצב הנוכחי - לחצו על ביטול צעד וחזרו אחורה!');
+      _showStatusSnackbar(
+        'אין מסלול תקף מהמצב הנוכחי - לחצו על ביטול צעד וחזרו אחורה!',
+      );
     }
   }
 
   void _openSolver() {
+    if (!widget.mode.allowsSolutions) return;
+
     showDialog(
       context: context,
       builder: (ctx) => SolverDialog(
@@ -358,7 +372,10 @@ class _GameScreenState extends State<GameScreen>
             children: [
               Text(
                 level.title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 level.worldTitle,
@@ -435,21 +452,21 @@ class _GameScreenState extends State<GameScreen>
             onTap: _gameState.currentPath.isNotEmpty ? _resetGame : null,
           ),
 
-          // Smart Hint
-          _ControlButton(
-            icon: Icons.tips_and_updates_rounded,
-            label: 'רמז חכם',
-            color: AppTheme.gold,
-            onTap: _requestHint,
-          ),
+          if (widget.mode.allowsHints)
+            _ControlButton(
+              icon: Icons.tips_and_updates_rounded,
+              label: 'רמז חכם',
+              color: AppTheme.gold,
+              onTap: _requestHint,
+            ),
 
-          // Smart Solver
-          _ControlButton(
-            icon: Icons.auto_awesome_rounded,
-            label: 'פתרון חכם',
-            color: AppTheme.pathCyan,
-            onTap: _openSolver,
-          ),
+          if (widget.mode.allowsSolutions)
+            _ControlButton(
+              icon: Icons.auto_awesome_rounded,
+              label: 'פתרון חכם',
+              color: AppTheme.pathCyan,
+              onTap: _openSolver,
+            ),
         ],
       ),
     );

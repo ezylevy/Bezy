@@ -81,8 +81,8 @@ class ModularTileContainer extends StatelessWidget {
             color: state.isInPath
                 ? AppTheme.pathCyan.withValues(alpha: 0.4)
                 : (state.isHinted
-                    ? AppTheme.gold.withValues(alpha: 0.45)
-                    : Colors.black.withValues(alpha: 0.25)),
+                      ? AppTheme.gold.withValues(alpha: 0.45)
+                      : Colors.black.withValues(alpha: 0.25)),
             blurRadius: state.isInPath || state.isHinted ? 8 : 4,
             offset: const Offset(0, 2),
           ),
@@ -104,7 +104,10 @@ class ModularTileContainer extends StatelessWidget {
                   top: 2,
                   right: 3,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(6),

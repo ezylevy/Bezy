@@ -20,3 +20,14 @@
   the active locale.
 - Added tests for first-run selection, persistence, English LTR, and Hebrew RTL.
 - Verification: analyzer clean; all nine tests passing.
+
+## 2026-09-16 — Learning and Challenge foundation
+
+- Added an explicit domain-level `GameMode` model.
+- Added a localized mode-selection screen between Journey and the world map.
+- Propagated the selected mode through world, level, and gameplay navigation.
+- Enforced Challenge restrictions at both the interface and method levels:
+  hint and solution controls are absent, and their handlers reject access.
+- Kept Free Play in Learning mode until its dedicated flow is designed.
+- Added policy tests proving Learning allows help and Challenge blocks it.
+- Verification: analyzer clean; all 11 tests passing.

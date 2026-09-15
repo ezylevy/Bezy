@@ -3,6 +3,7 @@ import '../../../core/audio/sound_service.dart';
 import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/level_generator.dart';
+import '../../../domain/models/game_mode.dart';
 import '../game/game_screen.dart';
 
 /// Screen allowing players to configure and generate infinite custom puzzles.
@@ -54,6 +55,7 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
           initialLevel: level,
           storage: widget.storage,
           sound: widget.sound,
+          mode: GameMode.learning,
         ),
       ),
     );
@@ -122,7 +124,10 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
 
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('חומות ומכשולים', style: TextStyle(fontSize: 14)),
+                title: const Text(
+                  'חומות ומכשולים',
+                  style: TextStyle(fontSize: 14),
+                ),
                 value: _includeWalls,
                 activeThumbColor: AppTheme.pathCyan,
                 onChanged: _selectedGridSize > 3
@@ -132,7 +137,10 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
 
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('מקפצות זינוק', style: TextStyle(fontSize: 14)),
+                title: const Text(
+                  'מקפצות זינוק',
+                  style: TextStyle(fontSize: 14),
+                ),
                 value: _includeTrampolines,
                 activeThumbColor: AppTheme.trampolineOrange,
                 onChanged: _selectedGridSize > 3
@@ -142,7 +150,10 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
 
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('שערים חכמים', style: TextStyle(fontSize: 14)),
+                title: const Text(
+                  'שערים חכמים',
+                  style: TextStyle(fontSize: 14),
+                ),
                 value: _includeSmartGates,
                 activeThumbColor: AppTheme.smartGatePurple,
                 onChanged: _selectedGridSize > 3
@@ -155,7 +166,10 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('ביטול', style: TextStyle(color: AppTheme.textMuted)),
+            child: const Text(
+              'ביטול',
+              style: TextStyle(color: AppTheme.textMuted),
+            ),
           ),
           ElevatedButton(
             onPressed: _isGenerating ? null : _startGame,

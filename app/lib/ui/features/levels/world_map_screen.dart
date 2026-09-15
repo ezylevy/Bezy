@@ -3,17 +3,20 @@ import '../../../core/audio/sound_service.dart';
 import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/campaign_levels.dart';
+import '../../../domain/models/game_mode.dart';
 import 'level_select_screen.dart';
 
 /// World map showing progressive difficulty chapters and overall stars.
 class WorldMapScreen extends StatefulWidget {
   final ProgressStorage storage;
   final SoundService sound;
+  final GameMode mode;
 
   const WorldMapScreen({
     super.key,
     required this.storage,
     required this.sound,
+    required this.mode,
   });
 
   @override
@@ -54,7 +57,11 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  const Icon(Icons.star_rounded, color: AppTheme.gold, size: 22),
+                  const Icon(
+                    Icons.star_rounded,
+                    color: AppTheme.gold,
+                    size: 22,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '$totalStars כוכבים',
@@ -76,9 +83,14 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
             final world = worlds[index];
             final worldLevels = CampaignLevels.getLevelsForWorld(world.id);
             final worldLevelIds = worldLevels.map((l) => l.id).toList();
-            final earnedStars = widget.storage.getTotalStarsForWorld(world.id, worldLevelIds);
+            final earnedStars = widget.storage.getTotalStarsForWorld(
+              world.id,
+              worldLevelIds,
+            );
             final maxStars = worldLevels.length * 3;
-            final progressPercent = maxStars > 0 ? (earnedStars / maxStars) : 0.0;
+            final progressPercent = maxStars > 0
+                ? (earnedStars / maxStars)
+                : 0.0;
             final color = Color(world.colorHex);
 
             return Padding(
@@ -93,6 +105,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                         world: world,
                         storage: widget.storage,
                         sound: widget.sound,
+                        mode: widget.mode,
                       ),
                     ),
                   );
@@ -186,8 +199,11 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                           ),
                           Row(
                             children: [
-                              const Icon(Icons.star_rounded,
-                                  color: AppTheme.gold, size: 16),
+                              const Icon(
+                                Icons.star_rounded,
+                                color: AppTheme.gold,
+                                size: 16,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 '$earnedStars / $maxStars',

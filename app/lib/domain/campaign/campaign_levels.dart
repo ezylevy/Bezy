@@ -61,13 +61,10 @@ class CampaignLevels {
       gridSize: 3,
       targetNumber: 10,
       parMoves: 4,
-      description: 'התחילו מאחת ממשבצות ההתחלה בירוק והגיעו למרכז עם סכום של 10 בדיוק!',
+      description:
+          'התחילו מאחת ממשבצות ההתחלה בירוק והגיעו למרכז עם סכום של 10 בדיוק!',
       hints: ['חפשו התחלה מלמטה', 'התחילו ב-3, המשיכו לפינה ולימין'],
-      values: [
-        2, 4, 1,
-        3, 10, 4,
-        1, 3, 3,
-      ],
+      values: [2, 4, 1, 3, 10, 4, 1, 3, 3],
       startIndices: [1, 3, 5, 7],
     ),
 
@@ -83,11 +80,7 @@ class CampaignLevels {
       parMoves: 4,
       description: 'לפעמים הדרך הישירה אינה מספיקה וצריך לבצע פנייה.',
       hints: ['התחילו משער שמאל (ערך 5)', 'רדו לפינה התחתונה ופנו למרכז'],
-      values: [
-        2, 3, 1,
-        5, 14, 4,
-        4, 5, 2,
-      ],
+      values: [2, 3, 1, 5, 14, 4, 4, 5, 2],
       startIndices: [1, 3, 5, 7],
     ),
 
@@ -103,11 +96,7 @@ class CampaignLevels {
       parMoves: 6,
       description: 'לכל אחד מארבעת שערי הכניסה סכום פתיחה אחר.',
       hints: ['התחילו מהשער העליון (ערך 4)', 'עשו סיבוב דרך הפינה הימנית'],
-      values: [
-        2, 4, 3,
-        3, 18, 4,
-        1, 4, 3,
-      ],
+      values: [2, 4, 3, 3, 18, 4, 1, 4, 3],
       startIndices: [1, 3, 5, 7],
     ),
 
@@ -123,11 +112,7 @@ class CampaignLevels {
       parMoves: 4,
       description: 'שימו לב להפרש שנשאר לכם לסכום המבוקש.',
       hints: ['בדקו את הדרך דרך הפינה הימנית העליונה'],
-      values: [
-        3, 5, 4,
-        2, 15, 6,
-        1, 4, 3,
-      ],
+      values: [3, 5, 4, 2, 15, 6, 1, 4, 3],
       startIndices: [1, 3, 5, 7],
     ),
 
@@ -143,11 +128,7 @@ class CampaignLevels {
       parMoves: 5,
       description: 'מבחן הסיום של לוחות 3x3! עליכם לתכנן את כל המסלול מראש.',
       hints: ['עברו כמעט על כל הלוח לפני הכניסה למרכז'],
-      values: [
-        7, 4, 5,
-        3, 22, 6,
-        4, 5, 2,
-      ],
+      values: [7, 4, 5, 3, 22, 6, 4, 5, 2],
       startIndices: [1, 3, 5, 7],
     ),
   ];
@@ -190,11 +171,31 @@ class CampaignLevels {
       description: 'שתי חומות סוגרות את המעברים המרכזיים.',
       wallIndices: [6, 18],
       values: [
-        3, 2, 5, 4, 1,
-        2, 0, 4, 3, 5,
-        4, 3, 28, 2, 6,
-        1, 5, 4, 0, 2,
-        3, 4, 2, 5, 1,
+        3,
+        2,
+        5,
+        4,
+        1,
+        2,
+        0,
+        4,
+        3,
+        5,
+        4,
+        3,
+        28,
+        2,
+        6,
+        1,
+        5,
+        4,
+        0,
+        2,
+        3,
+        4,
+        2,
+        5,
+        1,
       ],
     ),
 
@@ -211,11 +212,31 @@ class CampaignLevels {
       description: 'שלוש חומות יוצרות מבוך שדורש תכנון מעמיק.',
       wallIndices: [7, 11, 17],
       values: [
-        1, 5, 4, 2, 3,
-        4, 2, 0, 5, 1,
-        3, 0, 31, 4, 2,
-        2, 4, 0, 3, 5,
-        5, 2, 3, 4, 1,
+        1,
+        5,
+        4,
+        2,
+        3,
+        4,
+        2,
+        0,
+        5,
+        1,
+        3,
+        0,
+        31,
+        4,
+        2,
+        2,
+        4,
+        0,
+        3,
+        5,
+        5,
+        2,
+        3,
+        4,
+        1,
       ],
     ),
 
@@ -232,11 +253,31 @@ class CampaignLevels {
       description: 'הדרך למרכז עוברת במסדרונות מפותלים בלבד.',
       wallIndices: [8, 13, 16, 17],
       values: [
-        4, 3, 6, 2, 1,
-        2, 5, 3, 0, 4,
-        1, 4, 35, 0, 5,
-        3, 0, 0, 4, 2,
-        2, 5, 4, 3, 6,
+        4,
+        3,
+        6,
+        2,
+        1,
+        2,
+        5,
+        3,
+        0,
+        4,
+        1,
+        4,
+        35,
+        0,
+        5,
+        3,
+        0,
+        0,
+        4,
+        2,
+        2,
+        5,
+        4,
+        3,
+        6,
       ],
     ),
 
@@ -253,11 +294,31 @@ class CampaignLevels {
       description: 'סיום עולם החומות! עליכם לאסוף סכום גבוה במיוחד.',
       wallIndices: [6, 8, 16, 18],
       values: [
-        5, 4, 7, 3, 6,
-        3, 0, 5, 0, 4,
-        6, 5, 42, 6, 3,
-        2, 0, 7, 0, 5,
-        4, 6, 5, 4, 2,
+        5,
+        4,
+        7,
+        3,
+        6,
+        3,
+        0,
+        5,
+        0,
+        4,
+        6,
+        5,
+        42,
+        6,
+        3,
+        2,
+        0,
+        7,
+        0,
+        5,
+        4,
+        6,
+        5,
+        4,
+        2,
       ],
     ),
   ];
@@ -322,11 +383,31 @@ class CampaignLevels {
       wallIndices: [8, 16],
       trampolineIndices: [6],
       values: [
-        3, 5, 2, 4, 1,
-        2, 3, 4, 0, 5,
-        4, 2, 33, 5, 2,
-        1, 0, 3, 4, 3,
-        5, 3, 4, 2, 1,
+        3,
+        5,
+        2,
+        4,
+        1,
+        2,
+        3,
+        4,
+        0,
+        5,
+        4,
+        2,
+        33,
+        5,
+        2,
+        1,
+        0,
+        3,
+        4,
+        3,
+        5,
+        3,
+        4,
+        2,
+        1,
       ],
     ),
 
@@ -344,11 +425,31 @@ class CampaignLevels {
       wallIndices: [11, 17],
       smartGateIndices: [7, 13],
       values: [
-        4, 2, 5, 3, 1,
-        3, 4, 3, 2, 5,
-        2, 0, 36, 4, 2,
-        5, 3, 0, 4, 1,
-        1, 4, 2, 5, 3,
+        4,
+        2,
+        5,
+        3,
+        1,
+        3,
+        4,
+        3,
+        2,
+        5,
+        2,
+        0,
+        36,
+        4,
+        2,
+        5,
+        3,
+        0,
+        4,
+        1,
+        1,
+        4,
+        2,
+        5,
+        3,
       ],
     ),
 
@@ -495,29 +596,35 @@ class CampaignLevels {
       final r = i ~/ gridSize;
       final c = i % gridSize;
       if (i == center) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.target,
-          value: targetNumber,
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.target,
+            value: targetNumber,
+          ),
+        );
       } else if (startIndices.contains(i)) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.start,
-          value: values[i],
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.start,
+            value: values[i],
+          ),
+        );
       } else {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.number,
-          value: values[i],
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.number,
+            value: values[i],
+          ),
+        );
       }
     }
 
@@ -562,56 +669,62 @@ class CampaignLevels {
       final r = i ~/ gridSize;
       final c = i % gridSize;
       if (i == center) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.target,
-          value: targetNumber,
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.target,
+            value: targetNumber,
+          ),
+        );
       } else if (wallIndices.contains(i)) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.wall,
-          value: 0,
-        ));
+        tiles.add(
+          TileModel(index: i, row: r, col: c, type: TileType.wall, value: 0),
+        );
       } else if (trampolineIndices.contains(i)) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.trampoline,
-          value: values[i],
-          metadata: {'bonus': 2},
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.trampoline,
+            value: values[i],
+            metadata: {'bonus': 2},
+          ),
+        );
       } else if (smartGateIndices.contains(i)) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.smartGate,
-          value: values[i],
-          customLabel: 'זוגי',
-          metadata: {'rule': 'even'},
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.smartGate,
+            value: values[i],
+            customLabel: 'זוגי',
+            metadata: {'rule': 'even'},
+          ),
+        );
       } else if (defaultStarts.contains(i)) {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.start,
-          value: values[i],
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.start,
+            value: values[i],
+          ),
+        );
       } else {
-        tiles.add(TileModel(
-          index: i,
-          row: r,
-          col: c,
-          type: TileType.number,
-          value: values[i],
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: TileType.number,
+            value: values[i],
+          ),
+        );
       }
     }
 

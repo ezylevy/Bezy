@@ -4,7 +4,7 @@ import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../custom/custom_game_screen.dart';
-import '../levels/world_map_screen.dart';
+import '../mode/mode_selection_screen.dart';
 
 /// The welcoming home screen with Campaign, Custom Game, Instructions and Settings.
 class HomeScreen extends StatefulWidget {
@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     widget.sound.tileTap();
                     await Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => WorldMapScreen(
+                        builder: (context) => ModeSelectionScreen(
                           storage: widget.storage,
                           sound: widget.sound,
                         ),

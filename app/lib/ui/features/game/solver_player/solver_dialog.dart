@@ -64,67 +64,79 @@ class _SolverDialogState extends State<SolverDialog> {
 
       if (i == 0) {
         runningSum = tile.applyValue(0);
-        list.add(StepBreakdown(
-          step: i + 1,
-          tileIndex: tileIndex,
-          actionName: 'נקודת התחלה',
-          formula: 'סכום פתיחה: $runningSum',
-          runningSum: runningSum,
-          tileType: tile.type,
-          icon: Icons.play_circle_fill_rounded,
-          color: AppTheme.startGreen,
-        ));
+        list.add(
+          StepBreakdown(
+            step: i + 1,
+            tileIndex: tileIndex,
+            actionName: 'נקודת התחלה',
+            formula: 'סכום פתיחה: $runningSum',
+            runningSum: runningSum,
+            tileType: tile.type,
+            icon: Icons.play_circle_fill_rounded,
+            color: AppTheme.startGreen,
+          ),
+        );
       } else if (tile.isTarget) {
-        list.add(StepBreakdown(
-          step: i + 1,
-          tileIndex: tileIndex,
-          actionName: 'הגעה למרכז!',
-          formula: 'הסכום $runningSum תואם ליעד ${widget.level.targetNumber}!',
-          runningSum: runningSum,
-          tileType: tile.type,
-          icon: Icons.emoji_events_rounded,
-          color: AppTheme.targetPink,
-        ));
+        list.add(
+          StepBreakdown(
+            step: i + 1,
+            tileIndex: tileIndex,
+            actionName: 'הגעה למרכז!',
+            formula:
+                'הסכום $runningSum תואם ליעד ${widget.level.targetNumber}!',
+            runningSum: runningSum,
+            tileType: tile.type,
+            icon: Icons.emoji_events_rounded,
+            color: AppTheme.targetPink,
+          ),
+        );
       } else if (tile.isTrampoline) {
         final bonus = tile.metadata['bonus'] as int? ?? 2;
         final prev = runningSum;
         runningSum = tile.applyValue(runningSum);
-        list.add(StepBreakdown(
-          step: i + 1,
-          tileIndex: tileIndex,
-          actionName: 'מקפצה זינוק (+בונוס)',
-          formula: '$prev + ${tile.value} (ערך) + $bonus (בונוס) = $runningSum',
-          runningSum: runningSum,
-          tileType: tile.type,
-          icon: Icons.bolt_rounded,
-          color: AppTheme.trampolineOrange,
-        ));
+        list.add(
+          StepBreakdown(
+            step: i + 1,
+            tileIndex: tileIndex,
+            actionName: 'מקפצה זינוק (+בונוס)',
+            formula:
+                '$prev + ${tile.value} (ערך) + $bonus (בונוס) = $runningSum',
+            runningSum: runningSum,
+            tileType: tile.type,
+            icon: Icons.bolt_rounded,
+            color: AppTheme.trampolineOrange,
+          ),
+        );
       } else if (tile.isSmartGate) {
         final prev = runningSum;
         runningSum = tile.applyValue(runningSum);
-        list.add(StepBreakdown(
-          step: i + 1,
-          tileIndex: tileIndex,
-          actionName: 'שער חכם עביר',
-          formula: '$prev + ${tile.value} = $runningSum',
-          runningSum: runningSum,
-          tileType: tile.type,
-          icon: Icons.lock_open_rounded,
-          color: AppTheme.smartGatePurple,
-        ));
+        list.add(
+          StepBreakdown(
+            step: i + 1,
+            tileIndex: tileIndex,
+            actionName: 'שער חכם עביר',
+            formula: '$prev + ${tile.value} = $runningSum',
+            runningSum: runningSum,
+            tileType: tile.type,
+            icon: Icons.lock_open_rounded,
+            color: AppTheme.smartGatePurple,
+          ),
+        );
       } else {
         final prev = runningSum;
         runningSum = tile.applyValue(runningSum);
-        list.add(StepBreakdown(
-          step: i + 1,
-          tileIndex: tileIndex,
-          actionName: 'צעד נוסף',
-          formula: '$prev + ${tile.value} = $runningSum',
-          runningSum: runningSum,
-          tileType: tile.type,
-          icon: Icons.add_circle_outline_rounded,
-          color: AppTheme.pathCyan,
-        ));
+        list.add(
+          StepBreakdown(
+            step: i + 1,
+            tileIndex: tileIndex,
+            actionName: 'צעד נוסף',
+            formula: '$prev + ${tile.value} = $runningSum',
+            runningSum: runningSum,
+            tileType: tile.type,
+            icon: Icons.add_circle_outline_rounded,
+            color: AppTheme.pathCyan,
+          ),
+        );
       }
     }
     return list;
@@ -141,7 +153,9 @@ class _SolverDialogState extends State<SolverDialog> {
   void _startPlayback() {
     setState(() => _isPlaying = true);
     _playbackTimer?.cancel();
-    _playbackTimer = Timer.periodic(Duration(milliseconds: _playbackSpeedMs), (_) {
+    _playbackTimer = Timer.periodic(Duration(milliseconds: _playbackSpeedMs), (
+      _,
+    ) {
       if (_currentStepIndex < _breakdowns.length - 1) {
         setState(() => _currentStepIndex++);
       } else {
@@ -176,7 +190,10 @@ class _SolverDialogState extends State<SolverDialog> {
     if (_solutionPath == null) {
       return AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
-        title: const Text('אין פתרון אפשרי', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'אין פתרון אפשרי',
+          style: TextStyle(color: Colors.white),
+        ),
         content: const Text(
           'לא נמצא מסלול תקף ללוח זה עבור הסכום המבוקש.',
           style: TextStyle(color: AppTheme.textSecondary),
@@ -184,7 +201,10 @@ class _SolverDialogState extends State<SolverDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('סגור', style: TextStyle(color: AppTheme.pathCyan)),
+            child: const Text(
+              'סגור',
+              style: TextStyle(color: AppTheme.pathCyan),
+            ),
           ),
         ],
       );
@@ -282,8 +302,11 @@ class _SolverDialogState extends State<SolverDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(currentBreakdown.icon,
-                          color: currentBreakdown.color, size: 20),
+                      Icon(
+                        currentBreakdown.icon,
+                        color: currentBreakdown.color,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         currentBreakdown.actionName,
@@ -338,7 +361,9 @@ class _SolverDialogState extends State<SolverDialog> {
                   ),
                   child: IconButton(
                     icon: Icon(
-                      _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      _isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
                       color: Colors.black,
                       size: 32,
                     ),

@@ -6,8 +6,9 @@ import 'package:bezy/core/storage/progress_storage.dart';
 import 'package:bezy/main.dart';
 
 void main() {
-  testWidgets('First launch asks for a language and persists English',
-      (WidgetTester tester) async {
+  testWidgets('First launch asks for a language and persists English', (
+    WidgetTester tester,
+  ) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     final storage = ProgressStorage(prefs);
@@ -29,10 +30,18 @@ void main() {
       Directionality.of(tester.element(find.text('Journey'))),
       TextDirection.ltr,
     );
+
+    await tester.tap(find.text('Journey'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a mode'), findsOneWidget);
+    expect(find.text('Learning'), findsOneWidget);
+    expect(find.text('Challenge'), findsOneWidget);
   });
 
-  testWidgets('A saved Hebrew locale opens the RTL home screen',
-      (WidgetTester tester) async {
+  testWidgets('A saved Hebrew locale opens the RTL home screen', (
+    WidgetTester tester,
+  ) async {
     SharedPreferences.setMockInitialValues({'pref_locale_code': 'he'});
     final prefs = await SharedPreferences.getInstance();
     final storage = ProgressStorage(prefs);

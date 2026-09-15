@@ -128,7 +128,9 @@ class StartTileComponent extends StatelessWidget {
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: isSelected ? null : AppTheme.startGreen.withValues(alpha: 0.2),
+      customBgColor: isSelected
+          ? null
+          : AppTheme.startGreen.withValues(alpha: 0.2),
       customBorderColor: AppTheme.startGreen,
       child: Stack(
         alignment: Alignment.center,

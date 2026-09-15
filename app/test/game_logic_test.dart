@@ -65,16 +65,26 @@ void main() {
 
       for (final lvl in allLevels) {
         final solution = PathSolver.findSolution(lvl);
-        expect(solution, isNotNull,
-            reason: 'Level ${lvl.id} (${lvl.worldTitle} - ${lvl.title}) must be solvable');
+        expect(
+          solution,
+          isNotNull,
+          reason:
+              'Level ${lvl.id} (${lvl.worldTitle} - ${lvl.title}) must be solvable',
+        );
         expect(solution!.first, isIn(lvl.startIndices));
         expect(solution.last, lvl.centerIndex);
 
         // Verify wall avoidance
-        final walls = lvl.tiles.where((t) => t.isWall).map((t) => t.index).toSet();
+        final walls = lvl.tiles
+            .where((t) => t.isWall)
+            .map((t) => t.index)
+            .toSet();
         for (final idx in solution) {
-          expect(walls.contains(idx), false,
-              reason: 'Solution must not touch walls');
+          expect(
+            walls.contains(idx),
+            false,
+            reason: 'Solution must not touch walls',
+          );
         }
       }
     });

@@ -6,10 +6,7 @@ import '../../../../domain/models/game_state.dart';
 class StatsBar extends StatelessWidget {
   final GameState state;
 
-  const StatsBar({
-    super.key,
-    required this.state,
-  });
+  const StatsBar({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -99,11 +96,7 @@ class StatsBar extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Container(
-      width: 1,
-      height: 36,
-      color: AppTheme.cardBorder,
-    );
+    return Container(width: 1, height: 36, color: AppTheme.cardBorder);
   }
 }
 
@@ -154,10 +147,7 @@ class _StatColumn extends StatelessWidget {
         if (subValue != null)
           Text(
             subValue!,
-            style: const TextStyle(
-              fontSize: 9,
-              color: AppTheme.textMuted,
-            ),
+            style: const TextStyle(fontSize: 9, color: AppTheme.textMuted),
           ),
       ],
     );

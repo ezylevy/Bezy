@@ -66,7 +66,9 @@ class TileModel {
 
   /// Calculates the new sum after stepping onto this tile.
   int applyValue(int currentSum) {
-    if (isTarget) return currentSum; // Target cell contains the goal number, not added to sum
+    if (isTarget) {
+      return currentSum; // Target cell contains the goal number, not added to sum
+    }
     if (isTrampoline) {
       final bonus = metadata['bonus'] as int? ?? 2;
       return currentSum + value + bonus;

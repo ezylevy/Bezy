@@ -73,56 +73,68 @@ class LevelGenerator {
         final col = i % gridSize;
 
         if (i == centerIndex) {
-          tiles.add(TileModel(
-            index: i,
-            row: row,
-            col: col,
-            type: TileType.target,
-            value: targetNumber,
-          ));
+          tiles.add(
+            TileModel(
+              index: i,
+              row: row,
+              col: col,
+              type: TileType.target,
+              value: targetNumber,
+            ),
+          );
         } else if (defaultStarts.contains(i)) {
-          tiles.add(TileModel(
-            index: i,
-            row: row,
-            col: col,
-            type: TileType.start,
-            value: _rng.nextInt(7) + 1, // 1 to 7
-          ));
+          tiles.add(
+            TileModel(
+              index: i,
+              row: row,
+              col: col,
+              type: TileType.start,
+              value: _rng.nextInt(7) + 1, // 1 to 7
+            ),
+          );
         } else if (wallIndices.contains(i)) {
-          tiles.add(TileModel(
-            index: i,
-            row: row,
-            col: col,
-            type: TileType.wall,
-            value: 0,
-          ));
+          tiles.add(
+            TileModel(
+              index: i,
+              row: row,
+              col: col,
+              type: TileType.wall,
+              value: 0,
+            ),
+          );
         } else if (i == trampolineIndex) {
-          tiles.add(TileModel(
-            index: i,
-            row: row,
-            col: col,
-            type: TileType.trampoline,
-            value: _rng.nextInt(5) + 1,
-            metadata: {'bonus': 3},
-          ));
+          tiles.add(
+            TileModel(
+              index: i,
+              row: row,
+              col: col,
+              type: TileType.trampoline,
+              value: _rng.nextInt(5) + 1,
+              metadata: {'bonus': 3},
+            ),
+          );
         } else if (i == smartGateIndex) {
-          tiles.add(TileModel(
-            index: i,
-            row: row,
-            col: col,
-            type: TileType.smartGate,
-            value: _rng.nextInt(6) + 1,
-            customLabel: 'זוגי',
-            metadata: {'rule': 'even'},
-          ));
+          tiles.add(
+            TileModel(
+              index: i,
+              row: row,
+              col: col,
+              type: TileType.smartGate,
+              value: _rng.nextInt(6) + 1,
+              customLabel: 'זוגי',
+              metadata: {'rule': 'even'},
+            ),
+          );
         } else {
-          tiles.add(TileModel(
-            index: i,
-            row: row,
-            col: col,
-            type: TileType.number,
-            value: _rng.nextInt(10), // 0 to 9
-          ));
+          tiles.add(
+            TileModel(
+              index: i,
+              row: row,
+              col: col,
+              type: TileType.number,
+              value: _rng.nextInt(10), // 0 to 9
+            ),
+          );
         }
       }
 
@@ -166,29 +178,35 @@ class LevelGenerator {
       final row = i ~/ gridSize;
       final col = i % gridSize;
       if (i == centerIndex) {
-        tiles.add(TileModel(
-          index: i,
-          row: row,
-          col: col,
-          type: TileType.target,
-          value: target,
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: row,
+            col: col,
+            type: TileType.target,
+            value: target,
+          ),
+        );
       } else if (defaultStarts.contains(i)) {
-        tiles.add(TileModel(
-          index: i,
-          row: row,
-          col: col,
-          type: TileType.start,
-          value: 3,
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: row,
+            col: col,
+            type: TileType.start,
+            value: 3,
+          ),
+        );
       } else {
-        tiles.add(TileModel(
-          index: i,
-          row: row,
-          col: col,
-          type: TileType.number,
-          value: 3,
-        ));
+        tiles.add(
+          TileModel(
+            index: i,
+            row: row,
+            col: col,
+            type: TileType.number,
+            value: 3,
+          ),
+        );
       }
     }
 
