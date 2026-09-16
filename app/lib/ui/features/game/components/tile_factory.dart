@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../domain/models/tile_model.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'tile_widget.dart';
 
 /// Modular Factory that creates the dedicated UI component for any tile type.
@@ -213,7 +214,7 @@ class TargetTileComponent extends StatelessWidget {
               ),
               if (gridSize <= 5)
                 Text(
-                  'יעד',
+                  AppLocalizations.of(context).target,
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
@@ -348,7 +349,7 @@ class SmartGateTileComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize = _calculateFontSize(gridSize);
-    final label = tile.customLabel ?? 'זוגי';
+    final label = AppLocalizations.of(context).even;
 
     return ModularTileContainer(
       tile: tile,

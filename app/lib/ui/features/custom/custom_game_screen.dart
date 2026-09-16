@@ -4,6 +4,7 @@ import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/level_generator.dart';
 import '../../../domain/models/game_mode.dart';
+import '../../../l10n/app_localizations.dart';
 import '../game/game_screen.dart';
 
 /// Screen allowing players to configure and generate infinite custom puzzles.
@@ -63,126 +64,125 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: AlertDialog(
-        backgroundColor: AppTheme.surfaceDark,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppTheme.cardBorder),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.tune_rounded, color: AppTheme.pathCyan),
-            SizedBox(width: 8),
-            Text('משחק חופשי מותאם אישית'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'בחר גודל לוח:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
+    final strings = AppLocalizations.of(context);
 
-              // Grid Size Options
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [3, 5, 7, 9].map((size) {
-                  final isSelected = _selectedGridSize == size;
-                  return ChoiceChip(
-                    label: Text('${size}x$size'),
-                    selected: isSelected,
-                    selectedColor: AppTheme.pathCyan,
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() => _selectedGridSize = size);
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 16),
-              const Divider(color: AppTheme.cardBorder),
-              const SizedBox(height: 8),
-
-              const Text(
-                'שילוב אלמנטים מיוחדים:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'חומות ומכשולים',
-                  style: TextStyle(fontSize: 14),
-                ),
-                value: _includeWalls,
-                activeThumbColor: AppTheme.pathCyan,
-                onChanged: _selectedGridSize > 3
-                    ? (val) => setState(() => _includeWalls = val)
-                    : null,
-              ),
-
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'מקפצות זינוק',
-                  style: TextStyle(fontSize: 14),
-                ),
-                value: _includeTrampolines,
-                activeThumbColor: AppTheme.trampolineOrange,
-                onChanged: _selectedGridSize > 3
-                    ? (val) => setState(() => _includeTrampolines = val)
-                    : null,
-              ),
-
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'שערים חכמים',
-                  style: TextStyle(fontSize: 14),
-                ),
-                value: _includeSmartGates,
-                activeThumbColor: AppTheme.smartGatePurple,
-                onChanged: _selectedGridSize > 3
-                    ? (val) => setState(() => _includeSmartGates = val)
-                    : null,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'ביטול',
-              style: TextStyle(color: AppTheme.textMuted),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: _isGenerating ? null : _startGame,
-            child: _isGenerating
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('התחל משחק'),
-          ),
+    return AlertDialog(
+      backgroundColor: AppTheme.surfaceDark,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppTheme.cardBorder),
+      ),
+      title: Row(
+        children: [
+          const Icon(Icons.tune_rounded, color: AppTheme.pathCyan),
+          const SizedBox(width: 8),
+          Text(strings.customGame),
         ],
       ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              strings.selectBoardSize,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Grid Size Options
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [3, 5, 7, 9].map((size) {
+                final isSelected = _selectedGridSize == size;
+                return ChoiceChip(
+                  label: Text('${size}x$size'),
+                  selected: isSelected,
+                  selectedColor: AppTheme.pathCyan,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() => _selectedGridSize = size);
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 16),
+            const Divider(color: AppTheme.cardBorder),
+            const SizedBox(height: 8),
+
+            Text(
+              strings.specialElements,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                strings.wallsAndObstacles,
+                style: const TextStyle(fontSize: 14),
+              ),
+              value: _includeWalls,
+              activeThumbColor: AppTheme.pathCyan,
+              onChanged: _selectedGridSize > 3
+                  ? (val) => setState(() => _includeWalls = val)
+                  : null,
+            ),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                strings.launchPads,
+                style: const TextStyle(fontSize: 14),
+              ),
+              value: _includeTrampolines,
+              activeThumbColor: AppTheme.trampolineOrange,
+              onChanged: _selectedGridSize > 3
+                  ? (val) => setState(() => _includeTrampolines = val)
+                  : null,
+            ),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                strings.smartGates,
+                style: const TextStyle(fontSize: 14),
+              ),
+              value: _includeSmartGates,
+              activeThumbColor: AppTheme.smartGatePurple,
+              onChanged: _selectedGridSize > 3
+                  ? (val) => setState(() => _includeSmartGates = val)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            strings.cancel,
+            style: const TextStyle(color: AppTheme.textMuted),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: _isGenerating ? null : _startGame,
+          child: _isGenerating
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(strings.startGame),
+        ),
+      ],
     );
   }
 }

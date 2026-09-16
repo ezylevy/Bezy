@@ -31,3 +31,18 @@
 - Kept Free Play in Learning mode until its dedicated flow is designed.
 - Added policy tests proving Learning allows help and Challenge blocks it.
 - Verification: analyzer clean; all 11 tests passing.
+
+## 2026-09-16 — Complete visible localization and orientation support
+
+- Enabled portrait and landscape orientations on mobile.
+- Rebuilt the Home screen with adaptive portrait and landscape compositions.
+- Added a landscape gameplay composition with the board and controls sharing
+  the available width while keeping the statistics bar readable.
+- Localized every currently visible UI string outside the bilingual language
+  selector: world map, level list, gameplay feedback, statistics, Free Play,
+  victory, tile labels, and the guided solver.
+- Added English display names for all 20 existing campaign levels and all four
+  existing worlds without changing stable level identifiers or puzzle data.
+- Added widget coverage for English world content, landscape Home, landscape
+  Challenge gameplay, and the absence of help controls in Challenge mode.
+- Verification: analyzer clean; all 14 tests passing.

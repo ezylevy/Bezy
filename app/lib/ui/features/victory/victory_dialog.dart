@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Celebratory victory modal showing stars, stats, and navigation options.
 class VictoryDialog extends StatelessWidget {
@@ -26,6 +27,8 @@ class VictoryDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+
     return Dialog(
       backgroundColor: AppTheme.surfaceDark,
       shape: RoundedRectangleBorder(
@@ -53,9 +56,10 @@ class VictoryDialog extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            const Text(
-              'כל הכבוד! ניצחת!',
-              style: TextStyle(
+            Text(
+              strings.victoryTitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
@@ -65,7 +69,7 @@ class VictoryDialog extends StatelessWidget {
             const SizedBox(height: 6),
 
             Text(
-              'הגעת ליעד של $targetSum בדיוק!',
+              strings.exactTarget(targetSum),
               style: const TextStyle(
                 fontSize: 14,
                 color: AppTheme.textSecondary,
@@ -102,11 +106,11 @@ class VictoryDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _statItem('צעדים שלך', '$moves'),
+                  _statItem(strings.yourMoves, '$moves'),
                   Container(width: 1, height: 30, color: AppTheme.cardBorder),
-                  _statItem('יעד צעדים', '$parMoves'),
+                  _statItem(strings.targetMoves, '$parMoves'),
                   Container(width: 1, height: 30, color: AppTheme.cardBorder),
-                  _statItem('כוכבים', '$stars / 3'),
+                  _statItem(strings.starLabel, '$stars / 3'),
                 ],
               ),
             ),
@@ -118,7 +122,7 @@ class VictoryDialog extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onNextLevel,
                 icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                label: const Text('השלב הבא'),
+                label: Text(strings.nextLevel),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.startGreen,
                   foregroundColor: Colors.black,
@@ -134,7 +138,7 @@ class VictoryDialog extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onReplay,
                     icon: const Icon(Icons.replay_rounded, size: 18),
-                    label: const Text('שחק שוב'),
+                    label: Text(strings.playAgain),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textPrimary,
                       side: const BorderSide(color: AppTheme.cardBorder),
@@ -146,7 +150,7 @@ class VictoryDialog extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onLevelSelect,
                     icon: const Icon(Icons.grid_view_rounded, size: 18),
-                    label: const Text('מפת שלבים'),
+                    label: Text(strings.levelMap),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppTheme.textPrimary,
                       side: const BorderSide(color: AppTheme.cardBorder),

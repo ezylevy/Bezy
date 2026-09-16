@@ -7,6 +7,7 @@ import '../../../domain/models/game_state.dart';
 import '../../../domain/models/game_mode.dart';
 import '../../../domain/models/level_model.dart';
 import '../../../domain/solver/path_solver.dart';
+import '../../../l10n/app_localizations.dart';
 import '../victory/victory_dialog.dart';
 import 'components/board_widget.dart';
 import 'components/stats_bar.dart';
@@ -84,7 +85,7 @@ class _GameScreenState extends State<GameScreen>
         });
       } else {
         widget.sound.invalidMove();
-        _showStatusSnackbar('עליכם להתחיל מאחת ממשבצות ההתחלה הירוקות');
+        _showStatusSnackbar(AppLocalizations.of(context).startRequired);
       }
       return;
     }
@@ -132,22 +133,20 @@ class _GameScreenState extends State<GameScreen>
 
     if (!isOrthogonal) {
       widget.sound.invalidMove();
-      _showStatusSnackbar(
-        'ניתן לנוע רק למשבצת סמוכה (מעלה, מטה, ימינה או שמאלה)',
-      );
+      _showStatusSnackbar(AppLocalizations.of(context).adjacentOnly);
       return;
     }
 
     // 4. Validate Tile Walkability / Special Rules
     if (!clickedTile.isWalkable) {
       widget.sound.invalidMove();
-      _showStatusSnackbar('אי אפשר לעבור דרך חומת אבן!');
+      _showStatusSnackbar(AppLocalizations.of(context).wallBlocked);
       return;
     }
 
     if (!clickedTile.canEnter(_gameState.currentSum)) {
       widget.sound.invalidMove();
-      _showStatusSnackbar('השער החכם נעול! דרוש סכום זוגי למעבר');
+      _showStatusSnackbar(AppLocalizations.of(context).gateBlocked);
       return;
     }
 
@@ -196,7 +195,7 @@ class _GameScreenState extends State<GameScreen>
           );
         });
         _showStatusSnackbar(
-          'הסכום הנוכחי ($newSum) אינו תואם ליעד (${level.targetNumber})! חזרו אחורה',
+          AppLocalizations.of(context).wrongTarget(newSum, level.targetNumber),
         );
         return;
       }
@@ -303,12 +302,10 @@ class _GameScreenState extends State<GameScreen>
       setState(() {
         _gameState = _gameState.copyWith(nextHintIndex: nextHint);
       });
-      _showStatusSnackbar('רמז חכם: המשבצת המומלצת הבאה מהבהבת בזהב!');
+      _showStatusSnackbar(AppLocalizations.of(context).hintShown);
     } else {
       widget.sound.invalidMove();
-      _showStatusSnackbar(
-        'אין מסלול תקף מהמצב הנוכחי - לחצו על ביטול צעד וחזרו אחורה!',
-      );
+      _showStatusSnackbar(AppLocalizations.of(context).noValidPath);
     }
   }
 
@@ -363,140 +360,159 @@ class _GameScreenState extends State<GameScreen>
   @override
   Widget build(BuildContext context) {
     final level = _gameState.level;
+    final strings = AppLocalizations.of(context);
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Column(
-            children: [
-              Text(
+    return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          children: [
+            Text(
+              strings.levelTitle(
+                level.id,
                 level.title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                gridSize: level.gridSize,
               ),
-              Text(
-                level.worldTitle,
-                style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'איפוס לוח',
-              onPressed: _resetGame,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            IconButton(
-              icon: const Icon(Icons.help_outline_rounded),
-              tooltip: 'הוראות',
-              onPressed: _showHelpDialog,
+            Text(
+              strings.worldTitle(level.worldId, level.worldTitle),
+              style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
             ),
           ],
         ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              // Stats indicator
-              StatsBar(state: _gameState),
-
-              // Interactive Board with Pulse Animation
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, _) {
-                      return BoardWidget(
-                        state: _gameState,
-                        onTileTap: _handleTileTap,
-                        pulsePhase: _pulseController.value,
-                      );
-                    },
-                  ),
-                ),
-              ),
-
-              // Bottom Control Buttons
-              _buildBottomControls(),
-            ],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: strings.resetBoard,
+            onPressed: _resetGame,
           ),
+          IconButton(
+            icon: const Icon(Icons.help_outline_rounded),
+            tooltip: strings.instructions,
+            onPressed: _showHelpDialog,
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLandscape = constraints.maxWidth > constraints.maxHeight;
+
+            if (isLandscape) {
+              return Column(
+                children: [
+                  StatsBar(state: _gameState),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(child: _buildBoard()),
+                        SizedBox(
+                          width: 250,
+                          child: _buildBottomControls(wrap: true),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return Column(
+              children: [
+                StatsBar(state: _gameState),
+                Expanded(child: _buildBoard()),
+                _buildBottomControls(),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildBottomControls() {
+  Widget _buildBoard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, _) {
+          return BoardWidget(
+            state: _gameState,
+            onTileTap: _handleTileTap,
+            pulsePhase: _pulseController.value,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBottomControls({bool wrap = false}) {
+    final strings = AppLocalizations.of(context);
+    final controls = <Widget>[
+      _ControlButton(
+        icon: Icons.undo_rounded,
+        label: strings.undo,
+        onTap: _gameState.currentPath.isNotEmpty ? _undoStep : null,
+      ),
+      _ControlButton(
+        icon: Icons.restart_alt_rounded,
+        label: strings.reset,
+        onTap: _gameState.currentPath.isNotEmpty ? _resetGame : null,
+      ),
+      if (widget.mode.allowsHints)
+        _ControlButton(
+          icon: Icons.tips_and_updates_rounded,
+          label: strings.smartHint,
+          color: AppTheme.gold,
+          onTap: _requestHint,
+        ),
+      if (widget.mode.allowsSolutions)
+        _ControlButton(
+          icon: Icons.auto_awesome_rounded,
+          label: strings.guidedSolution,
+          color: AppTheme.pathCyan,
+          onTap: _openSolver,
+        ),
+    ];
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
         color: AppTheme.surfaceDark,
         border: Border(top: BorderSide(color: AppTheme.cardBorder)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Undo Step
-          _ControlButton(
-            icon: Icons.undo_rounded,
-            label: 'ביטול צעד',
-            onTap: _gameState.currentPath.isNotEmpty ? _undoStep : null,
-          ),
-
-          // Reset
-          _ControlButton(
-            icon: Icons.restart_alt_rounded,
-            label: 'איפוס',
-            onTap: _gameState.currentPath.isNotEmpty ? _resetGame : null,
-          ),
-
-          if (widget.mode.allowsHints)
-            _ControlButton(
-              icon: Icons.tips_and_updates_rounded,
-              label: 'רמז חכם',
-              color: AppTheme.gold,
-              onTap: _requestHint,
+      child: wrap
+          ? Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              runAlignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 16,
+              children: controls,
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: controls,
             ),
-
-          if (widget.mode.allowsSolutions)
-            _ControlButton(
-              icon: Icons.auto_awesome_rounded,
-              label: 'פתרון חכם',
-              color: AppTheme.pathCyan,
-              onTap: _openSolver,
-            ),
-        ],
-      ),
     );
   }
 
   void _showHelpDialog() {
+    final strings = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
-        title: const Text('איך משחקים?', textAlign: TextAlign.right),
-        content: const SingleChildScrollView(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Text(
-              '1. התחילו מאחת ממשבצות ההתחלה בירוק.\n'
-              '2. התקדמו למשבצת סמוכה (מעלה, מטה, ימינה או שמאלה).\n'
-              '3. כל משבצת מוסיפה את ערכה לסכום המצטבר.\n'
-              '4. חומות אבן חוסמות את המעבר.\n'
-              '5. מקפצות מעניקות בונוס זינוק לסכום.\n'
-              '6. שערים חכמים נפתחים רק כאשר עומדים בתנאי (כגון סכום זוגי).\n'
-              '7. המטרה: להגיע למשבצת היעד במרכז עם סכום מדויק!',
-              style: TextStyle(height: 1.5, color: AppTheme.textPrimary),
-            ),
+        title: Text(strings.howToPlay),
+        content: SingleChildScrollView(
+          child: Text(
+            strings.compactGameHelp,
+            style: const TextStyle(height: 1.5, color: AppTheme.textPrimary),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('הבנתי, בוא נשחק!'),
+            child: Text(strings.letsPlay),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../domain/models/game_state.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Top stats indicator displaying Target, Current Sum, Difference, and Moves.
 class StatsBar extends StatelessWidget {
@@ -10,6 +11,7 @@ class StatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
     final target = state.level.targetNumber;
     final current = state.currentSum;
     final diff = target - current;
@@ -24,13 +26,13 @@ class StatsBar extends StatelessWidget {
     String diffText;
     Color diffColor = AppTheme.textSecondary;
     if (diff == 0) {
-      diffText = 'מדויק!';
+      diffText = strings.exact;
       diffColor = AppTheme.startGreen;
     } else if (diff > 0) {
-      diffText = 'חסר: $diff';
+      diffText = strings.remaining(diff);
       diffColor = AppTheme.gold;
     } else {
-      diffText = 'חריגה: ${diff.abs()}';
+      diffText = strings.overBy(diff.abs());
       diffColor = AppTheme.targetPink;
     }
 
@@ -54,7 +56,7 @@ class StatsBar extends StatelessWidget {
         children: [
           // Target Number Badge
           _StatColumn(
-            label: 'יעד',
+            label: strings.target,
             value: '$target',
             color: AppTheme.targetPink,
             icon: Icons.flag_rounded,
@@ -64,7 +66,7 @@ class StatsBar extends StatelessWidget {
 
           // Current Sum Badge
           _StatColumn(
-            label: 'סכום נוכחי',
+            label: strings.currentSum,
             value: '$current',
             color: sumColor,
             icon: Icons.calculate_rounded,
@@ -74,7 +76,7 @@ class StatsBar extends StatelessWidget {
 
           // Difference Badge
           _StatColumn(
-            label: 'הפרש',
+            label: strings.difference,
             value: diffText,
             color: diffColor,
             icon: Icons.compare_arrows_rounded,
@@ -84,9 +86,9 @@ class StatsBar extends StatelessWidget {
 
           // Moves vs Par
           _StatColumn(
-            label: 'צעדים',
+            label: strings.moves,
             value: '${state.moves}',
-            subValue: 'יעד: ${state.level.parMoves}',
+            subValue: strings.par(state.level.parMoves),
             color: AppTheme.textPrimary,
             icon: Icons.directions_walk_rounded,
           ),

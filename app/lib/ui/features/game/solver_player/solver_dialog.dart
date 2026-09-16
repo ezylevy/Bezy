@@ -4,6 +4,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../domain/models/level_model.dart';
 import '../../../../domain/models/tile_model.dart';
 import '../../../../domain/solver/path_solver.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// An intelligent step-by-step solver player that explains the math and progression.
 class SolverDialog extends StatefulWidget {
@@ -27,11 +28,20 @@ class _SolverDialogState extends State<SolverDialog> {
   bool _isPlaying = false;
   Timer? _playbackTimer;
   final int _playbackSpeedMs = 800;
+  bool _hasComputedSolution = false;
 
   @override
   void initState() {
     super.initState();
-    _computeSolution();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasComputedSolution) {
+      _hasComputedSolution = true;
+      _computeSolution();
+    }
   }
 
   @override
@@ -43,9 +53,7 @@ class _SolverDialogState extends State<SolverDialog> {
   void _computeSolution() {
     final sol = PathSolver.findSolution(widget.level);
     if (sol == null || sol.isEmpty) {
-      setState(() {
-        _solutionPath = null;
-      });
+      _solutionPath = null;
       return;
     }
 
@@ -55,6 +63,7 @@ class _SolverDialogState extends State<SolverDialog> {
   }
 
   List<StepBreakdown> _generateBreakdowns(List<int> path) {
+    final strings = AppLocalizations.of(context);
     final list = <StepBreakdown>[];
     var runningSum = 0;
 
@@ -68,8 +77,8 @@ class _SolverDialogState extends State<SolverDialog> {
           StepBreakdown(
             step: i + 1,
             tileIndex: tileIndex,
-            actionName: 'נקודת התחלה',
-            formula: 'סכום פתיחה: $runningSum',
+            actionName: strings.solverStartPoint,
+            formula: strings.openingTotal(runningSum),
             runningSum: runningSum,
             tileType: tile.type,
             icon: Icons.play_circle_fill_rounded,
@@ -81,9 +90,11 @@ class _SolverDialogState extends State<SolverDialog> {
           StepBreakdown(
             step: i + 1,
             tileIndex: tileIndex,
-            actionName: 'הגעה למרכז!',
-            formula:
-                'הסכום $runningSum תואם ליעד ${widget.level.targetNumber}!',
+            actionName: strings.solverReachedTarget,
+            formula: strings.targetMatched(
+              runningSum,
+              widget.level.targetNumber,
+            ),
             runningSum: runningSum,
             tileType: tile.type,
             icon: Icons.emoji_events_rounded,
@@ -98,9 +109,8 @@ class _SolverDialogState extends State<SolverDialog> {
           StepBreakdown(
             step: i + 1,
             tileIndex: tileIndex,
-            actionName: 'מקפצה זינוק (+בונוס)',
-            formula:
-                '$prev + ${tile.value} (ערך) + $bonus (בונוס) = $runningSum',
+            actionName: strings.solverLaunchPad,
+            formula: strings.bonusFormula(prev, tile.value, bonus, runningSum),
             runningSum: runningSum,
             tileType: tile.type,
             icon: Icons.bolt_rounded,
@@ -114,7 +124,7 @@ class _SolverDialogState extends State<SolverDialog> {
           StepBreakdown(
             step: i + 1,
             tileIndex: tileIndex,
-            actionName: 'שער חכם עביר',
+            actionName: strings.solverGate,
             formula: '$prev + ${tile.value} = $runningSum',
             runningSum: runningSum,
             tileType: tile.type,
@@ -129,7 +139,7 @@ class _SolverDialogState extends State<SolverDialog> {
           StepBreakdown(
             step: i + 1,
             tileIndex: tileIndex,
-            actionName: 'צעד נוסף',
+            actionName: strings.solverNextStep,
             formula: '$prev + ${tile.value} = $runningSum',
             runningSum: runningSum,
             tileType: tile.type,
@@ -187,23 +197,25 @@ class _SolverDialogState extends State<SolverDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+
     if (_solutionPath == null) {
       return AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
-        title: const Text(
-          'אין פתרון אפשרי',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          strings.noSolution,
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'לא נמצא מסלול תקף ללוח זה עבור הסכום המבוקש.',
-          style: TextStyle(color: AppTheme.textSecondary),
+        content: Text(
+          strings.noSolutionDescription,
+          style: const TextStyle(color: AppTheme.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'סגור',
-              style: TextStyle(color: AppTheme.pathCyan),
+            child: Text(
+              strings.close,
+              style: const TextStyle(color: AppTheme.pathCyan),
             ),
           ),
         ],
@@ -240,10 +252,10 @@ class _SolverDialogState extends State<SolverDialog> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'מדריך פתרון חכם',
-                    style: TextStyle(
+                    strings.solverTitle,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
@@ -269,7 +281,7 @@ class _SolverDialogState extends State<SolverDialog> {
             ),
             const SizedBox(height: 6),
             Text(
-              'צעד ${_currentStepIndex + 1} מתוך ${_breakdowns.length}',
+              strings.stepProgress(_currentStepIndex + 1, _breakdowns.length),
               style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.textMuted,
@@ -318,7 +330,7 @@ class _SolverDialogState extends State<SolverDialog> {
                       ),
                       const Spacer(),
                       Text(
-                        'סכום: ${currentBreakdown.runningSum}',
+                        strings.sumValue(currentBreakdown.runningSum),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -392,7 +404,7 @@ class _SolverDialogState extends State<SolverDialog> {
                 widget.onApplySolution(_solutionPath!);
               },
               icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-              label: const Text('החל פתרון זה על הלוח'),
+              label: Text(strings.applySolution),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.pathCyan,
                 foregroundColor: Colors.black,
