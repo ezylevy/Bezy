@@ -1,5 +1,11 @@
+import 'dart:math';
+
 import '../models/level_model.dart';
 import '../models/tile_model.dart';
+import 'extra_campaign_levels.dart';
+import 'world_info.dart';
+
+export 'world_info.dart';
 
 /// Predefined campaign worlds and levels with rich progressive challenges.
 class CampaignLevels {
@@ -28,10 +34,11 @@ class CampaignLevels {
     const WorldInfo(
       id: 4,
       title: 'מאסטר החיבור',
-      subtitle: 'לוחות 7x7 ו-9x9 - אתגרי העל למקצוענים',
+      subtitle: 'לוחות 7x7 ו-9x9 - תאי מראה, שכפול והפתעה',
       colorHex: 0xFFF59E0B, // Amber Gold
       iconName: 'emoji_events',
     ),
+    ...ExtraCampaignLevels.worlds,
   ];
 
   static List<LevelModel> getAllLevels() {
@@ -40,6 +47,7 @@ class CampaignLevels {
       ..._world2Levels,
       ..._world3Levels,
       ..._world4Levels,
+      ...ExtraCampaignLevels.levels,
     ];
   }
 
@@ -337,14 +345,34 @@ class CampaignLevels {
       gridSize: 5,
       targetNumber: 27,
       parMoves: 5,
-      description: 'המשבצת הכתומה היא מקפצה שמעניקה תוספת בונוס לסכום!',
-      trampolineIndices: [13],
+      description: 'כניסה לדלת אחת מעבירה מיד לדלת השנייה בלי לשנות את הסכום.',
+      trampolineIndices: [13, 16],
       values: [
-        2, 3, 4, 1, 5,
-        4, 2, 5, 3, 2,
-        3, 6, 27, 4, 1, // 13 is trampoline (value 4 + bonus 2)
-        1, 5, 2, 4, 3,
-        4, 2, 3, 5, 2,
+        2,
+        3,
+        4,
+        1,
+        5,
+        4,
+        2,
+        5,
+        3,
+        2,
+        3,
+        6,
+        27,
+        4,
+        1,
+        1,
+        5,
+        2,
+        4,
+        3,
+        4,
+        2,
+        3,
+        5,
+        2,
       ],
     ),
 
@@ -379,9 +407,9 @@ class CampaignLevels {
       gridSize: 5,
       targetNumber: 33,
       parMoves: 6,
-      description: 'שילוב של חומות ומקפצה שמעניקה כוח תנופה.',
+      description: 'שילוב של חומות וזוג דלתות שמעבירות את השחקן ביניהן.',
       wallIndices: [8, 16],
-      trampolineIndices: [6],
+      trampolineIndices: [6, 18],
       values: [
         3,
         5,
@@ -478,74 +506,78 @@ class CampaignLevels {
   // WORLD 4: מאסטר החיבור (7x7 & 9x9)
   // ==========================================
   static final List<LevelModel> _world4Levels = [
-    // 4-1: המבוך הגדול
+    // 4-1: מבוך המראה
     _createLevelWithModifiers(
       id: 'w4_l1',
       worldId: 4,
       levelNumber: 1,
       worldTitle: 'מאסטר החיבור',
-      title: 'המבוך הגדול 7x7',
+      title: 'מבוך המראה 7x7',
       gridSize: 7,
       targetNumber: 52,
       parMoves: 9,
-      description: 'לוח ענק הדורש ריכוז וסכימה מבוקרת כדי לא לחרוג.',
+      description: 'תא המראה הופך את סדר הספרות של הסכום הנוכחי.',
       wallIndices: [9, 11, 37, 39],
+      mirrorIndices: [18],
       values: List.generate(49, (i) {
         if (i == 24) return 52;
         return (i * 3 + 2) % 9;
       }),
     ),
 
-    // 4-2: שרשרת השערים
+    // 4-2: מעבדת השכפול
     _createLevelWithModifiers(
       id: 'w4_l2',
       worldId: 4,
       levelNumber: 2,
       worldTitle: 'מאסטר החיבור',
-      title: 'שרשרת השערים',
+      title: 'מעבדת השכפול',
       gridSize: 7,
       targetNumber: 56,
       parMoves: 10,
-      description: 'שערים חכמים חוסמים את הכניסה למרכז – דרוש סכום זוגי מדויק!',
+      description: 'תא השכפול מכפיל מייד את הערך הנוכחי של השחקן.',
       wallIndices: [16, 32],
       smartGateIndices: [17, 31],
+      cloneIndices: [18],
       values: List.generate(49, (i) {
         if (i == 24) return 56;
         return (i * 3 + 2) % 7 + 1;
       }),
     ),
 
-    // 4-3: מבוך הספירלה
+    // 4-3: ספירלת האפס
     _createLevelWithModifiers(
       id: 'w4_l3',
       worldId: 4,
       levelNumber: 3,
       worldTitle: 'מאסטר החיבור',
-      title: 'מבוך הספירלה',
+      title: 'ספירלת האפס',
       gridSize: 7,
       targetNumber: 64,
       parMoves: 12,
-      description: 'חומות שמאלצות תנועה היקפית ספירלית סביב המרכז.',
+      description: 'תא האפס מאפס את הסכום ומחייב לבנות את המסלול מחדש.',
       wallIndices: [8, 9, 10, 26, 33, 40, 38, 37],
+      zeroIndices: [18],
       values: List.generate(49, (i) {
         if (i == 24) return 64;
         return (i * 2 + 3) % 9 + 1;
       }),
     ),
 
-    // 4-4: הטיטאן 9x9
+    // 4-4: הטיטאן והחור השחור 9x9
     _createLevelWithModifiers(
       id: 'w4_l4',
       worldId: 4,
       levelNumber: 4,
       worldTitle: 'מאסטר החיבור',
-      title: 'הטיטאן 9x9',
+      title: 'הטיטאן והחור השחור 9x9',
       gridSize: 9,
       targetNumber: 72,
       parMoves: 12,
-      description: 'לוח אדיר של 81 משבצות! אתגר ענק למוח.',
+      description: 'החור השחור משאיר רק המשך אקראי אחד פתוח.',
       wallIndices: [12, 14, 22, 32, 48, 58, 66, 68],
       trampolineIndices: [20, 60],
+      blackHoleIndices: [30],
       values: List.generate(81, (i) {
         if (i == 40) return 72; // center of 81
         return (i * 7 + 3) % 9 + 1;
@@ -562,10 +594,15 @@ class CampaignLevels {
       gridSize: 9,
       targetNumber: 85,
       parMoves: 14,
-      description: 'שלב הגמר המוחלט של משחק מסלול החיבור!',
+      description: 'שלב הגמר משלב מראה, שכפול, חור שחור, פצצה ואפס.',
       wallIndices: [21, 23, 31, 41, 49, 59, 57],
       trampolineIndices: [14, 66],
       smartGateIndices: [39, 41],
+      mirrorIndices: [20],
+      cloneIndices: [30],
+      blackHoleIndices: [50],
+      bombIndices: [60],
+      zeroIndices: [70],
       values: List.generate(81, (i) {
         if (i == 40) return 85;
         return (i * 4 + 5) % 9 + 1;
@@ -658,11 +695,34 @@ class CampaignLevels {
     List<int> wallIndices = const [],
     List<int> trampolineIndices = const [],
     List<int> smartGateIndices = const [],
+    List<int> mirrorIndices = const [],
+    List<int> cloneIndices = const [],
+    List<int> blackHoleIndices = const [],
+    List<int> bombIndices = const [],
+    List<int> zeroIndices = const [],
     List<String> hints = const [],
   }) {
     final total = gridSize * gridSize;
     final center = total ~/ 2;
     final defaultStarts = LevelModel.calculateDefaultStartPoints(gridSize);
+    final specialPlacements = _spreadSpecialCells(
+      id: id,
+      gridSize: gridSize,
+      center: center,
+      blockedIndices: {
+        ...wallIndices,
+        ...trampolineIndices,
+        ...smartGateIndices,
+        ...defaultStarts,
+      },
+      requestedTypes: [
+        for (final _ in mirrorIndices) TileType.mirror,
+        for (final _ in cloneIndices) TileType.clone,
+        for (final _ in blackHoleIndices) TileType.blackHole,
+        for (final _ in bombIndices) TileType.bomb,
+        for (final _ in zeroIndices) TileType.zero,
+      ],
+    );
     final tiles = <TileModel>[];
 
     for (var i = 0; i < total; i++) {
@@ -690,7 +750,6 @@ class CampaignLevels {
             col: c,
             type: TileType.trampoline,
             value: values[i],
-            metadata: {'bonus': 2},
           ),
         );
       } else if (smartGateIndices.contains(i)) {
@@ -704,6 +763,10 @@ class CampaignLevels {
             customLabel: 'זוגי',
             metadata: {'rule': 'even'},
           ),
+        );
+      } else if (specialPlacements.containsKey(i)) {
+        tiles.add(
+          TileModel(index: i, row: r, col: c, type: specialPlacements[i]!),
         );
       } else if (defaultStarts.contains(i)) {
         tiles.add(
@@ -742,20 +805,65 @@ class CampaignLevels {
       hints: hints,
     );
   }
-}
 
-class WorldInfo {
-  final int id;
-  final String title;
-  final String subtitle;
-  final int colorHex;
-  final String iconName;
+  /// Uses a stable shuffle so special cells look randomly distributed while
+  /// remaining reproducible for hints, tests, and saved campaign progress.
+  static Map<int, TileType> _spreadSpecialCells({
+    required String id,
+    required int gridSize,
+    required int center,
+    required Set<int> blockedIndices,
+    required List<TileType> requestedTypes,
+  }) {
+    if (requestedTypes.isEmpty) return const {};
 
-  const WorldInfo({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.colorHex,
-    required this.iconName,
-  });
+    final total = gridSize * gridSize;
+    final candidates = List<int>.generate(total, (index) => index).where((
+      index,
+    ) {
+      final row = index ~/ gridSize;
+      final col = index % gridSize;
+      return index != center &&
+          !blockedIndices.contains(index) &&
+          row > 0 &&
+          row < gridSize - 1 &&
+          col > 0 &&
+          col < gridSize - 1;
+    }).toList()..shuffle(Random(_stableSeed(id)));
+
+    final placements = <int, TileType>{};
+    for (final type in requestedTypes) {
+      if (candidates.isEmpty) break;
+      var best = candidates.first;
+      var bestDistance = -1;
+      for (final candidate in candidates) {
+        final candidateRow = candidate ~/ gridSize;
+        final candidateCol = candidate % gridSize;
+        final minimumDistance = placements.isEmpty
+            ? gridSize
+            : placements.keys
+                  .map(
+                    (placed) =>
+                        (candidateRow - placed ~/ gridSize).abs() +
+                        (candidateCol - placed % gridSize).abs(),
+                  )
+                  .reduce(min);
+        if (minimumDistance > bestDistance) {
+          best = candidate;
+          bestDistance = minimumDistance;
+        }
+      }
+      placements[best] = type;
+      candidates.remove(best);
+    }
+    return placements;
+  }
+
+  static int _stableSeed(String value) {
+    var seed = 17;
+    for (final unit in value.codeUnits) {
+      seed = (seed * 37 + unit) & 0x7fffffff;
+    }
+    return seed;
+  }
 }

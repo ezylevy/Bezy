@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../domain/models/tile_model.dart';
-import '../../../../l10n/app_localizations.dart';
 import 'tile_widget.dart';
 
 /// Modular Factory that creates the dedicated UI component for any tile type.
@@ -13,6 +12,27 @@ class TileComponentFactory {
     required int gridSize,
     VoidCallback? onTap,
   }) {
+    if (state.isBlackHoled) {
+      return ModularTileContainer(
+        tile: tile,
+        state: state,
+        onTap: onTap,
+        child: Image.asset(
+          'assets/special/black_holed_cell.png',
+          fit: BoxFit.contain,
+          gaplessPlayback: true,
+          filterQuality: FilterQuality.medium,
+        ),
+      );
+    }
+    if (state.isLocked) {
+      return ModularTileContainer(
+        tile: tile,
+        state: state,
+        onTap: onTap,
+        child: Image.asset('assets/special/wall.png', fit: BoxFit.contain),
+      );
+    }
     switch (tile.type) {
       case TileType.start:
         return StartTileComponent(
@@ -54,6 +74,16 @@ class TileComponentFactory {
           onTap: onTap,
         );
 
+      case TileType.mirror:
+      case TileType.clone:
+      case TileType.blackHole:
+      case TileType.bomb:
+      case TileType.zero:
+      case TileType.joker:
+      case TileType.ice:
+      case TileType.lonely:
+        return SpecialTileComponent(tile: tile, state: state, onTap: onTap);
+
       case TileType.number:
         return NumberTileComponent(
           tile: tile,
@@ -62,6 +92,79 @@ class TileComponentFactory {
           onTap: onTap,
         );
     }
+  }
+}
+
+class SpecialTileComponent extends StatelessWidget {
+  final TileModel tile;
+  final TileVisualState state;
+  final VoidCallback? onTap;
+
+  const SpecialTileComponent({
+    super.key,
+    required this.tile,
+    required this.state,
+    this.onTap,
+  });
+
+  String get _assetName => switch (tile.type) {
+    TileType.mirror => 'mirror.png',
+    TileType.clone => 'clone.png',
+    TileType.blackHole => 'black_hole.png',
+    TileType.bomb => 'bomb.png',
+    TileType.zero => 'zero.png',
+    TileType.joker => 'joker.png',
+    TileType.ice => 'ice.png',
+    TileType.lonely => 'lonely_cell.png',
+    _ => throw StateError('Not a special tile'),
+  };
+
+  IconData get _fallbackIcon => switch (tile.type) {
+    TileType.joker => Icons.theater_comedy_rounded,
+    TileType.ice => Icons.ac_unit_rounded,
+    TileType.lonely => Icons.person_outline_rounded,
+    _ => Icons.auto_awesome_rounded,
+  };
+
+  Color get _fallbackColor => switch (tile.type) {
+    TileType.joker => const Color(0xFFFF4FA3),
+    TileType.ice => const Color(0xFF50D8FF),
+    TileType.lonely => const Color(0xFFFFB84D),
+    _ => AppTheme.pathCyan,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return ModularTileContainer(
+      tile: tile,
+      state: state,
+      onTap: onTap,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.asset(
+            'assets/special/$_assetName',
+            fit: BoxFit.contain,
+            gaplessPlayback: true,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: (context, error, stackTrace) =>
+                Icon(_fallbackIcon, color: _fallbackColor, size: 34),
+          ),
+          if (tile.isJoker && tile.jokerOptions.isNotEmpty)
+            Positioned(
+              bottom: 2,
+              child: Text(
+                tile.jokerOptions.join(' / '),
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 
@@ -82,25 +185,11 @@ class NumberTileComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = _calculateFontSize(gridSize);
-    final textColor = state.isInPath || state.isSolutionStep || state.isVictory
-        ? Colors.black
-        : AppTheme.textPrimary;
-
     return ModularTileContainer(
       tile: tile,
       state: state,
       onTap: onTap,
-      child: Center(
-        child: Text(
-          '${tile.value}',
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: textColor,
-          ),
-        ),
-      ),
+      child: NumberTileArt(value: tile.value, state: state),
     );
   }
 }
@@ -122,39 +211,37 @@ class StartTileComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = _calculateFontSize(gridSize);
     final isSelected = state.isInPath || state.isSolutionStep;
+    final showAsStart = state.isStart;
 
     return ModularTileContainer(
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: isSelected
+      customBgColor: isSelected || !showAsStart
           ? null
           : AppTheme.startGreen.withValues(alpha: 0.2),
-      customBorderColor: AppTheme.startGreen,
+      customBorderColor: showAsStart ? AppTheme.startGreen : null,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Positioned(
-            top: 2,
-            left: 2,
-            child: Icon(
-              Icons.play_circle_fill_rounded,
-              size: gridSize > 5 ? 10 : 14,
-              color: AppTheme.startGreen,
-            ),
+          NumberTileArt(
+            value: tile.value,
+            state: state,
+            upAssetDirectory: showAsStart && !isSelected
+                ? 'assets/numbers/set1/gates'
+                : 'assets/numbers/set1',
           ),
-          Center(
-            child: Text(
-              '${tile.value}',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w900,
-                color: isSelected ? Colors.black : AppTheme.startGreen,
+          if (showAsStart)
+            Positioned(
+              top: 2,
+              left: 2,
+              child: Icon(
+                Icons.play_circle_fill_rounded,
+                size: gridSize > 5 ? 10 : 14,
+                color: AppTheme.startGreen,
               ),
             ),
-          ),
         ],
       ),
     );
@@ -178,54 +265,18 @@ class TargetTileComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = _calculateFontSize(gridSize) * 0.95;
-    final isVictory = state.isVictory;
-
     return ModularTileContainer(
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: isVictory
-          ? AppTheme.startGreen
-          : AppTheme.targetPink.withValues(alpha: 0.28),
-      customBorderColor: isVictory ? AppTheme.gold : AppTheme.targetPink,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            top: 2,
-            left: 3,
-            child: Icon(
-              Icons.flag_rounded,
-              size: gridSize > 5 ? 10 : 14,
-              color: isVictory ? Colors.white : AppTheme.targetPink,
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${tile.value}',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w900,
-                  color: isVictory ? Colors.black : AppTheme.targetPink,
-                ),
-              ),
-              if (gridSize <= 5)
-                Text(
-                  AppLocalizations.of(context).target,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: isVictory
-                        ? Colors.black.withValues(alpha: 0.8)
-                        : AppTheme.targetPink.withValues(alpha: 0.8),
-                  ),
-                ),
-            ],
-          ),
-        ],
+      customBorderColor: state.isVictory ? AppTheme.gold : AppTheme.targetPink,
+      child: Image.asset(
+        'assets/numbers/results/${tile.value}.png',
+        fit: BoxFit.contain,
+        gaplessPlayback: true,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (context, error, stackTrace) =>
+            NumberTileArt(value: tile.value, state: state),
       ),
     );
   }
@@ -252,14 +303,10 @@ class WallTileComponent extends StatelessWidget {
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: AppTheme.wallDark,
-      customBorderColor: AppTheme.wallGray,
-      child: Center(
-        child: Icon(
-          Icons.fence_rounded,
-          size: gridSize > 5 ? 16 : 24,
-          color: AppTheme.wallGray.withValues(alpha: 0.8),
-        ),
+      child: Image.asset(
+        'assets/special/wall.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
       ),
     );
   }
@@ -282,50 +329,14 @@ class TrampolineTileComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = _calculateFontSize(gridSize);
-    final bonus = tile.metadata['bonus'] as int? ?? 2;
-
     return ModularTileContainer(
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: AppTheme.trampolineOrange.withValues(alpha: 0.22),
-      customBorderColor: AppTheme.trampolineOrange,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            top: 2,
-            left: 2,
-            child: Icon(
-              Icons.bolt_rounded,
-              size: gridSize > 5 ? 10 : 13,
-              color: AppTheme.trampolineOrange,
-            ),
-          ),
-          Center(
-            child: Text(
-              '${tile.value}',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.trampolineOrange,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 2,
-            right: 2,
-            child: Text(
-              '+$bonus',
-              style: TextStyle(
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.trampolineOrange.withValues(alpha: 0.9),
-              ),
-            ),
-          ),
-        ],
+      child: Image.asset(
+        'assets/special/teleporting_door.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
       ),
     );
   }
@@ -348,57 +359,117 @@ class SmartGateTileComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = _calculateFontSize(gridSize);
-    final label = AppLocalizations.of(context).even;
-
     return ModularTileContainer(
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: AppTheme.smartGatePurple.withValues(alpha: 0.25),
-      customBorderColor: AppTheme.smartGatePurple,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            top: 2,
-            left: 2,
-            child: Icon(
-              Icons.lock_open_rounded,
-              size: gridSize > 5 ? 10 : 12,
-              color: AppTheme.smartGatePurple,
-            ),
-          ),
-          Center(
-            child: Text(
-              '${tile.value}',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.smartGatePurple,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 1,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.smartGatePurple.withValues(alpha: 0.9),
-              ),
-            ),
-          ),
-        ],
-      ),
+      child: NumberTileArt(value: tile.value, state: state),
     );
   }
 }
 
-double _calculateFontSize(int gridSize) {
-  if (gridSize <= 3) return 26.0;
-  if (gridSize <= 5) return 20.0;
-  if (gridSize <= 7) return 15.0;
-  return 12.0;
+/// Uses the supplied up/pressed artwork for every digit, including two-digit
+/// targets. Keeping each digit separate avoids stretching the artwork.
+class NumberTileArt extends StatelessWidget {
+  final int value;
+  final TileVisualState state;
+  final String upAssetDirectory;
+
+  const NumberTileArt({
+    super.key,
+    required this.value,
+    required this.state,
+    this.upAssetDirectory = 'assets/numbers/set1',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pressed = state.isInPath || state.isSolutionStep;
+    final digits = value.toString().split('');
+    final artwork = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final digit in digits)
+          Expanded(
+            child: Image.asset(
+              pressed
+                  ? 'assets/numbers/set1/${digit}pressed.png'
+                  : '$upAssetDirectory/${digit}up.png',
+              fit: digits.length > 1 ? BoxFit.cover : BoxFit.contain,
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.medium,
+              errorBuilder: (context, error, stackTrace) => Text(
+                digit,
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+
+    return Semantics(
+      label: '$value',
+      image: true,
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: state.isVictory && state.isTarget
+            ? ColorFiltered(
+                colorFilter: const ColorFilter.matrix([
+                  0.55,
+                  0,
+                  0,
+                  0,
+                  22,
+                  0,
+                  0.9,
+                  0,
+                  0,
+                  80,
+                  0,
+                  0,
+                  0.65,
+                  0,
+                  35,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                ]),
+                child: artwork,
+              )
+            : pressed
+            ? ColorFiltered(
+                colorFilter: const ColorFilter.matrix([
+                  0.65,
+                  0,
+                  0,
+                  0,
+                  25,
+                  0,
+                  0.8,
+                  0,
+                  0,
+                  32,
+                  0,
+                  0,
+                  0.95,
+                  0,
+                  55,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                ]),
+                child: artwork,
+              )
+            : artwork,
+      ),
+    );
+  }
 }

@@ -14,11 +14,20 @@ enum TileType {
   /// Wall / barrier obstacle (חומה) - cannot be entered by player or solver.
   wall,
 
-  /// Trampoline / bounce tile (מקפצה) - launches player or grants bonus multiplier.
+  /// Teleporting door - moves the player to its pair without changing value.
   trampoline,
 
-  /// Smart gate (שער חכם) - passable only when a condition is met (e.g. current sum is even).
+  /// Legacy smart-gate level cell. Entry gates are now visual start cells only,
+  /// so this behaves like a normal number during route movement.
   smartGate,
+  mirror,
+  clone,
+  blackHole,
+  bomb,
+  zero,
+  joker,
+  ice,
+  lonely,
 }
 
 /// Extensible model representing a single modular cell component on the board.
@@ -48,19 +57,24 @@ class TileModel {
   bool get isWall => type == TileType.wall;
   bool get isTrampoline => type == TileType.trampoline;
   bool get isSmartGate => type == TileType.smartGate;
+  bool get isMirror => type == TileType.mirror;
+  bool get isClone => type == TileType.clone;
+  bool get isBlackHole => type == TileType.blackHole;
+  bool get isBomb => type == TileType.bomb;
+  bool get isZero => type == TileType.zero;
+  bool get isJoker => type == TileType.joker;
+  bool get isIce => type == TileType.ice;
+  bool get isLonely => type == TileType.lonely;
+
+  List<int> get jokerOptions {
+    final raw = metadata['options'];
+    if (raw is List) return raw.whereType<int>().toList(growable: false);
+    return const [];
+  }
 
   /// Validates whether a player with [currentSum] can enter this tile.
   bool canEnter(int currentSum) {
     if (isWall) return false;
-    if (isSmartGate) {
-      final gateRule = metadata['rule'] as String? ?? 'even';
-      if (gateRule == 'even') {
-        return currentSum % 2 == 0;
-      } else if (gateRule == 'min') {
-        final minVal = metadata['min'] as int? ?? 10;
-        return currentSum >= minVal;
-      }
-    }
     return true;
   }
 
@@ -69,11 +83,28 @@ class TileModel {
     if (isTarget) {
       return currentSum; // Target cell contains the goal number, not added to sum
     }
-    if (isTrampoline) {
-      final bonus = metadata['bonus'] as int? ?? 2;
-      return currentSum + value + bonus;
+    if (isTrampoline) return currentSum;
+    if (isMirror) {
+      final sign = currentSum < 0 ? -1 : 1;
+      if (currentSum.abs() < 10) return currentSum * 10;
+      final reversed = currentSum.abs().toString().split('').reversed.join();
+      return sign * int.parse(reversed);
     }
+    if (isClone) return currentSum * 2;
+    if (isZero) return 0;
+    if (isJoker) {
+      final options = jokerOptions;
+      return currentSum + (options.isEmpty ? 0 : options.first);
+    }
+    if (isBlackHole || isBomb) return currentSum;
     return currentSum + value;
+  }
+
+  int applyJokerChoice(int currentSum, int choice) {
+    if (!isJoker || !jokerOptions.contains(choice)) {
+      return applyValue(currentSum);
+    }
+    return currentSum + choice;
   }
 
   TileModel copyWith({

@@ -56,6 +56,7 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
           initialLevel: level,
           storage: widget.storage,
           sound: widget.sound,
+          showSpecialIntroductions: true,
           mode: GameMode.learning,
         ),
       ),
@@ -127,7 +128,7 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 strings.wallsAndObstacles,
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 18),
               ),
               value: _includeWalls,
               activeThumbColor: AppTheme.pathCyan,
@@ -140,7 +141,7 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 strings.launchPads,
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 18),
               ),
               value: _includeTrampolines,
               activeThumbColor: AppTheme.trampolineOrange,
@@ -153,7 +154,7 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
               contentPadding: EdgeInsets.zero,
               title: Text(
                 strings.smartGates,
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 18),
               ),
               value: _includeSmartGates,
               activeThumbColor: AppTheme.smartGatePurple,

@@ -13,6 +13,8 @@ class LevelModel {
   final int targetNumber;
   final List<TileModel> tiles;
   final int parMoves;
+  final int? optimalMoves;
+  final int? challengeTimeSeconds;
   final String description;
   final List<String> hints;
 
@@ -26,12 +28,30 @@ class LevelModel {
     required this.targetNumber,
     required this.tiles,
     required this.parMoves,
+    this.optimalMoves,
+    this.challengeTimeSeconds,
     this.description = '',
     this.hints = const [],
   });
 
   int get totalCells => gridSize * gridSize;
   int get centerIndex => totalCells ~/ 2;
+  bool get hasChallengeTimer => challengeTimeSeconds != null;
+
+  /// Teleporting doors are paired in board-index order: 0↔1, 2↔3, etc.
+  int? pairedTeleportIndex(int index) {
+    final doors =
+        tiles
+            .where((tile) => tile.isTrampoline)
+            .map((tile) => tile.index)
+            .toList()
+          ..sort();
+    final position = doors.indexOf(index);
+    if (position == -1) return null;
+    final pairedPosition = position.isEven ? position + 1 : position - 1;
+    if (pairedPosition < 0 || pairedPosition >= doors.length) return null;
+    return doors[pairedPosition];
+  }
 
   List<int> get startIndices {
     return tiles
@@ -61,6 +81,8 @@ class LevelModel {
     int? targetNumber,
     List<TileModel>? tiles,
     int? parMoves,
+    int? optimalMoves,
+    int? challengeTimeSeconds,
     String? description,
     List<String>? hints,
   }) {
@@ -74,6 +96,8 @@ class LevelModel {
       targetNumber: targetNumber ?? this.targetNumber,
       tiles: tiles ?? this.tiles,
       parMoves: parMoves ?? this.parMoves,
+      optimalMoves: optimalMoves ?? this.optimalMoves,
+      challengeTimeSeconds: challengeTimeSeconds ?? this.challengeTimeSeconds,
       description: description ?? this.description,
       hints: hints ?? this.hints,
     );

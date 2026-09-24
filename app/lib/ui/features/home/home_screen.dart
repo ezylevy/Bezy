@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 strings.stars(totalStars),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 18,
                   color: AppTheme.gold,
                 ),
               ),
@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Icon(
               Icons.route_rounded,
               size: compact ? 42 : 52,
-              color: Colors.black,
+              color: AppTheme.bgDark,
             ),
           ),
           SizedBox(height: compact ? 12 : 20),
@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
             strings.appTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: compact ? 29 : 34,
+              fontSize: compact ? 33 : 38,
               fontWeight: FontWeight.w900,
               color: AppTheme.textPrimary,
               letterSpacing: 0.5,
@@ -192,13 +192,13 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             strings.appSubtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 15, color: AppTheme.textSecondary),
+            style: const TextStyle(fontSize: 19, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 4),
           Text(
             strings.createdBy,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 16,
               color: AppTheme.pathCyan,
               fontWeight: FontWeight.w500,
             ),
@@ -261,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 24),
         Text(
           strings.versionLabel,
-          style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+          style: const TextStyle(fontSize: 15, color: AppTheme.textMuted),
         ),
         const SizedBox(height: 8),
       ],
@@ -308,30 +308,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 strings.reachTarget,
                 strings.reachTargetDescription,
               ),
-              _ruleItem(
-                Icons.fence_rounded,
-                AppTheme.wallGray,
-                strings.walls,
-                strings.wallsDescription,
-              ),
-              _ruleItem(
-                Icons.bolt_rounded,
-                AppTheme.trampolineOrange,
-                strings.launchPads,
-                strings.launchPadsDescription,
-              ),
-              _ruleItem(
-                Icons.lock_open_rounded,
-                AppTheme.smartGatePurple,
-                strings.smartGates,
-                strings.smartGatesDescription,
-              ),
-              _ruleItem(
-                Icons.auto_awesome_rounded,
-                AppTheme.gold,
-                strings.smartHelp,
-                strings.smartHelpDescription,
-              ),
             ],
           ),
         ),
@@ -372,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
@@ -381,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   description,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 16,
                     color: AppTheme.textSecondary,
                   ),
                 ),
@@ -424,7 +400,7 @@ class _MenuCard extends StatelessWidget {
             border: Border.all(color: AppTheme.cardBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: AppTheme.bgDark.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -448,7 +424,7 @@ class _MenuCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
                       ),
@@ -457,7 +433,7 @@ class _MenuCard extends StatelessWidget {
                     Text(
                       subtitle,
                       style: const TextStyle(
-                        fontSize: 11,
+                        fontSize: 15,
                         color: AppTheme.textSecondary,
                       ),
                     ),

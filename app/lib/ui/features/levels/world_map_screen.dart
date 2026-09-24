@@ -25,8 +25,57 @@ class WorldMapScreen extends StatefulWidget {
 }
 
 class _WorldMapScreenState extends State<WorldMapScreen> {
+  static const _adminPasscode = String.fromEnvironment(
+    'BEZY_ADMIN_PASS',
+    defaultValue: 'bezy-special',
+  );
+  bool _adminAccess = false;
+
   void _refresh() {
     setState(() {});
+  }
+
+  Future<void> _requestAdminAccess() async {
+    final controller = TextEditingController();
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Admin testing pass'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          obscureText: true,
+          onSubmitted: (_) => Navigator.of(
+            dialogContext,
+          ).pop(controller.text.trim() == _adminPasscode),
+          decoration: const InputDecoration(labelText: 'Passcode'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(
+              dialogContext,
+            ).pop(controller.text.trim() == _adminPasscode),
+            child: const Text('Unlock test levels'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (!mounted) return;
+    if (accepted == true) {
+      setState(() => _adminAccess = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Admin testing access enabled')),
+      );
+    } else if (accepted == false) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Incorrect admin passcode')));
+    }
   }
 
   IconData _getIcon(String iconName) {
@@ -37,6 +86,12 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
         return Icons.shield_rounded;
       case 'bolt':
         return Icons.bolt_rounded;
+      case 'joker':
+        return Icons.theater_comedy_rounded;
+      case 'ice':
+        return Icons.ac_unit_rounded;
+      case 'party':
+        return Icons.celebration_rounded;
       case 'emoji_events':
       default:
         return Icons.emoji_events_rounded;
@@ -53,6 +108,16 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
       appBar: AppBar(
         title: Text(strings.worldMap),
         actions: [
+          IconButton(
+            tooltip: _adminAccess
+                ? 'Admin testing access enabled'
+                : 'Admin testing pass',
+            onPressed: _adminAccess ? null : _requestAdminAccess,
+            icon: Icon(
+              _adminAccess ? Icons.lock_open_rounded : Icons.key_rounded,
+              color: _adminAccess ? AppTheme.startGreen : AppTheme.textPrimary,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -63,7 +128,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                   strings.stars(totalStars),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 18,
                     color: AppTheme.gold,
                   ),
                 ),
@@ -100,6 +165,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                       storage: widget.storage,
                       sound: widget.sound,
                       mode: widget.mode,
+                      adminAccess: _adminAccess,
                     ),
                   ),
                 );
@@ -150,7 +216,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                                   strings.worldTitle(world.id, world.title),
                                 ),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.textPrimary,
                                 ),
@@ -159,7 +225,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                               Text(
                                 strings.worldSubtitle(world.id, world.subtitle),
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 16,
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
@@ -198,7 +264,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                             worldLevels.length,
                           ),
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 15,
                             color: AppTheme.textMuted,
                           ),
                         ),
@@ -213,7 +279,7 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
                             Text(
                               '$earnedStars / $maxStars',
                               style: const TextStyle(
-                                fontSize: 12,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.gold,
                               ),

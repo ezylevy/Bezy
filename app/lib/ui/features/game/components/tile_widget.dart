@@ -14,6 +14,7 @@ class TileVisualState {
   final bool isHinted;
   final bool isVictory;
   final bool isLocked;
+  final bool isBlackHoled;
 
   const TileVisualState({
     this.isStart = false,
@@ -26,6 +27,7 @@ class TileVisualState {
     this.isHinted = false,
     this.isVictory = false,
     this.isLocked = false,
+    this.isBlackHoled = false,
   });
 }
 
@@ -50,19 +52,17 @@ class ModularTileContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = customBgColor ?? AppTheme.surfaceElevated;
+    // Supplied artwork carries the visual state. Board squares remain neutral
+    // so tile rules are never communicated by a second, conflicting fill.
+    Color bgColor = Colors.transparent;
     Color borderColor = customBorderColor ?? AppTheme.cardBorder;
     if (state.isVictory) {
-      bgColor = AppTheme.startGreen.withValues(alpha: 0.85);
       borderColor = AppTheme.gold;
     } else if (state.isSolutionStep) {
-      bgColor = AppTheme.gold.withValues(alpha: 0.85);
-      borderColor = Colors.white;
+      borderColor = AppTheme.gold;
     } else if (state.isInPath) {
-      bgColor = AppTheme.pathCyan.withValues(alpha: 0.9);
-      borderColor = Colors.white;
+      borderColor = AppTheme.pathCyan;
     } else if (state.isHinted) {
-      bgColor = AppTheme.gold.withValues(alpha: 0.35);
       borderColor = AppTheme.gold;
     }
 
@@ -82,7 +82,7 @@ class ModularTileContainer extends StatelessWidget {
                 ? AppTheme.pathCyan.withValues(alpha: 0.4)
                 : (state.isHinted
                       ? AppTheme.gold.withValues(alpha: 0.45)
-                      : Colors.black.withValues(alpha: 0.25)),
+                      : AppTheme.bgDark.withValues(alpha: 0.25)),
             blurRadius: state.isInPath || state.isHinted ? 8 : 4,
             offset: const Offset(0, 2),
           ),
@@ -97,31 +97,6 @@ class ModularTileContainer extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               child,
-
-              // Step indicator badge for active path
-              if (state.isInPath && state.pathStepNumber != null)
-                Positioned(
-                  top: 2,
-                  right: 3,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '#${state.pathStepNumber}',
-                      style: const TextStyle(
-                        fontSize: 9,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
 
               // Pulse hint icon
               if (state.isHinted)

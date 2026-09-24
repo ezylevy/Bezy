@@ -19,8 +19,11 @@ class LevelGenerator {
     bool includeSmartGates = false,
     int minTarget = 15,
     int maxTarget = 65,
+    Random? random,
   }) {
     assert(gridSize % 2 == 1, 'Grid size must be odd to have a center cell.');
+
+    final rng = random ?? _rng;
 
     final totalCells = gridSize * gridSize;
     final centerIndex = totalCells ~/ 2;
@@ -31,7 +34,7 @@ class LevelGenerator {
 
     while (candidate == null && attempts < 200) {
       attempts++;
-      final targetNumber = minTarget + _rng.nextInt(maxTarget - minTarget + 1);
+      final targetNumber = minTarget + rng.nextInt(maxTarget - minTarget + 1);
       final tiles = <TileModel>[];
 
       // Prepare random wall placements if requested (avoid center and start positions)
@@ -40,30 +43,34 @@ class LevelGenerator {
         var tries = 0;
         while (wallIndices.length < wallCount && tries < 50) {
           tries++;
-          final rIndex = _rng.nextInt(totalCells);
+          final rIndex = rng.nextInt(totalCells);
           if (rIndex != centerIndex && !defaultStarts.contains(rIndex)) {
             wallIndices.add(rIndex);
           }
         }
       }
 
-      int? trampolineIndex;
-      if (includeTrampolines && _rng.nextBool()) {
-        final cand = _rng.nextInt(totalCells);
-        if (cand != centerIndex &&
-            !defaultStarts.contains(cand) &&
-            !wallIndices.contains(cand)) {
-          trampolineIndex = cand;
+      final trampolineIndices = <int>{};
+      if (includeTrampolines && rng.nextBool()) {
+        var tries = 0;
+        while (trampolineIndices.length < 2 && tries < 50) {
+          tries++;
+          final cand = rng.nextInt(totalCells);
+          if (cand != centerIndex &&
+              !defaultStarts.contains(cand) &&
+              !wallIndices.contains(cand)) {
+            trampolineIndices.add(cand);
+          }
         }
       }
 
       int? smartGateIndex;
-      if (includeSmartGates && _rng.nextBool()) {
-        final cand = _rng.nextInt(totalCells);
+      if (includeSmartGates && rng.nextBool()) {
+        final cand = rng.nextInt(totalCells);
         if (cand != centerIndex &&
             !defaultStarts.contains(cand) &&
             !wallIndices.contains(cand) &&
-            cand != trampolineIndex) {
+            !trampolineIndices.contains(cand)) {
           smartGateIndex = cand;
         }
       }
@@ -89,7 +96,8 @@ class LevelGenerator {
               row: row,
               col: col,
               type: TileType.start,
-              value: _rng.nextInt(7) + 1, // 1 to 7
+              // Every visible digit has the same 1-in-10 chance, including 0.
+              value: rng.nextInt(10),
             ),
           );
         } else if (wallIndices.contains(i)) {
@@ -102,15 +110,14 @@ class LevelGenerator {
               value: 0,
             ),
           );
-        } else if (i == trampolineIndex) {
+        } else if (trampolineIndices.contains(i)) {
           tiles.add(
             TileModel(
               index: i,
               row: row,
               col: col,
               type: TileType.trampoline,
-              value: _rng.nextInt(5) + 1,
-              metadata: {'bonus': 3},
+              value: 0,
             ),
           );
         } else if (i == smartGateIndex) {
@@ -120,7 +127,7 @@ class LevelGenerator {
               row: row,
               col: col,
               type: TileType.smartGate,
-              value: _rng.nextInt(6) + 1,
+              value: rng.nextInt(10),
               customLabel: 'זוגי',
               metadata: {'rule': 'even'},
             ),
@@ -132,7 +139,7 @@ class LevelGenerator {
               row: row,
               col: col,
               type: TileType.number,
-              value: _rng.nextInt(10), // 0 to 9
+              value: rng.nextInt(10),
             ),
           );
         }

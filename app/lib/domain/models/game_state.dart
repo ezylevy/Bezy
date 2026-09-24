@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'level_model.dart';
 
+enum MoveDirection { up, down, left, right }
+
 /// Represents the active interactive state of a game session.
 @immutable
 class GameState {
@@ -14,6 +16,11 @@ class GameState {
   final List<int>? activeSolutionRoute;
   final int solverStepIndex;
   final String? statusMessage;
+  final MoveDirection runnerDirection;
+  final Set<int> destroyedIndices;
+  final Set<int> allowedNextIndices;
+  final Set<int> blackHoledIndices;
+  final Map<int, int> jokerChoices;
 
   const GameState({
     required this.level,
@@ -26,6 +33,11 @@ class GameState {
     this.activeSolutionRoute,
     this.solverStepIndex = 0,
     this.statusMessage,
+    this.runnerDirection = MoveDirection.down,
+    this.destroyedIndices = const {},
+    this.allowedNextIndices = const {},
+    this.blackHoledIndices = const {},
+    this.jokerChoices = const {},
   });
 
   int get difference => level.targetNumber - currentSum;
@@ -47,6 +59,14 @@ class GameState {
     int? solverStepIndex,
     String? statusMessage,
     bool clearStatusMessage = false,
+    MoveDirection? runnerDirection,
+    Set<int>? destroyedIndices,
+    Set<int>? allowedNextIndices,
+    bool clearAllowedNext = false,
+    Set<int>? blackHoledIndices,
+    bool clearBlackHoled = false,
+    Map<int, int>? jokerChoices,
+    bool clearJokerChoices = false,
   }) {
     return GameState(
       level: level ?? this.level,
@@ -63,6 +83,17 @@ class GameState {
       statusMessage: clearStatusMessage
           ? null
           : (statusMessage ?? this.statusMessage),
+      runnerDirection: runnerDirection ?? this.runnerDirection,
+      destroyedIndices: destroyedIndices ?? this.destroyedIndices,
+      allowedNextIndices: clearAllowedNext
+          ? const {}
+          : (allowedNextIndices ?? this.allowedNextIndices),
+      blackHoledIndices: clearBlackHoled
+          ? const {}
+          : (blackHoledIndices ?? this.blackHoledIndices),
+      jokerChoices: clearJokerChoices
+          ? const {}
+          : (jokerChoices ?? this.jokerChoices),
     );
   }
 }

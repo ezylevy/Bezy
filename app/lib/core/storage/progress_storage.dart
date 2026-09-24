@@ -8,6 +8,8 @@ class ProgressStorage {
   static const String _hapticsKey = 'pref_haptics_enabled';
   static const String _soundKey = 'pref_sound_enabled';
   static const String _localeKey = 'pref_locale_code';
+  static const String _specialIntroductionPrefix = 'seen_special_intro_';
+  static const String _basicInstructionsSeenKey = 'seen_basic_instructions';
 
   final SharedPreferences _prefs;
 
@@ -105,4 +107,16 @@ class ProgressStorage {
   Future<void> setLocaleCode(String localeCode) async {
     await _prefs.setString(_localeKey, localeCode);
   }
+
+  bool hasSeenSpecialIntroduction(String tileType) =>
+      _prefs.getBool('$_specialIntroductionPrefix$tileType') ?? false;
+
+  Future<void> markSpecialIntroductionSeen(String tileType) =>
+      _prefs.setBool('$_specialIntroductionPrefix$tileType', true);
+
+  bool get hasSeenBasicInstructions =>
+      _prefs.getBool(_basicInstructionsSeenKey) ?? false;
+
+  Future<void> markBasicInstructionsSeen() =>
+      _prefs.setBool(_basicInstructionsSeenKey, true);
 }

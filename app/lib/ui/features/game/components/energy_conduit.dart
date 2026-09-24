@@ -3,6 +3,8 @@ import '../../../../core/theme/app_theme.dart';
 
 /// A sleek custom painter that draws a glowing neon energy conduit connecting tiles in a path.
 class EnergyConduitPainter extends CustomPainter {
+  static const double cellSpacing = 5;
+
   final List<int> path;
   final int gridSize;
   final double pulsePhase; // 0.0 to 1.0 for animating pulsing particles
@@ -21,15 +23,17 @@ class EnergyConduitPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (path.length < 2) return;
 
-    final cellWidth = size.width / gridSize;
-    final cellHeight = size.height / gridSize;
+    final horizontalSpacing = cellSpacing * (gridSize - 1);
+    final verticalSpacing = cellSpacing * (gridSize - 1);
+    final cellWidth = (size.width - horizontalSpacing) / gridSize;
+    final cellHeight = (size.height - verticalSpacing) / gridSize;
 
     Offset getCenter(int index) {
       final col = index % gridSize;
       final row = index ~/ gridSize;
       return Offset(
-        col * cellWidth + cellWidth / 2,
-        row * cellHeight + cellHeight / 2,
+        col * (cellWidth + cellSpacing) + cellWidth / 2,
+        row * (cellHeight + cellSpacing) + cellHeight / 2,
       );
     }
 
@@ -55,7 +59,18 @@ class EnergyConduitPainter extends CustomPainter {
     final pathObject = Path();
     pathObject.moveTo(points.first.dx, points.first.dy);
     for (var i = 1; i < points.length; i++) {
-      pathObject.lineTo(points[i].dx, points[i].dy);
+      final previousIndex = path[i - 1];
+      final currentIndex = path[i];
+      final rowDistance = (previousIndex ~/ gridSize - currentIndex ~/ gridSize)
+          .abs();
+      final colDistance = (previousIndex % gridSize - currentIndex % gridSize)
+          .abs();
+      if (rowDistance + colDistance == 1) {
+        pathObject.lineTo(points[i].dx, points[i].dy);
+      } else {
+        // Teleport jumps do not draw a false route segment across the board.
+        pathObject.moveTo(points[i].dx, points[i].dy);
+      }
     }
 
     canvas.drawPath(pathObject, glowPaint);
@@ -74,6 +89,7 @@ class EnergyConduitPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant EnergyConduitPainter oldDelegate) {
     return oldDelegate.path != path ||
+        oldDelegate.gridSize != gridSize ||
         oldDelegate.pulsePhase != pulsePhase ||
         oldDelegate.conduitColor != conduitColor ||
         oldDelegate.isSolution != isSolution;

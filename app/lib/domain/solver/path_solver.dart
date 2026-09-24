@@ -40,6 +40,9 @@ class PathSolver {
     final target = level.targetNumber;
     final centerIndex = level.centerIndex;
     final visited = currentPath.toSet();
+    final canReduceTotal = level.tiles.any(
+      (tile) => tile.isMirror || tile.isZero,
+    );
 
     List<int>? bestRoute;
 
@@ -49,7 +52,7 @@ class PathSolver {
 
     void dfs(int currentIndex, int pathSum, List<int> path) {
       if (bestRoute != null) return;
-      if (pathSum > target) return;
+      if (pathSum > target && !canReduceTotal) return;
       if (path.length > maxDepth) return;
 
       if (currentIndex == centerIndex) {
@@ -83,8 +86,21 @@ class PathSolver {
         if (!nextTile.canEnter(pathSum)) continue;
 
         final newSum = nextTile.applyValue(pathSum);
+        final teleportDestination = nextTile.isTrampoline
+            ? level.pairedTeleportIndex(nextIndex)
+            : null;
+        if (teleportDestination != null &&
+            visited.contains(teleportDestination)) {
+          continue;
+        }
         visited.add(nextIndex);
-        dfs(nextIndex, newSum, [...path, nextIndex]);
+        if (teleportDestination != null) visited.add(teleportDestination);
+        dfs(teleportDestination ?? nextIndex, newSum, [
+          ...path,
+          nextIndex,
+          ?teleportDestination,
+        ]);
+        if (teleportDestination != null) visited.remove(teleportDestination);
         visited.remove(nextIndex);
       }
     }

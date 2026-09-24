@@ -14,6 +14,7 @@ class LevelSelectScreen extends StatefulWidget {
   final ProgressStorage storage;
   final SoundService sound;
   final GameMode mode;
+  final bool adminAccess;
 
   const LevelSelectScreen({
     super.key,
@@ -21,6 +22,7 @@ class LevelSelectScreen extends StatefulWidget {
     required this.storage,
     required this.sound,
     required this.mode,
+    this.adminAccess = false,
   });
 
   @override
@@ -53,7 +55,8 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
         itemCount: _levels.length,
         itemBuilder: (context, index) {
           final level = _levels[index];
-          final isUnlocked = widget.storage.isLevelUnlocked(level.id);
+          final isUnlocked =
+              widget.adminAccess || widget.storage.isLevelUnlocked(level.id);
           final stars = widget.storage.getStars(level.id);
           final bestMoves = widget.storage.getBestMoves(level.id);
 
@@ -71,6 +74,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                             storage: widget.storage,
                             sound: widget.sound,
                             mode: widget.mode,
+                            showSpecialIntroductions: true,
                           ),
                         ),
                       );
@@ -110,7 +114,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                             ? Text(
                                 '${level.levelNumber}',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Color(widget.world.colorHex),
                                 ),
@@ -137,7 +141,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                               gridSize: level.gridSize,
                             ),
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: isUnlocked
                                   ? AppTheme.textPrimary
@@ -151,7 +155,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                               level.targetNumber,
                             ),
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 16,
                               color: AppTheme.textSecondary,
                             ),
                           ),
@@ -161,7 +165,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
                               child: Text(
                                 strings.bestMoves(bestMoves, level.parMoves),
                                 style: const TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 15,
                                   color: AppTheme.textMuted,
                                 ),
                               ),

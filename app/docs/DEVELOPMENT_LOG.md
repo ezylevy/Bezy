@@ -46,3 +46,19 @@
 - Added widget coverage for English world content, landscape Home, landscape
   Challenge gameplay, and the absence of help controls in Challenge mode.
 - Verification: analyzer clean; all 14 tests passing.
+
+## 2026-09-16 — First gameplay feedback fixes
+
+- Fixed the mirrored path rendering in RTL by giving board geometry a stable
+  left-to-right coordinate system while leaving the surrounding interface RTL.
+- Matched the conduit centers to the grid's real five-pixel cell spacing.
+- After a start tile is selected, all alternative start tiles now return to
+  the normal number-tile appearance; only the chosen start remains marked.
+- Moved the live remaining amount out of the statistics card into a prominent,
+  accessible live-region banner directly above the board.
+- Reduced the statistics card to target, current total, and moves.
+- Added stable tile keys to support precise interaction and future animated
+  player placement.
+- Added regression coverage for board direction, start-tile deactivation, and
+  the live remaining label.
+- Verification: analyzer clean; all 15 tests passing.

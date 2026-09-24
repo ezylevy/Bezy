@@ -10,11 +10,13 @@ import '../../../../l10n/app_localizations.dart';
 class SolverDialog extends StatefulWidget {
   final LevelModel level;
   final Function(List<int> solutionPath) onApplySolution;
+  final void Function(List<int> solutionPath, int stepIndex) onPreviewSolution;
 
   const SolverDialog({
     super.key,
     required this.level,
     required this.onApplySolution,
+    required this.onPreviewSolution,
   });
 
   @override
@@ -60,6 +62,13 @@ class _SolverDialogState extends State<SolverDialog> {
     _solutionPath = sol;
     _breakdowns = _generateBreakdowns(sol);
     _currentStepIndex = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _publishStep());
+  }
+
+  void _publishStep() {
+    if (_solutionPath != null) {
+      widget.onPreviewSolution(_solutionPath!, _currentStepIndex);
+    }
   }
 
   List<StepBreakdown> _generateBreakdowns(List<int> path) {
@@ -132,6 +141,34 @@ class _SolverDialogState extends State<SolverDialog> {
             color: AppTheme.smartGatePurple,
           ),
         );
+      } else if (tile.isMirror ||
+          tile.isClone ||
+          tile.isBlackHole ||
+          tile.isBomb ||
+          tile.isZero) {
+        final previous = runningSum;
+        runningSum = tile.applyValue(runningSum);
+        final actionName = tile.isMirror
+            ? strings.solverMirror
+            : tile.isClone
+            ? strings.solverClone
+            : tile.isBlackHole
+            ? strings.solverBlackHole
+            : tile.isBomb
+            ? strings.solverBomb
+            : strings.solverZero;
+        list.add(
+          StepBreakdown(
+            step: i + 1,
+            tileIndex: tileIndex,
+            actionName: actionName,
+            formula: '$previous → $runningSum',
+            runningSum: runningSum,
+            tileType: tile.type,
+            icon: Icons.auto_fix_high_rounded,
+            color: AppTheme.gold,
+          ),
+        );
       } else {
         final prev = runningSum;
         runningSum = tile.applyValue(runningSum);
@@ -168,6 +205,7 @@ class _SolverDialogState extends State<SolverDialog> {
     ) {
       if (_currentStepIndex < _breakdowns.length - 1) {
         setState(() => _currentStepIndex++);
+        _publishStep();
       } else {
         _stopPlayback();
       }
@@ -185,6 +223,7 @@ class _SolverDialogState extends State<SolverDialog> {
     _stopPlayback();
     if (_currentStepIndex < _breakdowns.length - 1) {
       setState(() => _currentStepIndex++);
+      _publishStep();
     }
   }
 
@@ -192,6 +231,7 @@ class _SolverDialogState extends State<SolverDialog> {
     _stopPlayback();
     if (_currentStepIndex > 0) {
       setState(() => _currentStepIndex--);
+      _publishStep();
     }
   }
 
@@ -256,7 +296,7 @@ class _SolverDialogState extends State<SolverDialog> {
                   child: Text(
                     strings.solverTitle,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
                     ),
@@ -283,7 +323,7 @@ class _SolverDialogState extends State<SolverDialog> {
             Text(
               strings.stepProgress(_currentStepIndex + 1, _breakdowns.length),
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 16,
                 color: AppTheme.textMuted,
                 fontWeight: FontWeight.bold,
               ),
@@ -323,7 +363,7 @@ class _SolverDialogState extends State<SolverDialog> {
                       Text(
                         currentBreakdown.actionName,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: currentBreakdown.color,
                         ),
@@ -332,7 +372,7 @@ class _SolverDialogState extends State<SolverDialog> {
                       Text(
                         strings.sumValue(currentBreakdown.runningSum),
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -343,7 +383,7 @@ class _SolverDialogState extends State<SolverDialog> {
                   Text(
                     currentBreakdown.formula,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
@@ -376,7 +416,7 @@ class _SolverDialogState extends State<SolverDialog> {
                       _isPlaying
                           ? Icons.pause_rounded
                           : Icons.play_arrow_rounded,
-                      color: Colors.black,
+                      color: AppTheme.bgDark,
                       size: 32,
                     ),
                     onPressed: _togglePlay,
@@ -407,7 +447,7 @@ class _SolverDialogState extends State<SolverDialog> {
               label: Text(strings.applySolution),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.pathCyan,
-                foregroundColor: Colors.black,
+                foregroundColor: AppTheme.bgDark,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

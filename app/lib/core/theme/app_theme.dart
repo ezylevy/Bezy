@@ -2,8 +2,29 @@ import 'package:flutter/material.dart';
 
 /// Design tokens and styles for Math Path Adventure.
 class AppTheme {
+  static TextStyle? _larger(TextStyle? style) =>
+      style?.copyWith(fontSize: (style.fontSize ?? 14) + 4);
+
+  static TextTheme _largerTextTheme(TextTheme theme) => TextTheme(
+    displayLarge: _larger(theme.displayLarge),
+    displayMedium: _larger(theme.displayMedium),
+    displaySmall: _larger(theme.displaySmall),
+    headlineLarge: _larger(theme.headlineLarge),
+    headlineMedium: _larger(theme.headlineMedium),
+    headlineSmall: _larger(theme.headlineSmall),
+    titleLarge: _larger(theme.titleLarge),
+    titleMedium: _larger(theme.titleMedium),
+    titleSmall: _larger(theme.titleSmall),
+    bodyLarge: _larger(theme.bodyLarge),
+    bodyMedium: _larger(theme.bodyMedium),
+    bodySmall: _larger(theme.bodySmall),
+    labelLarge: _larger(theme.labelLarge),
+    labelMedium: _larger(theme.labelMedium),
+    labelSmall: _larger(theme.labelSmall),
+  );
+
   // Background & Surfaces
-  static const Color bgDark = Color(0xFF0B0F19);
+  static const Color bgDark = Color(0xFF172A40);
   static const Color surfaceDark = Color(0xFF161F30);
   static const Color surfaceElevated = Color(0xFF1E293B);
   static const Color cardBorder = Color(0xFF334155);
@@ -33,13 +54,14 @@ class AppTheme {
         secondary: gold,
         surface: surfaceDark,
       ),
+      textTheme: _largerTextTheme(ThemeData.dark().textTheme),
       fontFamily: 'Roboto',
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontSize: 20,
+          fontSize: 24,
           fontWeight: FontWeight.bold,
           color: textPrimary,
         ),
@@ -47,13 +69,13 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: pathCyan,
-          foregroundColor: Colors.black,
+          foregroundColor: bgDark,
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
     );

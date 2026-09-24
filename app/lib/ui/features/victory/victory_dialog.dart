@@ -60,7 +60,7 @@ class VictoryDialog extends StatelessWidget {
               strings.victoryTitle,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
               ),
@@ -71,7 +71,7 @@ class VictoryDialog extends StatelessWidget {
             Text(
               strings.exactTarget(targetSum),
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 18,
                 color: AppTheme.textSecondary,
               ),
             ),
@@ -125,7 +125,7 @@ class VictoryDialog extends StatelessWidget {
                 label: Text(strings.nextLevel),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.startGreen,
-                  foregroundColor: Colors.black,
+                  foregroundColor: AppTheme.bgDark,
                   minimumSize: const Size.fromHeight(46),
                 ),
               ),
@@ -171,13 +171,13 @@ class VictoryDialog extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+          style: const TextStyle(fontSize: 15, color: AppTheme.textMuted),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
           ),

@@ -118,7 +118,7 @@ class _ModeCard extends StatelessWidget {
                         title,
                         style: const TextStyle(
                           color: AppTheme.textPrimary,
-                          fontSize: 21,
+                          fontSize: 25,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -127,7 +127,7 @@ class _ModeCard extends StatelessWidget {
                         description,
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
-                          fontSize: 14,
+                          fontSize: 18,
                           height: 1.35,
                         ),
                       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../domain/models/tile_model.dart';
 
 class AppLocalizations {
   const AppLocalizations(this.locale);
@@ -52,10 +53,8 @@ class AppLocalizations {
     he: 'לוחות חדשים מ־3×3 עד 9×9',
   );
   String get howToPlay => _value(en: 'How to play', he: 'איך משחקים?');
-  String get howToPlaySubtitle => _value(
-    en: 'Rules, special tiles, and winning tips',
-    he: 'חוקי המשחק, משבצות מיוחדות וטיפים לניצחון',
-  );
+  String get howToPlaySubtitle =>
+      _value(en: 'The basic rules of the board', he: 'חוקי המשחק הבסיסיים');
   String get versionLabel => _value(
     en: 'Version 1.0.0 • Android and iOS',
     he: 'גרסה 1.0.0 • Android ו־iOS',
@@ -69,8 +68,8 @@ class AppLocalizations {
   );
   String get boardMovement => _value(en: 'Move on the board', he: 'תנועה בלוח');
   String get boardMovementDescription => _value(
-    en: 'Move to a neighboring tile. Each tile adds its value to the total.',
-    he: 'התקדמו למשבצת סמוכה. כל משבצת מוסיפה את ערכה לסכום.',
+    en: 'Drag your finger to adjacent tiles, or tap them one by one. Number tiles add to your total. You can trace back along your path.',
+    he: 'גררו אצבע בין משבצות סמוכות, או הקישו עליהן בזו אחר זו. משבצות המספרים מוסיפות לסכום. אפשר לחזור אחורה לאורך המסלול.',
   );
   String get reachTarget => _value(en: 'Reach the target', he: 'הגעה ליעד');
   String get reachTargetDescription => _value(
@@ -82,15 +81,15 @@ class AppLocalizations {
     en: 'Walls block the way, so find a route around them.',
     he: 'החומות חוסמות מעבר ולכן צריך למצוא נתיב עוקף.',
   );
-  String get launchPads => _value(en: 'Launch pads', he: 'מקפצות זינוק');
+  String get launchPads => _value(en: 'Teleporting doors', he: 'דלתות שיגור');
   String get launchPadsDescription => _value(
-    en: 'Launch pads add a bonus to your running total.',
-    he: 'המקפצות מעניקות תוספת בונוס לסכום המצטבר.',
+    en: 'Entering one door moves you to its pair without changing the total.',
+    he: 'כניסה לדלת אחת מעבירה לדלת השנייה בלי לשנות את הסכום.',
   );
   String get smartGates => _value(en: 'Smart gates', he: 'שערים חכמים');
   String get smartGatesDescription => _value(
-    en: 'Gates open only when their number rule is satisfied.',
-    he: 'השערים נפתחים רק כאשר התנאי המספרי שלהם מתקיים.',
+    en: 'The gate artwork marks the available starting cells.',
+    he: 'תמונת השער מסמנת את משבצות ההתחלה האפשריות.',
   );
   String get smartHelp => _value(en: 'Smart help', he: 'עזרה חכמה');
   String get smartHelpDescription => _value(
@@ -124,6 +123,22 @@ class AppLocalizations {
   String get currentSum => _value(en: 'Current', he: 'סכום נוכחי');
   String get difference => _value(en: 'Difference', he: 'הפרש');
   String get moves => _value(en: 'Moves', he: 'צעדים');
+  String get jokerChoice =>
+      _value(en: 'Choose the Joker value', he: 'בחרו את ערך הג׳וקר');
+  String get timeUp => _value(en: 'Time is up!', he: 'הזמן נגמר!');
+  String get timeUpDescription => _value(
+    en: 'The challenge timer reached zero. Restart and try a faster route.',
+    he: 'טיימר האתגר הגיע לאפס. התחילו מחדש ונסו מסלול מהיר יותר.',
+  );
+  String get tryAgain => _value(en: 'Try again', he: 'נסו שוב');
+  String minimumMovesChallenge(int moves) => _value(
+    en: 'Moves: $moves • Find the minimum',
+    he: 'צעדים: $moves • מצאו את המינימום',
+  );
+  String minimumMovesRevealed(int moves, int optimal) => _value(
+    en: 'Moves: $moves • Minimum: $optimal',
+    he: 'צעדים: $moves • מינימום: $optimal',
+  );
   String par(int value) => _value(en: 'Par: $value', he: 'יעד: $value');
   String get undo => _value(en: 'Undo', he: 'ביטול צעד');
   String get reset => _value(en: 'Reset', he: 'איפוס');
@@ -147,6 +162,10 @@ class AppLocalizations {
     en: 'The smart gate is locked. An even total is required.',
     he: 'השער החכם נעול! דרוש סכום זוגי למעבר.',
   );
+  String get specialBlocked => _value(
+    en: 'That continuation is blocked by the active special cell.',
+    he: 'המשך זה חסום כעת על ידי המשבצת המיוחדת.',
+  );
   String wrongTarget(int current, int goal) => _value(
     en: 'Your total is $current, not $goal. Go back and try another path.',
     he: 'הסכום הנוכחי ($current) אינו תואם ליעד ($goal). חזרו אחורה.',
@@ -160,9 +179,60 @@ class AppLocalizations {
     he: 'אין מסלול תקף מהמצב הנוכחי. בטלו צעד ונסו שוב.',
   );
   String get compactGameHelp => _value(
-    en: '1. Start on a green tile.\n2. Move up, down, left, or right.\n3. Each tile changes your total.\n4. Walls block movement.\n5. Launch pads add a bonus.\n6. Smart gates open only when their rule is satisfied.\n7. Reach the center with the exact target total.',
-    he: '1. התחילו במשבצת ירוקה.\n2. נועו למעלה, למטה, ימינה או שמאלה.\n3. כל משבצת משנה את הסכום.\n4. חומות חוסמות מעבר.\n5. מקפצות מוסיפות בונוס.\n6. שערים נפתחים רק כאשר התנאי מתקיים.\n7. הגיעו למרכז עם הסכום המדויק.',
+    en: '1. Start at a marked gate tile.\n2. Drag through neighboring tiles without lifting your finger, or tap one tile at a time. Move up, down, left, or right.\n3. Each number adds to your total. Trace back along the path to change it.\n4. Reach the center with exactly the target total. New tile types are explained when they first appear.',
+    he: '1. התחילו במשבצת שער מסומנת.\n2. גררו אצבע בין משבצות סמוכות בלי להרים אותה, או הקישו על כל משבצת בנפרד. נועו למעלה, למטה, ימינה או שמאלה.\n3. כל מספר מוסיף לסכום. אפשר לחזור אחורה לאורך המסלול כדי לשנות אותו.\n4. הגיעו למרכז עם סכום היעד המדויק. סוגי משבצות חדשים יוסברו כשהם יופיעו לראשונה.',
   );
+  String get newTileIntroduction => _value(en: 'New tile', he: 'משבצת חדשה');
+  String specialTileTitle(TileType type) => switch (type) {
+    TileType.wall => walls,
+    TileType.trampoline => launchPads,
+    TileType.mirror => _value(en: 'Mirror', he: 'מראה'),
+    TileType.clone => _value(en: 'Clone', he: 'שכפול'),
+    TileType.blackHole => _value(en: 'Black Hole', he: 'חור שחור'),
+    TileType.bomb => _value(en: 'Bomb', he: 'פצצה'),
+    TileType.zero => _value(en: 'Zero cell', he: 'תא איפוס'),
+    TileType.joker => _value(en: 'Joker', he: 'ג׳וקר'),
+    TileType.ice => _value(en: 'Ice', he: 'קרח'),
+    TileType.lonely => _value(en: 'Lonely cell', he: 'תא בודד'),
+    _ => '',
+  };
+  String specialTileDescription(TileType type) => switch (type) {
+    TileType.wall => wallsDescription,
+    TileType.trampoline => launchPadsDescription,
+    TileType.mirror => _value(
+      en: 'Reverses the digits of your current total. A single digit gets a zero after it: 2 becomes 20.',
+      he: 'הופכת את סדר הספרות בסכום הנוכחי. למספר חד־ספרתי נוסף אפס בסוף: 2 הופך ל־20.',
+    ),
+    TileType.clone => _value(
+      en: 'Doubles your current total. For example, 12 becomes 24.',
+      he: 'מכפילה את הסכום הנוכחי. למשל, 12 הופך ל־24.',
+    ),
+    TileType.blackHole => _value(
+      en: 'Randomly leaves only one available next cell. Other possible exits become blocked for this attempt.',
+      he: 'משאירה באקראי רק משבצת המשך אחת פתוחה. יציאות אפשריות אחרות נחסמות עד לאיפוס השלב.',
+    ),
+    TileType.bomb => _value(
+      en: 'Randomly destroys one available next cell. You cannot enter it until you reset the level.',
+      he: 'הורסת באקראי משבצת המשך אפשרית אחת. לא ניתן להיכנס אליה עד לאיפוס השלב.',
+    ),
+    TileType.zero => _value(
+      en: 'Immediately resets your current total to 0.',
+      he: 'מאפסת מיד את הסכום הנוכחי ל־0.',
+    ),
+    TileType.joker => _value(
+      en: 'Choose one of two values to add to your total when you enter.',
+      he: 'כשנכנסים אליה בוחרים אחד משני ערכים שיוספו לסכום.',
+    ),
+    TileType.ice => _value(
+      en: 'Slides you in the direction you entered until the first normal stopping cell. The slide counts as one move.',
+      he: 'מחליקה אתכם בכיוון הכניסה עד למשבצת העצירה הרגילה הראשונה. ההחלקה נחשבת לצעד אחד.',
+    ),
+    TileType.lonely => _value(
+      en: 'Requires its four neighboring cells to have been visited before entry.',
+      he: 'מחייבת לבקר בארבע המשבצות שסביבה לפני הכניסה אליה.',
+    ),
+    _ => '',
+  };
   String get letsPlay => _value(en: "Let's play", he: 'בואו נשחק');
 
   String get victoryTitle =>
@@ -197,6 +267,14 @@ class AppLocalizations {
   String sumValue(int value) => _value(en: 'Total: $value', he: 'סכום: $value');
   String get applySolution =>
       _value(en: 'Apply this solution', he: 'החלת הפתרון על הלוח');
+  String get solutionFinished =>
+      _value(en: 'Solution complete', he: 'הדגמת הפתרון הסתיימה');
+  String get solutionFinishedQuestion => _value(
+    en: 'Would you like to try this level yourself or continue to the next level?',
+    he: 'רוצים לנסות את השלב בעצמכם או להמשיך לשלב הבא?',
+  );
+  String get tryThisLevel =>
+      _value(en: 'Try this level', he: 'לנסות את השלב הזה');
   String get solverStartPoint =>
       _value(en: 'Starting point', he: 'נקודת התחלה');
   String openingTotal(int value) =>
@@ -208,12 +286,19 @@ class AppLocalizations {
     he: 'הסכום $total תואם ליעד $targetValue.',
   );
   String get solverLaunchPad =>
-      _value(en: 'Launch pad bonus', he: 'בונוס מקפצה');
+      _value(en: 'Teleported to paired door', he: 'שיגור לדלת המקבילה');
   String bonusFormula(int previous, int value, int bonus, int total) => _value(
-    en: '$previous + $value value + $bonus bonus = $total',
-    he: '$previous + $value ערך + $bonus בונוס = $total',
+    en: '$previous → $total (total unchanged)',
+    he: '$previous → $total (הסכום לא השתנה)',
   );
   String get solverGate => _value(en: 'Smart gate passed', he: 'מעבר בשער חכם');
+  String get solverMirror => _value(en: 'Digits reversed', he: 'הספרות התהפכו');
+  String get solverClone => _value(en: 'Value doubled', he: 'הערך הוכפל');
+  String get solverBlackHole =>
+      _value(en: 'One exit remains', he: 'נותרה יציאה אחת');
+  String get solverBomb =>
+      _value(en: 'One exit destroyed', he: 'יציאה אחת נהרסה');
+  String get solverZero => _value(en: 'Total reset', he: 'הסכום אופס');
   String get solverNextStep => _value(en: 'Continue the path', he: 'צעד נוסף');
 
   String worldTitle(int worldId, String fallback) {
@@ -224,6 +309,9 @@ class AppLocalizations {
           2: 'The Wall Maze',
           3: 'Launch Pads & Gates',
           4: 'Master Circuit',
+          5: 'Joker Circus',
+          6: 'Ice Caves',
+          7: 'Masters Party',
         }[worldId] ??
         fallback;
   }
@@ -234,7 +322,10 @@ class AppLocalizations {
           1: '3×3 boards — learn the path rules',
           2: '5×5 boards — navigate walls and obstacles',
           3: '5×5 and 7×7 boards — bonuses and number rules',
-          4: '7×7 and 9×9 boards — expert challenges',
+          4: '7×7 and 9×9 boards — advanced special cells',
+          5: 'Levels 21–30 — Joker choices and minimum moves',
+          6: 'Levels 31–40 — ice slides and 45 seconds',
+          7: 'Levels 41–50 — combined mastery in 30 seconds',
         }[worldId] ??
         fallback;
   }
@@ -262,11 +353,41 @@ class AppLocalizations {
           'w3_l3': 'Over the Wall',
           'w3_l4': 'Gate Maze',
           'w3_l5': 'Super Launch Pad 7×7',
-          'w4_l1': 'The Grand Maze 7×7',
-          'w4_l2': 'Chain of Gates',
-          'w4_l3': 'Spiral Maze',
-          'w4_l4': 'The Titan 9×9',
+          'w4_l1': 'Mirror Maze 7×7',
+          'w4_l2': 'Clone Laboratory',
+          'w4_l3': 'Zero Spiral',
+          'w4_l4': 'Black Hole Titan 9×9',
           'w4_l5': 'Grand Master 9×9',
+          'w5_l1': 'The First Joker',
+          'w5_l2': 'Two Choices',
+          'w5_l3': 'Mirror and Joker',
+          'w5_l4': 'Quick Choice',
+          'w5_l5': 'Surprise Route',
+          'w5_l6': 'Reverse and Choose',
+          'w5_l7': 'Double Joker',
+          'w5_l8': 'Funny Clone',
+          'w5_l9': 'Efficient Route',
+          'w5_l10': 'Circus Champion',
+          'w6_l1': 'First Slide',
+          'w6_l2': 'Ice on the Right',
+          'w6_l3': 'Joker on Ice',
+          'w6_l4': 'Exact Stop',
+          'w6_l5': 'Frozen Route',
+          'w6_l6': 'Nine by Nine Cave',
+          'w6_l7': 'Slippery Route',
+          'w6_l8': 'Frozen Mirror',
+          'w6_l9': 'Forty-Five Rush',
+          'w6_l10': 'Ice King',
+          'w7_l1': 'Thirty Seconds',
+          'w7_l2': 'Mirror Party',
+          'w7_l3': 'Zero on Ice',
+          'w7_l4': 'Champion Choice',
+          'w7_l5': 'Rapid Clone',
+          'w7_l6': 'The Great Route',
+          'w7_l7': 'Joker Celebration',
+          'w7_l8': 'Number Storm',
+          'w7_l9': 'Almost Champion',
+          'w7_l10': 'Final Party',
         }[levelId] ??
         fallback;
   }

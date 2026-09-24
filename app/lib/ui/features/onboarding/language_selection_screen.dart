@@ -38,7 +38,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppTheme.textPrimary,
-                        fontSize: 42,
+                        fontSize: 46,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2,
                       ),
@@ -49,7 +49,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppTheme.textSecondary,
-                        fontSize: 20,
+                        fontSize: 24,
                         height: 1.5,
                       ),
                     ),
