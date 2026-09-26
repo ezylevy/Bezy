@@ -5,6 +5,7 @@ class ProgressStorage {
   static const String _unlockedLevelPrefix = 'unlocked_level_';
   static const String _levelStarsPrefix = 'level_stars_';
   static const String _levelBestMovesPrefix = 'level_best_moves_';
+  static const String _revealedLevelPrefix = 'revealed_level_';
   static const String _hapticsKey = 'pref_haptics_enabled';
   static const String _soundKey = 'pref_sound_enabled';
   static const String _localeKey = 'pref_locale_code';
@@ -32,6 +33,18 @@ class ProgressStorage {
 
   Future<void> unlockLevel(String levelId) async {
     await _prefs.setBool('$_unlockedLevelPrefix$levelId', true);
+  }
+
+  /// Completed levels and the first level are already visually open. A newly
+  /// unlocked, uncompleted level keeps its lock artwork until the player taps
+  /// it and watches the reveal animation on the campaign map.
+  bool isLevelRevealed(String levelId) {
+    if (levelId == 'w1_l1' || getStars(levelId) > 0) return true;
+    return _prefs.getBool('$_revealedLevelPrefix$levelId') ?? false;
+  }
+
+  Future<void> revealLevel(String levelId) async {
+    await _prefs.setBool('$_revealedLevelPrefix$levelId', true);
   }
 
   int getStars(String levelId) {

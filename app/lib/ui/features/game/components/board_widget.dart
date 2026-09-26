@@ -287,6 +287,12 @@ class _BoardWidgetState extends State<BoardWidget> {
       isVictory: widget.state.isWon && inPath,
       isLocked: widget.state.destroyedIndices.contains(index),
       isBlackHoled: widget.state.blackHoledIndices.contains(index),
+      isRuleLocked:
+          widget.state.level.tiles[index].isLonely &&
+          !widget.state.level.isLonelyUnlocked(
+            index,
+            widget.state.visitedIndices,
+          ),
     );
   }
 }

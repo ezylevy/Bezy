@@ -121,8 +121,8 @@ class VictoryDialog extends StatelessWidget {
             if (hasNextLevel)
               ElevatedButton.icon(
                 onPressed: onNextLevel,
-                icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                label: Text(strings.nextLevel),
+                icon: const Icon(Icons.map_rounded, size: 20),
+                label: Text(strings.levelMap),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.startGreen,
                   foregroundColor: AppTheme.bgDark,
@@ -145,18 +145,20 @@ class VictoryDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onLevelSelect,
-                    icon: const Icon(Icons.grid_view_rounded, size: 18),
-                    label: Text(strings.levelMap),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.textPrimary,
-                      side: const BorderSide(color: AppTheme.cardBorder),
+                if (!hasNextLevel) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onLevelSelect,
+                      icon: const Icon(Icons.grid_view_rounded, size: 18),
+                      label: Text(strings.levelMap),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.textPrimary,
+                        side: const BorderSide(color: AppTheme.cardBorder),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ],

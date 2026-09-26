@@ -68,6 +68,7 @@ flutter:
     - assets/buttons/
     - assets/figure/
     - assets/special/
+    - assets/stages/
     - assets/special/mirror.png
     - assets/special/clone.png
     - assets/special/black_hole.png

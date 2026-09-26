@@ -97,8 +97,22 @@ class AppLocalizations {
     he: 'במצב לימודי אפשר להשתמש ברמז או בפתרון מודרך בעת הצורך.',
   );
   String get close => _value(en: 'Got it', he: 'הבנתי');
+  String get doNotShowAgain =>
+      _value(en: "Don't show this again", he: 'אל תציג שוב');
 
   String get worldMap => _value(en: 'World map', he: 'מפת העולמות');
+  String get campaignMapHint => _value(
+    en: 'Tap the map to return to your current group of five.',
+    he: 'הקישו על המפה כדי לחזור לחמישיית השלבים הנוכחית.',
+  );
+  String get stageLocked => _value(
+    en: 'Complete the previous stage to unlock this one.',
+    he: 'השלימו את השלב הקודם כדי לפתוח את השלב הזה.',
+  );
+  String get tapToUnlock => _value(
+    en: 'Tap to unlock the next stage',
+    he: 'הקישו כדי לפתוח את השלב הבא',
+  );
   String worldNumber(int number, String title) =>
       _value(en: 'World $number: $title', he: 'עולם $number: $title');
   String levelProgress(int unlocked, int total) => _value(
@@ -165,6 +179,10 @@ class AppLocalizations {
   String get specialBlocked => _value(
     en: 'That continuation is blocked by the active special cell.',
     he: 'המשך זה חסום כעת על ידי המשבצת המיוחדת.',
+  );
+  String get lonelyBlocked => _value(
+    en: 'Visit all four neighboring tiles before entering the Lonely Cell.',
+    he: 'יש לבקר בכל ארבע המשבצות שסביב התא הבודד לפני שנכנסים אליו.',
   );
   String wrongTarget(int current, int goal) => _value(
     en: 'Your total is $current, not $goal. Go back and try another path.',

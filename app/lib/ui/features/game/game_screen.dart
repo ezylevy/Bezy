@@ -11,6 +11,7 @@ import '../../../domain/models/level_model.dart';
 import '../../../domain/models/tile_model.dart';
 import '../../../domain/solver/path_solver.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../components/bezy_message_dialog.dart';
 import '../victory/victory_dialog.dart';
 import 'components/board_widget.dart';
 import 'components/stats_bar.dart';
@@ -46,6 +47,7 @@ class _GameScreenState extends State<GameScreen>
   final Random _random = Random();
   Timer? _countdownTimer;
   int? _remainingSeconds;
+  bool _messageDialogVisible = false;
 
   bool get _usesChallengeTimer =>
       widget.mode == GameMode.challenge &&
@@ -123,6 +125,7 @@ class _GameScreenState extends State<GameScreen>
     TileType.zero,
     TileType.joker,
     TileType.ice,
+    TileType.lonely,
   };
 
   String _specialArt(TileType type) => switch (type) {
@@ -135,6 +138,7 @@ class _GameScreenState extends State<GameScreen>
     TileType.zero => 'zero.png',
     TileType.joker => 'joker.png',
     TileType.ice => 'ice.png',
+    TileType.lonely => 'lonely_cell.png',
     _ => throw StateError('No introduction artwork for $type'),
   };
 
@@ -150,23 +154,46 @@ class _GameScreenState extends State<GameScreen>
 
     if (!widget.storage.hasSeenBasicInstructions) {
       final strings = AppLocalizations.of(context);
-      await showDialog<void>(
+      var doNotShowAgain = false;
+      final shouldHide = await showDialog<bool>(
         context: context,
         barrierDismissible: false,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: AppTheme.surfaceDark,
-          title: Text(strings.howToPlay),
-          content: SingleChildScrollView(child: Text(strings.compactGameHelp)),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(strings.letsPlay),
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            backgroundColor: AppTheme.surfaceDark,
+            title: Text(strings.howToPlay),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(strings.compactGameHelp),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    key: const ValueKey('basic-do-not-show-again'),
+                    value: doNotShowAgain,
+                    onChanged: (value) =>
+                        setDialogState(() => doNotShowAgain = value ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(strings.doNotShowAgain),
+                  ),
+                ],
+              ),
             ),
-          ],
+            actions: [
+              FilledButton(
+                onPressed: () =>
+                    Navigator.of(dialogContext).pop(doNotShowAgain),
+                child: Text(strings.letsPlay),
+              ),
+            ],
+          ),
         ),
       );
       if (!mounted || _gameState.level.id != level.id) return;
-      await widget.storage.markBasicInstructionsSeen();
+      if (shouldHide == true) {
+        await widget.storage.markBasicInstructionsSeen();
+      }
     }
 
     final types = level.tiles
@@ -177,39 +204,57 @@ class _GameScreenState extends State<GameScreen>
       if (!mounted || _gameState.level.id != level.id) return;
       if (widget.storage.hasSeenSpecialIntroduction(type.name)) continue;
       final strings = AppLocalizations.of(context);
-      await showDialog<void>(
+      var doNotShowAgain = false;
+      final shouldHide = await showDialog<bool>(
         context: context,
         barrierDismissible: false,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: AppTheme.surfaceDark,
-          title: Text(
-            '${strings.newTileIntroduction}: ${strings.specialTileTitle(type)}',
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 86,
-                height: 86,
-                child: Image.asset(
-                  'assets/special/${_specialArt(type)}',
-                  fit: BoxFit.contain,
-                ),
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            backgroundColor: AppTheme.surfaceDark,
+            title: Text(
+              '${strings.newTileIntroduction}: ${strings.specialTileTitle(type)}',
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 86,
+                    height: 86,
+                    child: Image.asset(
+                      'assets/special/${_specialArt(type)}',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(strings.specialTileDescription(type)),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    key: ValueKey('special-${type.name}-do-not-show-again'),
+                    value: doNotShowAgain,
+                    onChanged: (value) =>
+                        setDialogState(() => doNotShowAgain = value ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(strings.doNotShowAgain),
+                  ),
+                ],
               ),
-              const SizedBox(height: 14),
-              Text(strings.specialTileDescription(type)),
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () =>
+                    Navigator.of(dialogContext).pop(doNotShowAgain),
+                child: Text(strings.close),
+              ),
             ],
           ),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(strings.close),
-            ),
-          ],
         ),
       );
       if (!mounted) return;
-      await widget.storage.markSpecialIntroductionSeen(type.name);
+      if (shouldHide == true) {
+        await widget.storage.markSpecialIntroductionSeen(type.name);
+      }
     }
   }
 
@@ -227,6 +272,7 @@ class _GameScreenState extends State<GameScreen>
     required int sum,
     required List<int> path,
     required Set<int> destroyed,
+    required Set<int> visitedIndices,
   }) {
     final level = _gameState.level;
     final n = level.gridSize;
@@ -244,7 +290,7 @@ class _GameScreenState extends State<GameScreen>
               !path.contains(index) &&
               !destroyed.contains(index) &&
               level.tiles[index].isWalkable &&
-              level.tiles[index].canEnter(sum) &&
+              level.canEnterTile(index, sum, visitedIndices) &&
               (index != level.centerIndex || sum == level.targetNumber),
         )
         .toList();
@@ -424,6 +470,7 @@ class _GameScreenState extends State<GameScreen>
         setState(() {
           _gameState = _gameState.copyWith(
             currentPath: [clickedIndex],
+            visitedIndices: {clickedIndex},
             currentSum: initialSum,
             moves: 1,
             clearHint: true,
@@ -506,6 +553,12 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
 
+    if (!level.isLonelyUnlocked(clickedIndex, _gameState.visitedIndices)) {
+      widget.sound.invalidMove();
+      _showStatusSnackbar(AppLocalizations.of(context).lonelyBlocked);
+      return;
+    }
+
     int? jokerChoice;
     if (clickedTile.isJoker) {
       jokerChoice = await _chooseJoker(clickedTile, _gameState.currentSum);
@@ -519,6 +572,15 @@ class _GameScreenState extends State<GameScreen>
         currentPath.contains(teleportDestination)) {
       widget.sound.invalidMove();
       _showStatusSnackbar(AppLocalizations.of(context).specialBlocked);
+      return;
+    }
+    if (teleportDestination != null &&
+        !level.isLonelyUnlocked(teleportDestination, {
+          ..._gameState.visitedIndices,
+          clickedIndex,
+        })) {
+      widget.sound.invalidMove();
+      _showStatusSnackbar(AppLocalizations.of(context).lonelyBlocked);
       return;
     }
 
@@ -551,6 +613,19 @@ class _GameScreenState extends State<GameScreen>
             currentPath: currentPath,
           )
         : <int>[clickedIndex];
+
+    final moveVisitHistory = Set<int>.from(_gameState.visitedIndices);
+    for (final index in slide) {
+      if (!level.isLonelyUnlocked(index, moveVisitHistory)) {
+        widget.sound.invalidMove();
+        _showStatusSnackbar(AppLocalizations.of(context).lonelyBlocked);
+        return;
+      }
+      moveVisitHistory.add(index);
+    }
+    if (teleportDestination != null) {
+      moveVisitHistory.add(teleportDestination);
+    }
 
     final jokerChoices = Map<int, int>.from(_gameState.jokerChoices);
     if (jokerChoice != null) jokerChoices[clickedIndex] = jokerChoice;
@@ -585,6 +660,7 @@ class _GameScreenState extends State<GameScreen>
       sum: newSum,
       path: newPath,
       destroyed: {...destroyed, ...blackHoled},
+      visitedIndices: moveVisitHistory,
     );
     if (clickedTile.isBlackHole && candidates.isNotEmpty) {
       final keptIndex = candidates[_random.nextInt(candidates.length)];
@@ -614,6 +690,7 @@ class _GameScreenState extends State<GameScreen>
           allowedNextIndices: allowedNext,
           blackHoledIndices: blackHoled,
           jokerChoices: jokerChoices,
+          visitedIndices: moveVisitHistory,
           clearHint: true,
         );
       });
@@ -630,6 +707,7 @@ class _GameScreenState extends State<GameScreen>
         allowedNextIndices: allowedNext,
         blackHoledIndices: blackHoled,
         jokerChoices: jokerChoices,
+        visitedIndices: moveVisitHistory,
         moves: newMoves,
         clearHint: true,
         clearStatusMessage: true,
@@ -668,7 +746,7 @@ class _GameScreenState extends State<GameScreen>
         onNextLevel: () {
           Navigator.of(ctx).pop();
           if (nextLevel != null) {
-            _loadLevel(nextLevel);
+            Navigator.of(context).pop();
           }
         },
         onReplay: () {
@@ -734,6 +812,7 @@ class _GameScreenState extends State<GameScreen>
       level: _gameState.level,
       currentPath: _gameState.currentPath,
       currentSum: _gameState.currentSum,
+      visitedIndices: _gameState.visitedIndices,
     );
 
     if (nextHint != null) {
@@ -825,10 +904,10 @@ class _GameScreenState extends State<GameScreen>
             FilledButton.icon(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                _loadLevel(nextLevel);
+                Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.arrow_forward_rounded),
-              label: Text(strings.nextLevel),
+              icon: const Icon(Icons.map_rounded),
+              label: Text(strings.levelMap),
             ),
         ],
       ),
@@ -836,18 +915,12 @@ class _GameScreenState extends State<GameScreen>
   }
 
   void _showStatusSnackbar(String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          textAlign: TextAlign.right,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: AppTheme.surfaceElevated,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
+    if (_messageDialogVisible) return;
+    _messageDialogVisible = true;
+    unawaited(
+      showBezyMessageDialog(context, message: message).whenComplete(() {
+        _messageDialogVisible = false;
+      }),
     );
   }
 

@@ -1,18 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../../core/audio/sound_service.dart';
 import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/campaign_levels.dart';
 import '../../../domain/models/game_mode.dart';
+import '../../../domain/models/level_model.dart';
 import '../../../l10n/app_localizations.dart';
-import 'level_select_screen.dart';
+import '../../components/bezy_message_dialog.dart';
+import '../game/game_screen.dart';
 
-/// World map showing progressive difficulty chapters and overall stars.
+enum _UnlockPhase { idle, unlocking, free }
+
+/// A single winding campaign map. The artwork contains all 50 numbered stage
+/// stones; interactive lock layers are positioned over those stones.
 class WorldMapScreen extends StatefulWidget {
-  final ProgressStorage storage;
-  final SoundService sound;
-  final GameMode mode;
-
   const WorldMapScreen({
     super.key,
     required this.storage,
@@ -20,19 +24,256 @@ class WorldMapScreen extends StatefulWidget {
     required this.mode,
   });
 
+  final ProgressStorage storage;
+  final SoundService sound;
+  final GameMode mode;
+
   @override
   State<WorldMapScreen> createState() => _WorldMapScreenState();
 }
 
-class _WorldMapScreenState extends State<WorldMapScreen> {
+class _WorldMapScreenState extends State<WorldMapScreen>
+    with SingleTickerProviderStateMixin {
   static const _adminPasscode = String.fromEnvironment(
     'BEZY_ADMIN_PASS',
     defaultValue: 'bezy-special',
   );
+  static const _mapAspectRatio = 941 / 1672;
+
+  // Centers of the numbered stones in map.png, normalized to its source size.
+  static const _stageCenters = <Offset>[
+    Offset(310 / 941, 145 / 1672),
+    Offset(416 / 941, 166 / 1672),
+    Offset(522 / 941, 184 / 1672),
+    Offset(627 / 941, 205 / 1672),
+    Offset(731 / 941, 237 / 1672),
+    Offset(291 / 941, 345 / 1672),
+    Offset(383 / 941, 311 / 1672),
+    Offset(484 / 941, 313 / 1672),
+    Offset(592 / 941, 329 / 1672),
+    Offset(689 / 941, 301 / 1672),
+    Offset(330 / 941, 418 / 1672),
+    Offset(433 / 941, 455 / 1672),
+    Offset(540 / 941, 473 / 1672),
+    Offset(650 / 941, 495 / 1672),
+    Offset(760 / 941, 522 / 1672),
+    Offset(291 / 941, 604 / 1672),
+    Offset(393 / 941, 582 / 1672),
+    Offset(505 / 941, 607 / 1672),
+    Offset(616 / 941, 622 / 1672),
+    Offset(726 / 941, 603 / 1672),
+    Offset(326 / 941, 695 / 1672),
+    Offset(436 / 941, 719 / 1672),
+    Offset(550 / 941, 742 / 1672),
+    Offset(662 / 941, 765 / 1672),
+    Offset(773 / 941, 799 / 1672),
+    Offset(278 / 941, 872 / 1672),
+    Offset(386 / 941, 883 / 1672),
+    Offset(501 / 941, 908 / 1672),
+    Offset(615 / 941, 919 / 1672),
+    Offset(728 / 941, 901 / 1672),
+    Offset(325 / 941, 1006 / 1672),
+    Offset(438 / 941, 1021 / 1672),
+    Offset(551 / 941, 1051 / 1672),
+    Offset(660 / 941, 1080 / 1672),
+    Offset(765 / 941, 1107 / 1672),
+    Offset(287 / 941, 1160 / 1672),
+    Offset(400 / 941, 1170 / 1672),
+    Offset(516 / 941, 1175 / 1672),
+    Offset(631 / 941, 1196 / 1672),
+    Offset(748 / 941, 1185 / 1672),
+    Offset(328 / 941, 1260 / 1672),
+    Offset(438 / 941, 1300 / 1672),
+    Offset(551 / 941, 1331 / 1672),
+    Offset(660 / 941, 1358 / 1672),
+    Offset(770 / 941, 1382 / 1672),
+    Offset(272 / 941, 1447 / 1672),
+    Offset(379 / 941, 1405 / 1672),
+    Offset(488 / 941, 1442 / 1672),
+    Offset(601 / 941, 1467 / 1672),
+    Offset(725 / 941, 1501 / 1672),
+  ];
+
+  final TransformationController _mapController = TransformationController();
+  late final AnimationController _focusController;
+  Animation<Matrix4>? _focusAnimation;
+  late GameMode _mode;
+  final Map<int, _UnlockPhase> _unlockPhases = {};
+  List<LevelModel> get _levels => CampaignLevels.getAllLevels();
+  Size? _viewportSize;
+  double? _mapWidth;
+  bool _mapFocused = false;
+  bool _stageImagesPrecached = false;
   bool _adminAccess = false;
 
-  void _refresh() {
+  @override
+  void initState() {
+    super.initState();
+    _mode = widget.mode;
+    _focusController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 650),
+        )..addListener(() {
+          final animation = _focusAnimation;
+          if (animation != null) _mapController.value = animation.value;
+        });
+  }
+
+  @override
+  void dispose() {
+    _focusController.dispose();
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_stageImagesPrecached) return;
+    _stageImagesPrecached = true;
+    for (final asset in const [
+      'assets/stages/map.png',
+      'assets/stages/lock.png',
+      'assets/stages/unlock.png',
+      'assets/stages/free.png',
+      'assets/buttons/msg.png',
+    ]) {
+      precacheImage(AssetImage(asset), context);
+    }
+  }
+
+  int get _currentStageIndex {
+    final firstPending = _levels.indexWhere(
+      (level) =>
+          (_adminAccess || widget.storage.isLevelUnlocked(level.id)) &&
+          widget.storage.getStars(level.id) == 0,
+    );
+    return firstPending == -1 ? _levels.length - 1 : firstPending;
+  }
+
+  bool _isUnlocked(LevelModel level) =>
+      _adminAccess || widget.storage.isLevelUnlocked(level.id);
+
+  bool _isRevealed(LevelModel level) =>
+      _adminAccess || widget.storage.isLevelRevealed(level.id);
+
+  void _focusCurrentGroup({bool animate = true}) {
+    final viewport = _viewportSize;
+    final mapWidth = _mapWidth;
+    if (viewport == null || mapWidth == null) return;
+    _mapFocused = true;
+
+    final groupStart = (_currentStageIndex ~/ 5) * 5;
+    final group = _stageCenters.skip(groupStart).take(5).toList();
+    final center = group.reduce((a, b) => a + b) / group.length.toDouble();
+    final top = group.map((point) => point.dy).reduce((a, b) => a < b ? a : b);
+    final mapHeight = mapWidth / _mapAspectRatio;
+    final scale = viewport.height > viewport.width ? 1.55 : 1.18;
+    final tx = viewport.width / 2 - center.dx * mapWidth * scale;
+    final ty = 70 - top * mapHeight * scale;
+    final target = Matrix4.diagonal3Values(scale, scale, 1)
+      ..setTranslationRaw(tx, ty, 0);
+
+    _animateMapTo(target, animate: animate);
+  }
+
+  void _focusMapStart({bool animate = true}) {
+    final viewport = _viewportSize;
+    final mapWidth = _mapWidth;
+    if (viewport == null || mapWidth == null) return;
+    final mapHeight = mapWidth / _mapAspectRatio;
+    final firstGroup = _stageCenters.take(5).toList();
+    final center =
+        firstGroup.reduce((a, b) => a + b) / firstGroup.length.toDouble();
+    final scale = viewport.height > viewport.width ? 1.28 : 1.1;
+    final tx = viewport.width / 2 - center.dx * mapWidth * scale;
+    const ty = 10.0;
+    final target = Matrix4.diagonal3Values(scale, scale, 1)
+      ..setTranslationRaw(tx, ty, 0);
+
+    // Entering the detailed map should feel like a gentle glide to its top,
+    // with stage 1 comfortably inside the viewport rather than clipped above it.
+    final firstStageY = ty + _stageCenters.first.dy * mapHeight * scale;
+    assert(firstStageY > 40);
+    _animateMapTo(target, animate: animate);
+  }
+
+  void _animateMapTo(Matrix4 target, {required bool animate}) {
+    if (!animate) {
+      _mapController.value = target;
+      return;
+    }
+    _focusController.stop();
+    _focusAnimation = Matrix4Tween(begin: _mapController.value, end: target)
+        .animate(
+          CurvedAnimation(parent: _focusController, curve: Curves.easeOutCubic),
+        );
+    unawaited(_focusController.forward(from: 0));
+  }
+
+  void _enterFocusedMap() {
+    if (_mapFocused) {
+      _focusCurrentGroup();
+      return;
+    }
+    setState(() => _mapFocused = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusMapStart();
+    });
+  }
+
+  Future<void> _handleStageTap(int index) async {
+    final level = _levels[index];
+    if (!_isUnlocked(level)) {
+      widget.sound.invalidMove();
+      await showBezyMessageDialog(
+        context,
+        message: AppLocalizations.of(context).stageLocked,
+      );
+      return;
+    }
+
+    if (!_isRevealed(level)) {
+      await _playUnlock(index, level);
+      return;
+    }
+
+    await _openLevel(level);
+  }
+
+  Future<void> _openLevel(LevelModel level) async {
+    widget.sound.tileTap();
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => GameScreen(
+          initialLevel: level,
+          storage: widget.storage,
+          sound: widget.sound,
+          mode: _mode,
+          showSpecialIntroductions: true,
+        ),
+      ),
+    );
+    if (!mounted) return;
     setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusCurrentGroup();
+    });
+  }
+
+  Future<void> _playUnlock(int index, LevelModel level) async {
+    if (_unlockPhases[index] != null) return;
+    widget.sound.tileTap();
+    setState(() => _unlockPhases[index] = _UnlockPhase.unlocking);
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    setState(() => _unlockPhases[index] = _UnlockPhase.free);
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    await widget.storage.revealLevel(level.id);
+    if (!mounted) return;
+    setState(() => _unlockPhases.remove(index));
+    await _openLevel(level);
   }
 
   Future<void> _requestAdminAccess() async {
@@ -65,53 +306,64 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
       ),
     );
     controller.dispose();
-    if (!mounted) return;
-    if (accepted == true) {
-      setState(() => _adminAccess = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Admin testing access enabled')),
-      );
-    } else if (accepted == false) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Incorrect admin passcode')));
-    }
+    if (!mounted || accepted != true) return;
+    setState(() => _adminAccess = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusCurrentGroup();
+    });
   }
 
-  IconData _getIcon(String iconName) {
-    switch (iconName) {
-      case 'school':
-        return Icons.school_rounded;
-      case 'shield':
-        return Icons.shield_rounded;
-      case 'bolt':
-        return Icons.bolt_rounded;
-      case 'joker':
-        return Icons.theater_comedy_rounded;
-      case 'ice':
-        return Icons.ac_unit_rounded;
-      case 'party':
-        return Icons.celebration_rounded;
-      case 'emoji_events':
-      default:
-        return Icons.emoji_events_rounded;
-    }
+  String _lockAsset(int index) {
+    return switch (_unlockPhases[index] ?? _UnlockPhase.idle) {
+      _UnlockPhase.unlocking => 'assets/stages/unlock.png',
+      _UnlockPhase.free => 'assets/stages/free.png',
+      _UnlockPhase.idle => 'assets/stages/lock.png',
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalStars = widget.storage.getTotalStars();
-    final worlds = CampaignLevels.worlds;
     final strings = AppLocalizations.of(context);
+    final currentNumber = _currentStageIndex + 1;
+    final groupStart = (_currentStageIndex ~/ 5) * 5 + 1;
+    final groupEnd = (groupStart + 4).clamp(1, _levels.length);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(strings.worldMap),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(strings.levelMap),
+            Text(
+              '$groupStart–$groupEnd • ${strings.levelTitle(_levels[_currentStageIndex].id, _levels[_currentStageIndex].title)}',
+              style: const TextStyle(fontSize: 13, color: AppTheme.textMuted),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            tooltip: _adminAccess
-                ? 'Admin testing access enabled'
-                : 'Admin testing pass',
+            tooltip: _mode == GameMode.learning
+                ? strings.learningMode
+                : strings.challengeMode,
+            onPressed: () {
+              widget.sound.tileTap();
+              setState(() {
+                _mode = _mode == GameMode.learning
+                    ? GameMode.challenge
+                    : GameMode.learning;
+              });
+            },
+            icon: Icon(
+              _mode == GameMode.learning
+                  ? Icons.school_rounded
+                  : Icons.emoji_events_rounded,
+              color: _mode == GameMode.learning
+                  ? AppTheme.startGreen
+                  : AppTheme.gold,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Admin testing pass',
             onPressed: _adminAccess ? null : _requestAdminAccess,
             icon: Icon(
               _adminAccess ? Icons.lock_open_rounded : Icons.key_rounded,
@@ -119,181 +371,213 @@ class _WorldMapScreenState extends State<WorldMapScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                const Icon(Icons.star_rounded, color: AppTheme.gold, size: 22),
-                const SizedBox(width: 4),
-                Text(
-                  strings.stars(totalStars),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: AppTheme.gold,
-                  ),
+            padding: const EdgeInsetsDirectional.only(end: 12),
+            child: Center(
+              child: Text(
+                '$currentNumber / ${_levels.length}',
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w800,
                 ),
-              ],
+              ),
             ),
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: worlds.length,
-        itemBuilder: (context, index) {
-          final world = worlds[index];
-          final worldLevels = CampaignLevels.getLevelsForWorld(world.id);
-          final worldLevelIds = worldLevels.map((l) => l.id).toList();
-          final earnedStars = widget.storage.getTotalStarsForWorld(
-            world.id,
-            worldLevelIds,
-          );
-          final maxStars = worldLevels.length * 3;
-          final progressPercent = maxStars > 0 ? (earnedStars / maxStars) : 0.0;
-          final color = Color(world.colorHex);
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final viewport = Size(constraints.maxWidth, constraints.maxHeight);
+          final mapWidth = constraints.maxWidth;
+          final mapHeight = mapWidth / _mapAspectRatio;
+          _viewportSize = viewport;
+          _mapWidth = mapWidth;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () async {
-                widget.sound.tileTap();
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => LevelSelectScreen(
-                      world: world,
-                      storage: widget.storage,
-                      sound: widget.sound,
-                      mode: widget.mode,
-                      adminAccess: _adminAccess,
-                    ),
-                  ),
-                );
-                _refresh();
-              },
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceDark,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.5),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Icon(
-                            _getIcon(world.iconName),
-                            color: color,
-                            size: 28,
-                          ),
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: _mapFocused
+                    ? InteractiveViewer(
+                        transformationController: _mapController,
+                        constrained: false,
+                        minScale: 0.18,
+                        maxScale: 3.5,
+                        boundaryMargin: EdgeInsets.all(viewport.longestSide),
+                        child: _buildMapCanvas(
+                          mapWidth,
+                          mapHeight,
+                          strings,
+                          interactive: true,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                strings.worldNumber(
-                                  world.id,
-                                  strings.worldTitle(world.id, world.title),
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.textPrimary,
-                                ),
+                      )
+                    : GestureDetector(
+                        key: const ValueKey('campaign-map-overview'),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: _enterFocusedMap,
+                        child: Center(
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: IgnorePointer(
+                              child: _buildMapCanvas(
+                                941,
+                                1672,
+                                strings,
+                                interactive: false,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                strings.worldSubtitle(world.id, world.subtitle),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: color,
+                      ),
+              ),
+              PositionedDirectional(
+                start: 12,
+                end: 12,
+                bottom: 10,
+                child: IgnorePointer(
+                  child: Center(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AppTheme.bgDark.withValues(alpha: 0.82),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppTheme.pathCyan),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: progressPercent,
-                        backgroundColor: AppTheme.surfaceElevated,
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                        minHeight: 8,
+                        child: Text(
+                          strings.campaignMapHint,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          strings.levelProgress(
-                            worldLevels
-                                .where(
-                                  (level) =>
-                                      widget.storage.isLevelUnlocked(level.id),
-                                )
-                                .length,
-                            worldLevels.length,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: AppTheme.textMuted,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star_rounded,
-                              color: AppTheme.gold,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$earnedStars / $maxStars',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.gold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildStageNode(
+    int index,
+    double mapWidth,
+    double mapHeight,
+    AppLocalizations strings,
+  ) {
+    final level = _levels[index];
+    final center = _stageCenters[index];
+    final size = mapWidth * 0.095;
+    final unlocked = _isUnlocked(level);
+    final revealed = _isRevealed(level);
+    final phase = _unlockPhases[index];
+    final showLock = !revealed || phase != null;
+    final stars = widget.storage.getStars(level.id);
+
+    return Positioned(
+      key: ValueKey('stage-node-${index + 1}'),
+      left: center.dx * mapWidth - size / 2,
+      top: center.dy * mapHeight - size / 2,
+      width: size,
+      height: size,
+      child: Semantics(
+        button: true,
+        enabled: unlocked,
+        label: showLock && unlocked
+            ? '${strings.tapToUnlock}: ${index + 1}'
+            : strings.levelTitle(level.id, level.title),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _handleStageTap(index),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              const Positioned.fill(
+                child: ColoredBox(color: Colors.transparent),
+              ),
+              if (showLock)
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween<double>(begin: 0.82, end: 1).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutBack,
+                        ),
+                      ),
+                      child: child,
+                    ),
+                  ),
+                  child: Image.asset(
+                    _lockAsset(index),
+                    key: ValueKey(_lockAsset(index)),
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                ),
+              if (!showLock && stars > 0)
+                Positioned(
+                  bottom: -size * 0.12,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      3,
+                      (star) => Icon(
+                        Icons.star_rounded,
+                        size: size * 0.2,
+                        color: star < stars ? AppTheme.gold : AppTheme.wallGray,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapCanvas(
+    double mapWidth,
+    double mapHeight,
+    AppLocalizations strings, {
+    required bool interactive,
+  }) {
+    return SizedBox(
+      width: mapWidth,
+      height: mapHeight,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: interactive
+                ? GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _focusCurrentGroup,
+                    child: Image.asset(
+                      'assets/stages/map.png',
+                      fit: BoxFit.fill,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  )
+                : Image.asset(
+                    'assets/stages/map.png',
+                    fit: BoxFit.fill,
+                    filterQuality: FilterQuality.medium,
+                  ),
+          ),
+          for (var index = 0; index < _levels.length; index++)
+            _buildStageNode(index, mapWidth, mapHeight, strings),
+        ],
       ),
     );
   }

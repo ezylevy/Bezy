@@ -62,3 +62,18 @@
 - Added regression coverage for board direction, start-tile deactivation, and
   the live remaining label.
 - Verification: analyzer clean; all 15 tests passing.
+
+## 2026-09-26 — Campaign map and gameplay stabilization
+
+- Replaced the chapter list with an illustrated, interactive 50-stage campaign
+  map, including locked, unlocking, and revealed stage states.
+- Added persistent stage reveal state and returned completed gameplay to the
+  map so progression remains visible.
+- Completed the Lonely Cell rules across gameplay, hints, the solver, and
+  campaign validation.
+- Added framed gameplay feedback and first-appearance guidance with an explicit
+  localized "Don't show this again" preference.
+- Softened the map's initial zoom so it glides to the top with stage 1 visible.
+- Centered the remaining-target label within the yellow panel artwork.
+- Verification: analyzer clean; all 40 automated tests passing, including
+  solvability checks for all 50 campaign levels. No emulator was used.

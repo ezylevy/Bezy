@@ -603,6 +603,7 @@ class CampaignLevels {
       blackHoleIndices: [50],
       bombIndices: [60],
       zeroIndices: [70],
+      lonelyIndices: [1],
       values: List.generate(81, (i) {
         if (i == 40) return 85;
         return (i * 4 + 5) % 9 + 1;
@@ -700,6 +701,7 @@ class CampaignLevels {
     List<int> blackHoleIndices = const [],
     List<int> bombIndices = const [],
     List<int> zeroIndices = const [],
+    List<int> lonelyIndices = const [],
     List<String> hints = const [],
   }) {
     final total = gridSize * gridSize;
@@ -721,6 +723,7 @@ class CampaignLevels {
         for (final _ in blackHoleIndices) TileType.blackHole,
         for (final _ in bombIndices) TileType.bomb,
         for (final _ in zeroIndices) TileType.zero,
+        for (final _ in lonelyIndices) TileType.lonely,
       ],
     );
     final tiles = <TileModel>[];

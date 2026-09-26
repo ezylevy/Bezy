@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bezy/domain/campaign/campaign_levels.dart';
 import 'package:bezy/domain/campaign/level_generator.dart';
+import 'package:bezy/domain/models/level_model.dart';
 import 'package:bezy/domain/models/tile_model.dart';
 import 'package:bezy/domain/solver/path_solver.dart';
 
@@ -87,6 +88,87 @@ void main() {
   });
 
   group('All Campaign Levels Solvability', () {
+    test('Lonely Cell unlocks only after all four neighbors were visited', () {
+      final tiles = List.generate(
+        25,
+        (index) => TileModel(
+          index: index,
+          row: index ~/ 5,
+          col: index % 5,
+          type: index == 8
+              ? TileType.lonely
+              : index == 12
+              ? TileType.target
+              : TileType.number,
+          value: 0,
+        ),
+      );
+      final level = LevelModel(
+        id: 'lonely-rule-test',
+        worldId: 1,
+        levelNumber: 1,
+        worldTitle: 'Test',
+        title: 'Lonely',
+        gridSize: 5,
+        targetNumber: 0,
+        tiles: tiles,
+        parMoves: 1,
+      );
+
+      expect(level.orthogonalNeighborIndices(8), [3, 13, 7, 9]);
+      expect(level.isLonelyUnlocked(8, {3, 7, 9}), isFalse);
+      expect(level.isLonelyUnlocked(8, {3, 7, 9, 13}), isTrue);
+    });
+
+    test('Solver uses visit history when continuing through a Lonely Cell', () {
+      const walkable = {3, 7, 8, 9, 12, 13};
+      final tiles = List.generate(25, (index) {
+        final type = index == 8
+            ? TileType.lonely
+            : index == 12
+            ? TileType.target
+            : walkable.contains(index)
+            ? TileType.number
+            : TileType.wall;
+        return TileModel(
+          index: index,
+          row: index ~/ 5,
+          col: index % 5,
+          type: type,
+          value: 0,
+        );
+      });
+      final level = LevelModel(
+        id: 'lonely-solver-test',
+        worldId: 1,
+        levelNumber: 1,
+        worldTitle: 'Test',
+        title: 'Lonely solver',
+        gridSize: 5,
+        targetNumber: 0,
+        tiles: tiles,
+        parMoves: 3,
+      );
+
+      expect(
+        PathSolver.findRouteFromCurrent(
+          level: level,
+          currentPath: const [3],
+          currentSum: 0,
+        ),
+        isNull,
+      );
+      expect(
+        PathSolver.findRouteFromCurrent(
+          level: level,
+          currentPath: const [3],
+          currentSum: 0,
+          visitedIndices: const {3, 7, 9, 13},
+        ),
+        [3, 8, 13, 12],
+      );
+    });
+
     test('World 4 introduces special cells progressively', () {
       final levels = CampaignLevels.getLevelsForWorld(4);
 
@@ -162,6 +244,15 @@ void main() {
           );
         }
       }
+    });
+
+    test('The campaign includes the Lonely Cell', () {
+      expect(
+        CampaignLevels.getAllLevels().any(
+          (level) => level.tiles.any((tile) => tile.isLonely),
+        ),
+        isTrue,
+      );
     });
 
     test('Extra 30 levels use the approved challenge tiers', () {

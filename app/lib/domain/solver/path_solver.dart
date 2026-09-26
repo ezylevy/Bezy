@@ -32,6 +32,7 @@ class PathSolver {
     required LevelModel level,
     required List<int> currentPath,
     required int currentSum,
+    Set<int>? visitedIndices,
     int maxDepth = 40,
   }) {
     if (currentPath.isEmpty) return findSolution(level);
@@ -39,7 +40,8 @@ class PathSolver {
     final n = level.gridSize;
     final target = level.targetNumber;
     final centerIndex = level.centerIndex;
-    final visited = currentPath.toSet();
+    final pathIndices = currentPath.toSet();
+    final visitHistory = {...?visitedIndices, ...currentPath};
     final canReduceTotal = level.tiles.any(
       (tile) => tile.isMirror || tile.isZero,
     );
@@ -79,29 +81,45 @@ class PathSolver {
         if (!isValid(nr, nc)) continue;
 
         final nextIndex = nr * n + nc;
-        if (visited.contains(nextIndex)) continue;
+        if (pathIndices.contains(nextIndex)) continue;
 
         final nextTile = level.tiles[nextIndex];
         if (!nextTile.isWalkable) continue;
-        if (!nextTile.canEnter(pathSum)) continue;
+        if (!level.canEnterTile(nextIndex, pathSum, visitHistory)) continue;
 
         final newSum = nextTile.applyValue(pathSum);
         final teleportDestination = nextTile.isTrampoline
             ? level.pairedTeleportIndex(nextIndex)
             : null;
         if (teleportDestination != null &&
-            visited.contains(teleportDestination)) {
+            pathIndices.contains(teleportDestination)) {
           continue;
         }
-        visited.add(nextIndex);
-        if (teleportDestination != null) visited.add(teleportDestination);
+        if (teleportDestination != null &&
+            !level.canEnterTile(teleportDestination, newSum, {
+              ...visitHistory,
+              nextIndex,
+            })) {
+          continue;
+        }
+        final nextWasNew = visitHistory.add(nextIndex);
+        pathIndices.add(nextIndex);
+        var destinationWasNew = false;
+        if (teleportDestination != null) {
+          destinationWasNew = visitHistory.add(teleportDestination);
+          pathIndices.add(teleportDestination);
+        }
         dfs(teleportDestination ?? nextIndex, newSum, [
           ...path,
           nextIndex,
           ?teleportDestination,
         ]);
-        if (teleportDestination != null) visited.remove(teleportDestination);
-        visited.remove(nextIndex);
+        if (teleportDestination != null) {
+          pathIndices.remove(teleportDestination);
+          if (destinationWasNew) visitHistory.remove(teleportDestination);
+        }
+        pathIndices.remove(nextIndex);
+        if (nextWasNew) visitHistory.remove(nextIndex);
       }
     }
 
@@ -120,6 +138,7 @@ class PathSolver {
     required LevelModel level,
     required List<int> currentPath,
     required int currentSum,
+    Set<int>? visitedIndices,
   }) {
     if (currentPath.isEmpty) {
       final sol = findSolution(level);
@@ -130,6 +149,7 @@ class PathSolver {
       level: level,
       currentPath: currentPath,
       currentSum: currentSum,
+      visitedIndices: visitedIndices,
     );
 
     if (solution != null && solution.length > currentPath.length) {

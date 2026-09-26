@@ -45,9 +45,8 @@ void main() {
     await tester.tap(find.text('Journey'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose a mode'), findsOneWidget);
-    expect(find.text('Learning'), findsOneWidget);
-    expect(find.text('Challenge'), findsOneWidget);
+    expect(find.text('Level map'), findsOneWidget);
+    expect(find.byKey(const ValueKey('stage-node-1')), findsOneWidget);
   });
 
   testWidgets('A saved Hebrew locale opens the RTL home screen', (
@@ -101,11 +100,88 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Journey'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Learning'));
-    await tester.pumpAndSettle();
 
-    expect(find.text('World map'), findsOneWidget);
-    expect(find.text('World 1: Number Academy'), findsOneWidget);
+    expect(find.text('Level map'), findsOneWidget);
+    expect(find.byKey(const ValueKey('stage-node-1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('stage-node-50')), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsNothing);
+    expect(find.byType(FittedBox), findsWidgets);
+
+    await tester.tap(find.byKey(const ValueKey('campaign-map-overview')));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    final viewer = tester.widget<InteractiveViewer>(
+      find.byType(InteractiveViewer),
+    );
+    expect(
+      viewer.transformationController!.value.getMaxScaleOnAxis(),
+      greaterThan(1),
+    );
+    expect(
+      viewer.transformationController!.value.getTranslation().y,
+      closeTo(10, 0.1),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('stage-node-1'))).dy,
+      greaterThan(0),
+    );
+  });
+
+  testWidgets('Newly approved stage plays unlock sequence before opening', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'pref_locale_code': 'en',
+      'unlocked_level_w1_l2': true,
+      'level_stars_w1_l1': 3,
+      'seen_basic_instructions': true,
+    });
+    final prefs = await SharedPreferences.getInstance();
+    final storage = ProgressStorage(prefs);
+    final sound = SoundService(storage);
+
+    await tester.pumpWidget(BezyApp(storage: storage, sound: sound));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Journey'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('campaign-map-overview')));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final stageTwo = find.byKey(const ValueKey('stage-node-2'));
+    expect(storage.isLevelRevealed('w1_l2'), isFalse);
+    expect(
+      tester
+          .widgetList<Image>(
+            find.descendant(of: stageTwo, matching: find.byType(Image)),
+          )
+          .map((image) => (image.image as AssetImage).assetName),
+      contains('assets/stages/lock.png'),
+    );
+
+    await tester.tap(stageTwo);
+    await tester.pump();
+    expect(
+      tester
+          .widgetList<Image>(
+            find.descendant(of: stageTwo, matching: find.byType(Image)),
+          )
+          .map((image) => (image.image as AssetImage).assetName),
+      contains('assets/stages/unlock.png'),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      tester
+          .widgetList<Image>(
+            find.descendant(of: stageTwo, matching: find.byType(Image)),
+          )
+          .map((image) => (image.image as AssetImage).assetName),
+      contains('assets/stages/free.png'),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(storage.isLevelRevealed('w1_l2'), isTrue);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(GameScreen), findsOneWidget);
   });
 
   testWidgets('Home remains usable in landscape', (WidgetTester tester) async {
@@ -248,14 +324,22 @@ void main() {
     await tester.pumpWidget(game(const ValueKey('first-visit')));
     await tester.pump();
     expect(find.text('How to play'), findsOneWidget);
+    expect(find.text("Don't show this again"), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('basic-do-not-show-again')));
+    await tester.pump();
     await tester.tap(find.text("Let's play"));
     await tester.pump();
+    expect(storage.hasSeenBasicInstructions, isTrue);
     expect(find.text('New tile: Stone walls'), findsOneWidget);
     expect(
       find.text('Walls block the way, so find a route around them.'),
       findsOneWidget,
     );
 
+    await tester.tap(
+      find.byKey(const ValueKey('special-wall-do-not-show-again')),
+    );
+    await tester.pump();
     await tester.tap(find.text('Got it'));
     await tester.pump();
     expect(storage.hasSeenSpecialIntroduction(TileType.wall.name), isTrue);
@@ -461,6 +545,14 @@ void main() {
       [1],
     );
     expect(find.text('Exact!'), findsNothing);
+    expect(
+      tester
+          .widgetList<Image>(find.byType(Image))
+          .map((image) => (image.image as AssetImage).assetName),
+      contains('assets/buttons/msg.png'),
+    );
+    await tester.tap(find.text('Got it'));
+    await tester.pump();
 
     await tester.tap(find.byKey(const ValueKey('tile-0')));
     await tester.pump();
@@ -626,12 +718,100 @@ void main() {
     expect(panelState.isWon, isTrue);
     expect(find.text('Solution complete'), findsOneWidget);
     expect(find.text('Try this level'), findsOneWidget);
-    expect(find.text('Next level'), findsOneWidget);
+    expect(find.text('Level map'), findsOneWidget);
 
     await tester.tap(find.text('Try this level'));
     await tester.pump();
     boardState = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
     expect(boardState.activeSolutionRoute, isNull);
+  });
+
+  testWidgets('Lonely Cell remembers neighbors visited before backtracking', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'pref_locale_code': 'en'});
+    final prefs = await SharedPreferences.getInstance();
+    final storage = ProgressStorage(prefs);
+    final sound = SoundService(storage);
+    final tiles = List.generate(25, (index) {
+      final type = switch (index) {
+        3 => TileType.start,
+        8 => TileType.lonely,
+        12 => TileType.target,
+        _ => TileType.number,
+      };
+      return TileModel(
+        index: index,
+        row: index ~/ 5,
+        col: index % 5,
+        type: type,
+        value: index == 12 ? 99 : 0,
+      );
+    });
+    final level = LevelModel(
+      id: 'lonely-widget-test',
+      worldId: 1,
+      levelNumber: 1,
+      worldTitle: 'Test',
+      title: 'Lonely history',
+      gridSize: 5,
+      targetNumber: 99,
+      tiles: tiles,
+      parMoves: 8,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: GameScreen(
+          initialLevel: level,
+          storage: storage,
+          sound: sound,
+          mode: GameMode.learning,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    Future<void> tapTile(int index) async {
+      await tester.tap(find.byKey(ValueKey('tile-$index')));
+      await tester.pump();
+    }
+
+    await tapTile(3);
+    await tapTile(8);
+    var state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
+    expect(state.currentPath, [3]);
+    expect(find.textContaining('Visit all four neighboring'), findsOneWidget);
+    await tester.tap(find.text('Got it'));
+    await tester.pump();
+
+    for (final route in const [
+      [2, 7],
+      [4, 9],
+      [4, 9, 14, 13],
+    ]) {
+      for (final index in route) {
+        await tapTile(index);
+      }
+      await tapTile(3);
+    }
+
+    state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
+    expect(state.currentPath, [3]);
+    expect(state.visitedIndices, containsAll({3, 7, 9, 13}));
+    expect(find.byIcon(Icons.lock_rounded), findsNothing);
+
+    await tapTile(8);
+    state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
+    expect(state.currentPath, [3, 8]);
   });
 
   testWidgets('Special and gate tiles use supplied PNG artwork', (
@@ -762,6 +942,8 @@ void main() {
     await tester.pump();
     state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
     expect(state.currentPath, [22, 17]);
+    await tester.tap(find.text('Got it'));
+    await tester.pump();
 
     final allowedIndex = state.allowedNextIndices.single;
     await tester.tap(find.byKey(ValueKey('tile-$allowedIndex')));

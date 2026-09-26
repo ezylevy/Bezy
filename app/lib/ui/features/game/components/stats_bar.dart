@@ -84,22 +84,22 @@ class StatsBar extends StatelessWidget {
                 ),
                 Positioned(
                   key: const ValueKey('remaining-target-label'),
-                  left: width * 0.40,
+                  left: width * 0.28,
                   right: width * 0.28,
-                  top: height * 0.58,
-                  bottom: height * 0.13,
+                  top: height * 0.55,
+                  bottom: height * 0.18,
                   child: Semantics(
                     liveRegion: true,
                     label: remainingLabel,
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: Alignment.center,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
+                        alignment: Alignment.center,
                         child: Text(
                           remainingLabel,
                           maxLines: 1,
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             color: remainingColor,
                             fontSize: 25,

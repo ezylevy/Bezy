@@ -38,6 +38,38 @@ class LevelModel {
   int get centerIndex => totalCells ~/ 2;
   bool get hasChallengeTimer => challengeTimeSeconds != null;
 
+  List<int> orthogonalNeighborIndices(int index) {
+    final row = index ~/ gridSize;
+    final col = index % gridSize;
+    return <(int, int)>[
+          (row - 1, col),
+          (row + 1, col),
+          (row, col - 1),
+          (row, col + 1),
+        ]
+        .where(
+          (cell) =>
+              cell.$1 >= 0 &&
+              cell.$1 < gridSize &&
+              cell.$2 >= 0 &&
+              cell.$2 < gridSize,
+        )
+        .map((cell) => cell.$1 * gridSize + cell.$2)
+        .toList(growable: false);
+  }
+
+  /// A Lonely Cell opens only after all four orthogonal neighbors have been
+  /// visited during the current attempt. Visit history survives backtracking.
+  bool isLonelyUnlocked(int index, Set<int> visitedIndices) {
+    if (!tiles[index].isLonely) return true;
+    final neighbors = orthogonalNeighborIndices(index);
+    return neighbors.length == 4 && neighbors.every(visitedIndices.contains);
+  }
+
+  bool canEnterTile(int index, int currentSum, Set<int> visitedIndices) =>
+      tiles[index].canEnter(currentSum) &&
+      isLonelyUnlocked(index, visitedIndices);
+
   /// Teleporting doors are paired in board-index order: 0↔1, 2↔3, etc.
   int? pairedTeleportIndex(int index) {
     final doors =

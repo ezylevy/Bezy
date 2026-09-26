@@ -15,6 +15,7 @@ class TileVisualState {
   final bool isVictory;
   final bool isLocked;
   final bool isBlackHoled;
+  final bool isRuleLocked;
 
   const TileVisualState({
     this.isStart = false,
@@ -28,6 +29,7 @@ class TileVisualState {
     this.isVictory = false,
     this.isLocked = false,
     this.isBlackHoled = false,
+    this.isRuleLocked = false,
   });
 }
 
@@ -105,6 +107,16 @@ class ModularTileContainer extends StatelessWidget {
                   left: 3,
                   child: Icon(
                     Icons.touch_app_rounded,
+                    size: 14,
+                    color: AppTheme.gold,
+                  ),
+                ),
+              if (state.isRuleLocked)
+                const Positioned(
+                  top: 3,
+                  right: 3,
+                  child: Icon(
+                    Icons.lock_rounded,
                     size: 14,
                     color: AppTheme.gold,
                   ),

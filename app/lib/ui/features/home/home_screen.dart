@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../core/audio/sound_service.dart';
 import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../domain/models/game_mode.dart';
 import '../../../l10n/app_localizations.dart';
 import '../custom/custom_game_screen.dart';
-import '../mode/mode_selection_screen.dart';
+import '../levels/world_map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.storage, required this.sound});
@@ -221,9 +222,10 @@ class _HomeScreenState extends State<HomeScreen> {
             widget.sound.tileTap();
             await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => ModeSelectionScreen(
+                builder: (context) => WorldMapScreen(
                   storage: widget.storage,
                   sound: widget.sound,
+                  mode: GameMode.learning,
                 ),
               ),
             );

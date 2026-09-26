@@ -95,8 +95,10 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
             const SizedBox(height: 8),
 
             // Grid Size Options
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 6,
+              runSpacing: 6,
               children: [3, 5, 7, 9].map((size) {
                 final isSelected = _selectedGridSize == size;
                 return ChoiceChip(
