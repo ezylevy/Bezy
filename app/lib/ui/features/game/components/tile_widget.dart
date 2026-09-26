@@ -16,6 +16,7 @@ class TileVisualState {
   final bool isLocked;
   final bool isBlackHoled;
   final bool isRuleLocked;
+  final bool isResolvedLonely;
 
   const TileVisualState({
     this.isStart = false,
@@ -30,6 +31,7 @@ class TileVisualState {
     this.isLocked = false,
     this.isBlackHoled = false,
     this.isRuleLocked = false,
+    this.isResolvedLonely = false,
   });
 }
 

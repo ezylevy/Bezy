@@ -22,6 +22,7 @@ class GameState {
   final Set<int> blackHoledIndices;
   final Map<int, int> jokerChoices;
   final Set<int> visitedIndices;
+  final bool runnerTeleported;
 
   const GameState({
     required this.level,
@@ -40,6 +41,7 @@ class GameState {
     this.blackHoledIndices = const {},
     this.jokerChoices = const {},
     this.visitedIndices = const {},
+    this.runnerTeleported = false,
   });
 
   int get difference => level.targetNumber - currentSum;
@@ -70,6 +72,7 @@ class GameState {
     Map<int, int>? jokerChoices,
     bool clearJokerChoices = false,
     Set<int>? visitedIndices,
+    bool? runnerTeleported,
   }) {
     return GameState(
       level: level ?? this.level,
@@ -98,6 +101,7 @@ class GameState {
           ? const {}
           : (jokerChoices ?? this.jokerChoices),
       visitedIndices: visitedIndices ?? this.visitedIndices,
+      runnerTeleported: runnerTeleported ?? this.runnerTeleported,
     );
   }
 }

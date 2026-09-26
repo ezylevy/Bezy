@@ -193,6 +193,7 @@ class _BoardWidgetState extends State<BoardWidget> {
                       n,
                       boardSize,
                       _solutionDirection(),
+                      instant: false,
                     )
                   else if (widget.state.currentPath.isNotEmpty)
                     _buildRunner(
@@ -200,6 +201,7 @@ class _BoardWidgetState extends State<BoardWidget> {
                       n,
                       boardSize,
                       widget.state.runnerDirection.name,
+                      instant: widget.state.runnerTeleported,
                     ),
                 ],
               ),
@@ -225,8 +227,9 @@ class _BoardWidgetState extends State<BoardWidget> {
     int head,
     int gridSize,
     double boardSize,
-    String direction,
-  ) {
+    String direction, {
+    required bool instant,
+  }) {
     const padding = 6.0;
     const spacing = 5.0;
     final cellSize =
@@ -236,7 +239,7 @@ class _BoardWidgetState extends State<BoardWidget> {
     final col = head % gridSize;
 
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 70),
+      duration: instant ? Duration.zero : const Duration(milliseconds: 70),
       curve: Curves.linear,
       left: padding + col * (cellSize + spacing) + (cellSize - runnerSize) / 2,
       top: padding + row * (cellSize + spacing) + (cellSize - runnerSize) / 2,
@@ -245,6 +248,7 @@ class _BoardWidgetState extends State<BoardWidget> {
       child: IgnorePointer(
         child: Image.asset(
           'assets/figure/$direction.png',
+          key: ValueKey('runner-at-$head'),
           fit: BoxFit.contain,
           filterQuality: FilterQuality.medium,
         ),
@@ -293,6 +297,9 @@ class _BoardWidgetState extends State<BoardWidget> {
             index,
             widget.state.visitedIndices,
           ),
+      isResolvedLonely:
+          widget.state.level.tiles[index].isLonely &&
+          widget.state.visitedIndices.contains(index),
     );
   }
 }

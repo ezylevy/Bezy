@@ -12,6 +12,14 @@ class TileComponentFactory {
     required int gridSize,
     VoidCallback? onTap,
   }) {
+    if (tile.isLonely && state.isResolvedLonely) {
+      return NumberTileComponent(
+        tile: tile.copyWith(type: TileType.number),
+        state: state,
+        gridSize: gridSize,
+        onTap: onTap,
+      );
+    }
     if (state.isBlackHoled) {
       return ModularTileContainer(
         tile: tile,

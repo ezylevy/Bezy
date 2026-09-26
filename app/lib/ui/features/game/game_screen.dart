@@ -473,6 +473,7 @@ class _GameScreenState extends State<GameScreen>
             visitedIndices: {clickedIndex},
             currentSum: initialSum,
             moves: 1,
+            runnerTeleported: false,
             clearHint: true,
             clearStatusMessage: true,
           );
@@ -506,6 +507,7 @@ class _GameScreenState extends State<GameScreen>
           currentPath: truncatedPath,
           currentSum: recalculatedSum,
           runnerDirection: _facingFrom(prevIndex, clickedIndex, n),
+          runnerTeleported: false,
           jokerChoices: jokerChoices,
           clearAllowedNext: true,
           clearHint: true,
@@ -684,6 +686,7 @@ class _GameScreenState extends State<GameScreen>
           currentPath: newPath,
           currentSum: newSum,
           runnerDirection: _facingFrom(prevIndex, clickedIndex, n),
+          runnerTeleported: teleportDestination != null,
           moves: newMoves,
           isWon: true,
           destroyedIndices: destroyed,
@@ -703,6 +706,7 @@ class _GameScreenState extends State<GameScreen>
         currentPath: newPath,
         currentSum: newSum,
         runnerDirection: _facingFrom(prevIndex, clickedIndex, n),
+        runnerTeleported: teleportDestination != null,
         destroyedIndices: destroyed,
         allowedNextIndices: allowedNext,
         blackHoledIndices: blackHoled,
@@ -789,6 +793,7 @@ class _GameScreenState extends State<GameScreen>
         runnerDirection: newPath.isEmpty
             ? MoveDirection.down
             : _facingFrom(fromIndex, newPath.last, _gameState.level.gridSize),
+        runnerTeleported: false,
         jokerChoices: jokerChoices,
         clearAllowedNext: true,
         clearHint: true,

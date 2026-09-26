@@ -41,7 +41,7 @@ class _WorldMapScreenState extends State<WorldMapScreen>
   static const _mapAspectRatio = 941 / 1672;
 
   // Centers of the numbered stones in map.png, normalized to its source size.
-  static const _stageCenters = <Offset>[
+  static const _physicalStageCenters = <Offset>[
     Offset(310 / 941, 145 / 1672),
     Offset(416 / 941, 166 / 1672),
     Offset(522 / 941, 184 / 1672),
@@ -92,6 +92,19 @@ class _WorldMapScreenState extends State<WorldMapScreen>
     Offset(488 / 941, 1442 / 1672),
     Offset(601 / 941, 1467 / 1672),
     Offset(725 / 941, 1501 / 1672),
+  ];
+
+  // The illustrated road snakes across each row. Keep campaign numbering in
+  // travel order: left-to-right on one row, then right-to-left on the next.
+  static final List<Offset> _stageCenters = <Offset>[
+    for (var row = 0; row < 10; row++)
+      ...(row.isEven
+          ? _physicalStageCenters.skip(row * 5).take(5)
+          : _physicalStageCenters
+                .skip(row * 5)
+                .take(5)
+                .toList(growable: false)
+                .reversed),
   ];
 
   final TransformationController _mapController = TransformationController();
@@ -536,6 +549,34 @@ class _WorldMapScreenState extends State<WorldMapScreen>
                         Icons.star_rounded,
                         size: size * 0.2,
                         color: star < stars ? AppTheme.gold : AppTheme.wallGray,
+                      ),
+                    ),
+                  ),
+                ),
+              if (!showLock)
+                Container(
+                  width: size * 0.58,
+                  height: size * 0.58,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppTheme.bgDark.withValues(alpha: 0.58),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.72),
+                      width: 1,
+                    ),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: size * 0.34,
+                        fontWeight: FontWeight.w900,
+                        shadows: const [
+                          Shadow(color: Colors.black, blurRadius: 4),
+                        ],
                       ),
                     ),
                   ),

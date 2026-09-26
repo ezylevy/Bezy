@@ -87,7 +87,8 @@ class ExtraCampaignLevels {
 
   static LevelModel _jokerLevel(int offset) {
     final route = offset.isEven ? _route7Left : _route7Right;
-    final jokerIndex = route[6];
+    final alternateRoute = offset.isEven ? _route7Right : _route7Left;
+    final jokerIndex = route[5];
     final specials = <int, TileType>{jokerIndex: TileType.joker};
     if (offset >= 2) specials[route[4]] = TileType.mirror;
     if (offset >= 7) specials[route[8]] = TileType.clone;
@@ -111,6 +112,7 @@ class ExtraCampaignLevels {
       description:
           'בחרו את פעולת הג׳וקר הנכונה והגיעו ליעד במספר הצעדים הקטן ביותר.',
       route: route,
+      alternateRoute: offset >= 2 ? alternateRoute : null,
       specials: specials,
       jokerOptions: [2 + offset % 3, 5 + offset % 4],
       timerSeconds: 60,
@@ -123,6 +125,9 @@ class ExtraCampaignLevels {
     final route = useNine
         ? (offset.isEven ? _route9Left : _route9Right)
         : (offset.isEven ? _route7Left : _route7Right);
+    final alternateRoute = useNine
+        ? (offset.isEven ? _route9Right : _route9Left)
+        : (offset.isEven ? _route7Right : _route7Left);
     final iceStart = useNine
         ? (offset.isEven ? 36 : 44)
         : (offset.isEven ? 21 : 27);
@@ -148,6 +153,7 @@ class ExtraCampaignLevels {
       ][offset],
       description: 'כניסה לקרח מחליקה את השחקן אוטומטית עד לתא העצירה המואר.',
       route: route,
+      alternateRoute: alternateRoute,
       specials: specials,
       jokerOptions: [3, 6 + offset % 3],
       timerSeconds: 45,
@@ -157,6 +163,7 @@ class ExtraCampaignLevels {
 
   static LevelModel _masterLevel(int offset) {
     final route = offset.isEven ? _route9Left : _route9Right;
+    final alternateRoute = offset.isEven ? _route9Right : _route9Left;
     final iceStart = offset.isEven ? 36 : 44;
     final specials = <int, TileType>{
       route[3]: TileType.joker,
@@ -184,6 +191,7 @@ class ExtraCampaignLevels {
       description:
           'שלבו ג׳וקר, קרח ומכניקות מאסטר והגיעו ליעד לפני שהזמן נגמר.',
       route: route,
+      alternateRoute: alternateRoute,
       specials: specials,
       jokerOptions: [2 + offset % 3, 7 + offset % 3],
       timerSeconds: 30,
@@ -199,6 +207,7 @@ class ExtraCampaignLevels {
     required String title,
     required String description,
     required List<int> route,
+    List<int>? alternateRoute,
     required Map<int, TileType> specials,
     required List<int> jokerOptions,
     required int timerSeconds,
@@ -207,17 +216,43 @@ class ExtraCampaignLevels {
     final gridSize = route.last == 24 ? 7 : 9;
     final center = gridSize * gridSize ~/ 2;
     assert(route.last == center);
-    final routeSet = route.toSet();
+    assert(alternateRoute == null || alternateRoute.last == center);
+    final effectiveSpecials = Map<int, TileType>.from(specials);
+    if (alternateRoute != null) {
+      for (final entry in specials.entries) {
+        final position = route.indexOf(entry.key);
+        if (position > 0 && position < alternateRoute.length - 1) {
+          effectiveSpecials[alternateRoute[position]] = entry.value;
+        }
+      }
+    }
+    final routeSet = <int>{...route, ...?alternateRoute};
+    final centerNeighbors = <int>{
+      center - gridSize,
+      center + gridSize,
+      center - 1,
+      center + 1,
+    };
+    final startIndices = alternateRoute == null
+        ? <int>{route.first}
+        : LevelModel.calculateDefaultStartPoints(
+            gridSize,
+          ).where((index) => !effectiveSpecials.containsKey(index)).toSet();
+    final walkableIndices = <int>{
+      ...routeSet,
+      ...centerNeighbors,
+      ...startIndices,
+    };
     final values = <int, int>{};
     final clonePosition = route.indexWhere(
-      (index) => specials[index] == TileType.clone,
+      (index) => effectiveSpecials[index] == TileType.clone,
     );
     final combinesMirrorAndClone =
-        clonePosition >= 0 && specials.containsValue(TileType.mirror);
+        clonePosition >= 0 && effectiveSpecials.containsValue(TileType.mirror);
     var sum = 0;
     for (var position = 0; position < route.length - 1; position++) {
       final index = route[position];
-      final type = specials[index];
+      final type = effectiveSpecials[index];
       // Alternate 0 and 1. Besides putting the ordinary zero artwork
       // into the challenge boards, the smaller inputs keep Mirror and Clone
       // targets within the supplied 8-88 result-art range.
@@ -259,6 +294,13 @@ class ExtraCampaignLevels {
       values[lastNumberIndex] = values[lastNumberIndex]! + increase;
       sum = 8;
     }
+    if (alternateRoute != null) {
+      for (var position = 0; position < alternateRoute.length - 1; position++) {
+        final primaryIndex = route[position];
+        final alternateIndex = alternateRoute[position];
+        values[alternateIndex] = values[primaryIndex] ?? 0;
+      }
+    }
 
     final tiles = List<TileModel>.generate(gridSize * gridSize, (index) {
       final row = index ~/ gridSize;
@@ -272,30 +314,30 @@ class ExtraCampaignLevels {
           value: sum,
         );
       }
-      if (!routeSet.contains(index)) {
+      if (!walkableIndices.contains(index)) {
         return TileModel(index: index, row: row, col: col, type: TileType.wall);
       }
-      if (index == route.first) {
+      if (startIndices.contains(index)) {
         return TileModel(
           index: index,
           row: row,
           col: col,
           type: TileType.start,
-          value: values[index]!,
+          value: values[index] ?? (seed + index) % 4 + 1,
         );
       }
-      final type = specials[index] ?? TileType.number;
+      final type = effectiveSpecials[index] ?? TileType.number;
       return TileModel(
         index: index,
         row: row,
         col: col,
         type: type,
-        value: values[index] ?? 0,
+        value: values[index] ?? (seed + index) % 4 + 1,
         metadata: type == TileType.joker ? {'options': jokerOptions} : const {},
       );
     });
 
-    final optimalMoves = _countUserMoves(route, specials);
+    final optimalMoves = _countUserMoves(route, effectiveSpecials);
     return LevelModel(
       id: id,
       worldId: worldId,

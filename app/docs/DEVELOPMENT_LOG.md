@@ -77,3 +77,18 @@
 - Centered the remaining-target label within the yellow panel artwork.
 - Verification: analyzer clean; all 40 automated tests passing, including
   solvability checks for all 50 campaign levels. No emulator was used.
+
+## 2026-09-26 — Gameplay and campaign QA fixes
+
+- Corrected the campaign-map sequence to follow the illustrated road in
+  chronological order from 1 through 50.
+- Limited campaign and generated boards to at most one wall beside the target.
+- Made the Lonely Cell reveal its underlying number and behave as an ordinary
+  number cell after the player successfully enters it.
+- Made teleport movement place the runner immediately on the destination door.
+- Made illustrated feedback dialogs grow with their message while retaining a
+  safe scroll area on small screens.
+- Reworked stages 23-50 around two mirrored playable routes instead of a single
+  wall corridor; later Joker stages now place a Joker on both routes.
+- Normalized the iOS bundle identifier to `com.ezylevy.bezy`. A signed iOS IPA
+  still requires an Apple development team and a macOS/Xcode build.

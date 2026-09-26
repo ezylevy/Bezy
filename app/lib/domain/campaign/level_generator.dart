@@ -39,12 +39,23 @@ class LevelGenerator {
 
       // Prepare random wall placements if requested (avoid center and start positions)
       final wallIndices = <int>{};
+      final centerNeighbors = <int>{
+        centerIndex - gridSize,
+        centerIndex + gridSize,
+        centerIndex - 1,
+        centerIndex + 1,
+      };
       if (includeWalls && wallCount > 0) {
         var tries = 0;
         while (wallIndices.length < wallCount && tries < 50) {
           tries++;
           final rIndex = rng.nextInt(totalCells);
-          if (rIndex != centerIndex && !defaultStarts.contains(rIndex)) {
+          final alreadyHasCenterWall = wallIndices.any(
+            centerNeighbors.contains,
+          );
+          if (rIndex != centerIndex &&
+              !defaultStarts.contains(rIndex) &&
+              (!centerNeighbors.contains(rIndex) || !alreadyHasCenterWall)) {
             wallIndices.add(rIndex);
           }
         }

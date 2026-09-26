@@ -255,6 +255,20 @@ void main() {
       );
     });
 
+    test('No campaign level puts more than one wall beside the target', () {
+      for (final level in CampaignLevels.getAllLevels()) {
+        final adjacentWalls = level
+            .orthogonalNeighborIndices(level.centerIndex)
+            .where((index) => level.tiles[index].isWall)
+            .length;
+        expect(
+          adjacentWalls,
+          lessThanOrEqualTo(1),
+          reason: '${level.id} has $adjacentWalls walls beside its target',
+        );
+      }
+    });
+
     test('Extra 30 levels use the approved challenge tiers', () {
       final extra = CampaignLevels.getAllLevels().skip(20).toList();
       expect(extra, hasLength(30));
@@ -282,6 +296,23 @@ void main() {
             .where((level) => level.targetNumber > 88)
             .map((level) => '${level.id}:${level.targetNumber}')
             .join(', '),
+      );
+
+      final postTutorial = extra.skip(2);
+      expect(
+        postTutorial.every((level) => level.startIndices.length >= 2),
+        isTrue,
+        reason: 'Stages after the Joker tutorials should be open boards',
+      );
+      expect(
+        extra
+            .skip(2)
+            .take(8)
+            .every(
+              (level) => level.tiles.where((tile) => tile.isJoker).length >= 2,
+            ),
+        isTrue,
+        reason: 'Later Joker stages should offer a Joker on both routes',
       );
     });
 
@@ -325,6 +356,25 @@ void main() {
       final solution = PathSolver.findSolution(generated);
       expect(solution, isNotNull);
       expect(solution!.isNotEmpty, true);
+    });
+
+    test('Generated boards keep at most one wall beside the target', () {
+      final random = Random(20260926);
+      for (var attempt = 0; attempt < 20; attempt++) {
+        final generated = LevelGenerator.generate(
+          gridSize: 7,
+          includeWalls: true,
+          wallCount: 12,
+          minTarget: 20,
+          maxTarget: 40,
+          random: random,
+        );
+        final adjacentWalls = generated
+            .orthogonalNeighborIndices(generated.centerIndex)
+            .where((index) => generated.tiles[index].isWall)
+            .length;
+        expect(adjacentWalls, lessThanOrEqualTo(1));
+      }
     });
 
     test('LevelGenerator gives zero the same digit pool as 1 through 9', () {

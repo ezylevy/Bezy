@@ -706,13 +706,28 @@ class CampaignLevels {
   }) {
     final total = gridSize * gridSize;
     final center = total ~/ 2;
+    final centerNeighbors = <int>{
+      center - gridSize,
+      center + gridSize,
+      center - 1,
+      center + 1,
+    };
+    var keptCenterWall = false;
+    final effectiveWallIndices = <int>[];
+    for (final index in wallIndices) {
+      if (centerNeighbors.contains(index)) {
+        if (keptCenterWall) continue;
+        keptCenterWall = true;
+      }
+      effectiveWallIndices.add(index);
+    }
     final defaultStarts = LevelModel.calculateDefaultStartPoints(gridSize);
     final specialPlacements = _spreadSpecialCells(
       id: id,
       gridSize: gridSize,
       center: center,
       blockedIndices: {
-        ...wallIndices,
+        ...effectiveWallIndices,
         ...trampolineIndices,
         ...smartGateIndices,
         ...defaultStarts,
@@ -741,7 +756,7 @@ class CampaignLevels {
             value: targetNumber,
           ),
         );
-      } else if (wallIndices.contains(i)) {
+      } else if (effectiveWallIndices.contains(i)) {
         tiles.add(
           TileModel(index: i, row: r, col: c, type: TileType.wall, value: 0),
         );
@@ -768,8 +783,15 @@ class CampaignLevels {
           ),
         );
       } else if (specialPlacements.containsKey(i)) {
+        final type = specialPlacements[i]!;
         tiles.add(
-          TileModel(index: i, row: r, col: c, type: specialPlacements[i]!),
+          TileModel(
+            index: i,
+            row: r,
+            col: c,
+            type: type,
+            value: type == TileType.lonely ? values[i] : 0,
+          ),
         );
       } else if (defaultStarts.contains(i)) {
         tiles.add(

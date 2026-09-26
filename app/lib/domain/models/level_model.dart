@@ -62,6 +62,7 @@ class LevelModel {
   /// visited during the current attempt. Visit history survives backtracking.
   bool isLonelyUnlocked(int index, Set<int> visitedIndices) {
     if (!tiles[index].isLonely) return true;
+    if (visitedIndices.contains(index)) return true;
     final neighbors = orthogonalNeighborIndices(index);
     return neighbors.length == 4 && neighbors.every(visitedIndices.contains);
   }

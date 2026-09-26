@@ -11,12 +11,55 @@ import 'package:bezy/domain/models/level_model.dart';
 import 'package:bezy/domain/models/tile_model.dart';
 import 'package:bezy/l10n/app_localizations.dart';
 import 'package:bezy/main.dart';
+import 'package:bezy/ui/components/bezy_message_dialog.dart';
 import 'package:bezy/ui/features/game/game_screen.dart';
 import 'package:bezy/ui/features/game/components/board_widget.dart';
 import 'package:bezy/ui/features/game/components/stats_bar.dart';
 import 'package:bezy/ui/features/game/components/tile_factory.dart';
 
 void main() {
+  testWidgets('Framed messages grow vertically without leaking content', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const message =
+        'This is a longer gameplay explanation that needs enough room inside '
+        'the illustrated message frame. It must remain readable without text '
+        'crossing the frame or covering the confirmation button.';
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showBezyMessageDialog(context, message: message),
+            child: const Text('Show message'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show message'));
+    await tester.pumpAndSettle();
+    final frameSize = tester.getSize(
+      find.byKey(const ValueKey('bezy-message-frame')),
+    );
+    expect(frameSize.height, greaterThan(frameSize.width / 1.5));
+    expect(find.text(message), findsOneWidget);
+    expect(find.text('Got it'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('First launch asks for a language and persists English', (
     WidgetTester tester,
   ) async {
@@ -125,6 +168,12 @@ void main() {
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('stage-node-1'))).dy,
       greaterThan(0),
+    );
+    expect(
+      tester.getCenter(find.byKey(const ValueKey('stage-node-6'))).dx,
+      greaterThan(
+        tester.getCenter(find.byKey(const ValueKey('stage-node-10'))).dx,
+      ),
     );
   });
 
@@ -812,6 +861,17 @@ void main() {
     await tapTile(8);
     state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
     expect(state.currentPath, [3, 8]);
+    expect(state.visitedIndices, contains(8));
+    final lonelyCellAssets = tester
+        .widgetList<Image>(
+          find.descendant(
+            of: find.byKey(const ValueKey('tile-8')),
+            matching: find.byType(Image),
+          ),
+        )
+        .map((image) => (image.image as AssetImage).assetName);
+    expect(lonelyCellAssets, isNot(contains('assets/special/lonely_cell.png')));
+    expect(lonelyCellAssets, contains('assets/numbers/set1/0pressed.png'));
   });
 
   testWidgets('Special and gate tiles use supplied PNG artwork', (
@@ -1025,6 +1085,8 @@ void main() {
     expect(state.currentCellIndex, 7);
     expect(state.currentSum, 3);
     expect(state.moves, 2);
+    expect(find.byKey(const ValueKey('runner-at-7')), findsOneWidget);
+    expect(find.byKey(const ValueKey('runner-at-17')), findsNothing);
   });
 
   testWidgets('A normal-looking legacy gate accepts an upward move', (
@@ -1128,7 +1190,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('0:59'), findsOneWidget);
 
-    for (final index in [2, 9, 8, 15, 14, 21]) {
+    for (final index in [2, 9, 8, 15, 14]) {
       await tester.tap(find.byKey(ValueKey('tile-$index')));
       await tester.pump();
     }
@@ -1137,8 +1199,8 @@ void main() {
     await tester.pump();
 
     final state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
-    expect(state.currentPath.last, 21);
-    expect(state.jokerChoices[21], 2);
+    expect(state.currentPath.last, 14);
+    expect(state.jokerChoices[14], 2);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
