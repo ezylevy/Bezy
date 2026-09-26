@@ -79,7 +79,7 @@ void main() {
     expect(storage.localeCode, 'en');
     expect(find.text('BEZY'), findsOneWidget);
     expect(find.text('Journey'), findsOneWidget);
-    expect(find.text('Free Play'), findsOneWidget);
+    expect(find.text('Free Play'), findsNothing);
     expect(
       Directionality.of(tester.element(find.text('Journey'))),
       TextDirection.ltr,
@@ -104,7 +104,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('מסע השלבים'), findsOneWidget);
-    expect(find.text('משחק חופשי'), findsOneWidget);
+    expect(find.text('משחק חופשי'), findsNothing);
     expect(
       Directionality.of(tester.element(find.text('מסע השלבים'))),
       TextDirection.rtl,
@@ -249,7 +249,7 @@ void main() {
 
     expect(find.text('BEZY'), findsOneWidget);
     expect(find.text('Journey'), findsOneWidget);
-    expect(find.text('Free Play'), findsOneWidget);
+    expect(find.text('Free Play'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

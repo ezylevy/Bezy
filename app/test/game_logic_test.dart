@@ -246,6 +246,29 @@ void main() {
       }
     });
 
+    test(
+      'DFS can rediscover solutions without the campaign solution cache',
+      () {
+        final allLevels = CampaignLevels.getAllLevels();
+        for (final index in List.generate(26, (offset) => offset + 24)) {
+          final level = allLevels[index];
+          final knownLength = level.solutionRoutes.first.length;
+          final discovered = PathSolver.findSolution(
+            level,
+            useKnownSolutions: false,
+            maxDepth: knownLength,
+          );
+
+          expect(
+            discovered,
+            isNotNull,
+            reason: 'DFS must independently solve campaign stage ${index + 1}',
+          );
+          expect(discovered!.last, level.centerIndex);
+        }
+      },
+    );
+
     test('The campaign includes the Lonely Cell', () {
       expect(
         CampaignLevels.getAllLevels().any(
@@ -313,6 +336,13 @@ void main() {
             ),
         isTrue,
         reason: 'Later Joker stages should offer a Joker on both routes',
+      );
+      expect(
+        extra
+            .skip(4)
+            .every((level) => level.tiles.every((tile) => !tile.isWall)),
+        isTrue,
+        reason: 'Stages 25-50 should be open boards, not wall corridors',
       );
     });
 

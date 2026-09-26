@@ -17,6 +17,7 @@ class LevelModel {
   final int? challengeTimeSeconds;
   final String description;
   final List<String> hints;
+  final List<List<int>> solutionRoutes;
 
   const LevelModel({
     required this.id,
@@ -32,6 +33,7 @@ class LevelModel {
     this.challengeTimeSeconds,
     this.description = '',
     this.hints = const [],
+    this.solutionRoutes = const [],
   });
 
   int get totalCells => gridSize * gridSize;
@@ -118,6 +120,7 @@ class LevelModel {
     int? challengeTimeSeconds,
     String? description,
     List<String>? hints,
+    List<List<int>>? solutionRoutes,
   }) {
     return LevelModel(
       id: id ?? this.id,
@@ -133,6 +136,7 @@ class LevelModel {
       challengeTimeSeconds: challengeTimeSeconds ?? this.challengeTimeSeconds,
       description: description ?? this.description,
       hints: hints ?? this.hints,
+      solutionRoutes: solutionRoutes ?? this.solutionRoutes,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/audio/sound_service.dart';
+import '../../../core/config/app_features.dart';
 import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/game_mode.dart';
@@ -232,23 +233,25 @@ class _HomeScreenState extends State<HomeScreen> {
             _refresh();
           },
         ),
-        const SizedBox(height: 14),
-        _MenuCard(
-          title: strings.freePlayTitle,
-          subtitle: strings.freePlaySubtitle,
-          icon: Icons.casino_rounded,
-          accentColor: AppTheme.pathCyan,
-          onTap: () {
-            widget.sound.tileTap();
-            showDialog(
-              context: context,
-              builder: (context) => CustomGameDialog(
-                storage: widget.storage,
-                sound: widget.sound,
-              ),
-            );
-          },
-        ),
+        if (AppFeatures.freePlayEnabled) ...[
+          const SizedBox(height: 14),
+          _MenuCard(
+            title: strings.freePlayTitle,
+            subtitle: strings.freePlaySubtitle,
+            icon: Icons.casino_rounded,
+            accentColor: AppTheme.pathCyan,
+            onTap: () {
+              widget.sound.tileTap();
+              showDialog(
+                context: context,
+                builder: (context) => CustomGameDialog(
+                  storage: widget.storage,
+                  sound: widget.sound,
+                ),
+              );
+            },
+          ),
+        ],
         const SizedBox(height: 14),
         _MenuCard(
           title: strings.howToPlay,

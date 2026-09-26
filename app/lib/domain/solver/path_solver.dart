@@ -2,10 +2,32 @@ import '../models/level_model.dart';
 
 /// Intelligent pathfinding solver and hint engine.
 class PathSolver {
-  /// Finds the first valid route from any of the start points to the center target.
-  static List<int>? findSolution(LevelModel level) {
+  /// Finds the first valid route from any start point to the center target.
+  ///
+  /// Campaign levels may contain a previously discovered solution. It is used
+  /// as a fast, validated cache for hints. Set [useKnownSolutions] to false to
+  /// force a fresh DFS discovery, for example when authoring a level.
+  static List<int>? findSolution(
+    LevelModel level, {
+    bool useKnownSolutions = true,
+    int maxDepth = 40,
+    int maxVisitedStates = 500000,
+  }) {
+    if (useKnownSolutions) {
+      for (final route in level.solutionRoutes) {
+        if (_isValidConfiguredRoute(level, route)) {
+          return List<int>.from(route);
+        }
+      }
+    }
+
     for (final startPoint in level.startIndices) {
-      final route = findRouteFromStart(level, startPoint);
+      final route = findRouteFromStart(
+        level,
+        startPoint,
+        maxDepth: maxDepth,
+        maxVisitedStates: maxVisitedStates,
+      );
       if (route != null) {
         return route;
       }
@@ -13,8 +35,47 @@ class PathSolver {
     return null;
   }
 
+  static bool _isValidConfiguredRoute(LevelModel level, List<int> route) {
+    if (route.isEmpty ||
+        !level.startIndices.contains(route.first) ||
+        route.last != level.centerIndex ||
+        route.toSet().length != route.length) {
+      return false;
+    }
+
+    var sum = 0;
+    final visited = <int>{};
+    for (var position = 0; position < route.length; position++) {
+      final index = route[position];
+      if (index < 0 || index >= level.tiles.length) return false;
+      final tile = level.tiles[index];
+      if (!tile.isWalkable || !level.canEnterTile(index, sum, visited)) {
+        return false;
+      }
+      if (position > 0) {
+        final previous = route[position - 1];
+        final rowDistance =
+            (index ~/ level.gridSize - previous ~/ level.gridSize).abs();
+        final columnDistance =
+            (index % level.gridSize - previous % level.gridSize).abs();
+        final teleported =
+            level.tiles[previous].isTrampoline &&
+            level.pairedTeleportIndex(previous) == index;
+        if (rowDistance + columnDistance != 1 && !teleported) return false;
+      }
+      if (!tile.isTarget) sum = tile.applyValue(sum);
+      visited.add(index);
+    }
+    return sum == level.targetNumber;
+  }
+
   /// Finds a valid route starting from a specific [startIndex].
-  static List<int>? findRouteFromStart(LevelModel level, int startIndex) {
+  static List<int>? findRouteFromStart(
+    LevelModel level,
+    int startIndex, {
+    int maxDepth = 40,
+    int maxVisitedStates = 500000,
+  }) {
     final startTile = level.tiles[startIndex];
     if (!startTile.canEnter(0)) return null;
 
@@ -23,6 +84,8 @@ class PathSolver {
       level: level,
       currentPath: [startIndex],
       currentSum: initialSum,
+      maxDepth: maxDepth,
+      maxVisitedStates: maxVisitedStates,
     );
   }
 
@@ -34,6 +97,7 @@ class PathSolver {
     required int currentSum,
     Set<int>? visitedIndices,
     int maxDepth = 40,
+    int maxVisitedStates = 500000,
   }) {
     if (currentPath.isEmpty) return findSolution(level);
 
@@ -45,6 +109,8 @@ class PathSolver {
     final canReduceTotal = level.tiles.any(
       (tile) => tile.isMirror || tile.isZero,
     );
+    final deadStates = <(int, int, BigInt)>{};
+    var visitedStateCount = 0;
 
     List<int>? bestRoute;
 
@@ -56,6 +122,15 @@ class PathSolver {
       if (bestRoute != null) return;
       if (pathSum > target && !canReduceTotal) return;
       if (path.length > maxDepth) return;
+      if (visitedStateCount >= maxVisitedStates) return;
+
+      final visitedSignature = visitHistory.fold(
+        BigInt.zero,
+        (signature, index) => signature | (BigInt.one << index),
+      );
+      final state = (currentIndex, pathSum, visitedSignature);
+      if (!deadStates.add(state)) return;
+      visitedStateCount++;
 
       if (currentIndex == centerIndex) {
         if (pathSum == target) {
@@ -67,7 +142,9 @@ class PathSolver {
       final r = currentIndex ~/ n;
       final c = currentIndex % n;
 
-      // 4 orthogonal directions: right, down, left, up
+      // Generate all legal moves, then try the most promising ones first.
+      // This preserves depth-first search semantics while avoiding the huge
+      // right/down/left/up branching penalty on open campaign boards.
       const directions = [
         [0, 1],
         [1, 0],
@@ -75,6 +152,8 @@ class PathSolver {
         [-1, 0],
       ];
 
+      final candidates =
+          <({int index, int newSum, int? teleportDestination, int score})>[];
       for (final dir in directions) {
         final nr = r + dir[0];
         final nc = c + dir[1];
@@ -88,6 +167,7 @@ class PathSolver {
         if (!level.canEnterTile(nextIndex, pathSum, visitHistory)) continue;
 
         final newSum = nextTile.applyValue(pathSum);
+        if (newSum > target && !canReduceTotal) continue;
         final teleportDestination = nextTile.isTrampoline
             ? level.pairedTeleportIndex(nextIndex)
             : null;
@@ -102,6 +182,33 @@ class PathSolver {
             })) {
           continue;
         }
+        final landingIndex = teleportDestination ?? nextIndex;
+        if (landingIndex == centerIndex && newSum != target) continue;
+
+        final landingRow = landingIndex ~/ n;
+        final landingColumn = landingIndex % n;
+        final centerRow = centerIndex ~/ n;
+        final centerColumn = centerIndex % n;
+        final distance =
+            (landingRow - centerRow).abs() +
+            (landingColumn - centerColumn).abs();
+        final sumGap = (target - newSum).abs();
+        final score = landingIndex == centerIndex
+            ? -1
+            : distance * 100 + sumGap;
+        candidates.add((
+          index: nextIndex,
+          newSum: newSum,
+          teleportDestination: teleportDestination,
+          score: score,
+        ));
+      }
+
+      candidates.sort((a, b) => a.score.compareTo(b.score));
+      for (final candidate in candidates) {
+        final nextIndex = candidate.index;
+        final newSum = candidate.newSum;
+        final teleportDestination = candidate.teleportDestination;
         final nextWasNew = visitHistory.add(nextIndex);
         pathIndices.add(nextIndex);
         var destinationWasNew = false;

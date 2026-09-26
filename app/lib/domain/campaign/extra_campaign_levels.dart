@@ -113,6 +113,7 @@ class ExtraCampaignLevels {
           'בחרו את פעולת הג׳וקר הנכונה והגיעו ליעד במספר הצעדים הקטן ביותר.',
       route: route,
       alternateRoute: offset >= 2 ? alternateRoute : null,
+      openBoard: offset >= 4,
       specials: specials,
       jokerOptions: [2 + offset % 3, 5 + offset % 4],
       timerSeconds: 60,
@@ -154,6 +155,7 @@ class ExtraCampaignLevels {
       description: 'כניסה לקרח מחליקה את השחקן אוטומטית עד לתא העצירה המואר.',
       route: route,
       alternateRoute: alternateRoute,
+      openBoard: true,
       specials: specials,
       jokerOptions: [3, 6 + offset % 3],
       timerSeconds: 45,
@@ -192,6 +194,7 @@ class ExtraCampaignLevels {
           'שלבו ג׳וקר, קרח ומכניקות מאסטר והגיעו ליעד לפני שהזמן נגמר.',
       route: route,
       alternateRoute: alternateRoute,
+      openBoard: true,
       specials: specials,
       jokerOptions: [2 + offset % 3, 7 + offset % 3],
       timerSeconds: 30,
@@ -208,6 +211,7 @@ class ExtraCampaignLevels {
     required String description,
     required List<int> route,
     List<int>? alternateRoute,
+    bool openBoard = false,
     required Map<int, TileType> specials,
     required List<int> jokerOptions,
     required int timerSeconds,
@@ -238,17 +242,19 @@ class ExtraCampaignLevels {
         : LevelModel.calculateDefaultStartPoints(
             gridSize,
           ).where((index) => !effectiveSpecials.containsKey(index)).toSet();
-    final walkableIndices = <int>{
-      ...routeSet,
-      ...centerNeighbors,
-      ...startIndices,
-    };
+    final walkableIndices = openBoard
+        ? Set<int>.from(
+            List<int>.generate(gridSize * gridSize, (index) => index),
+          )
+        : <int>{...routeSet, ...centerNeighbors, ...startIndices};
     final values = <int, int>{};
     final clonePosition = route.indexWhere(
       (index) => effectiveSpecials[index] == TileType.clone,
     );
     final combinesMirrorAndClone =
         clonePosition >= 0 && effectiveSpecials.containsValue(TileType.mirror);
+    final hasMirrorWithoutClone =
+        clonePosition < 0 && effectiveSpecials.containsValue(TileType.mirror);
     var sum = 0;
     for (var position = 0; position < route.length - 1; position++) {
       final index = route[position];
@@ -258,6 +264,10 @@ class ExtraCampaignLevels {
       // targets within the supplied 8-88 result-art range.
       final value = combinesMirrorAndClone && position < clonePosition
           ? 0
+          : openBoard
+          ? hasMirrorWithoutClone
+                ? (seed + position) % 2
+                : (seed + position) % 2 + 1
           : (seed + position) % 2;
       values[index] = type == null ? value : 0;
       switch (type) {
@@ -323,7 +333,7 @@ class ExtraCampaignLevels {
           row: row,
           col: col,
           type: TileType.start,
-          value: values[index] ?? (seed + index) % 4 + 1,
+          value: values[index] ?? (seed + index) % 5 + 1,
         );
       }
       final type = effectiveSpecials[index] ?? TileType.number;
@@ -332,7 +342,9 @@ class ExtraCampaignLevels {
         row: row,
         col: col,
         type: type,
-        value: values[index] ?? (seed + index) % 4 + 1,
+        value:
+            values[index] ??
+            (openBoard ? (seed + index) % 5 + 5 : (seed + index) % 4 + 1),
         metadata: type == TileType.joker ? {'options': jokerOptions} : const {},
       );
     });
@@ -352,6 +364,7 @@ class ExtraCampaignLevels {
       challengeTimeSeconds: timerSeconds,
       description: description,
       hints: const [],
+      solutionRoutes: [route, ?alternateRoute],
     );
   }
 

@@ -88,7 +88,15 @@
 - Made teleport movement place the runner immediately on the destination door.
 - Made illustrated feedback dialogs grow with their message while retaining a
   safe scroll area on small screens.
-- Reworked stages 23-50 around two mirrored playable routes instead of a single
-  wall corridor; later Joker stages now place a Joker on both routes.
+- Kept stages 21-24 as progressive tutorials, with two route choices after the
+  first two Joker explanations. Stages 25-50 are open, wall-free boards whose
+  difficulty comes from choices, timers, targets, and combined special cells.
 - Normalized the iOS bundle identifier to `com.ezylevy.bezy`. A signed iOS IPA
   still requires an Apple development team and a macOS/Xcode build.
+- Hid Free Play from V1 navigation behind `AppFeatures.freePlayEnabled` while
+  preserving its implementation for a later release.
+- Upgraded the path solver with heuristic move ordering, repeated-state
+  pruning, a search budget, and an explicit cache-free DFS verification mode.
+- Normalized the Android production identity to `com.ezylevy.bezy`, added a
+  release-keystore template, marked iOS as using no non-exempt encryption, and
+  prepared store copy, privacy text, and release/submission checklists.
