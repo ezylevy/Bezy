@@ -75,6 +75,6 @@ account, special hardware, purchases, or external service is required.
 
 - Public support URL
 - Public privacy-policy URL
-- Support email
+- Support email: `naraelapp@gmail.com`
 - Copyright holder/year
 - Distribution countries and price (recommended initial choice: free)

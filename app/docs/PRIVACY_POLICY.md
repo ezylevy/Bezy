@@ -1,6 +1,6 @@
 # BEZY Privacy Policy
 
-Effective date: 26 September 2026
+Effective date: 28 September 2026
 
 BEZY is an offline puzzle game created by Ezy Levy. This policy explains how
 the application handles information.
@@ -31,7 +31,8 @@ privacy declarations will be updated before the changed version is released.
 
 ## Contact
 
-For privacy or support questions, contact: **[INSERT PUBLIC SUPPORT EMAIL]**.
+For privacy or support questions, contact:
+[naraelapp@gmail.com](mailto:naraelapp@gmail.com).
 
-Before submission, publish this policy at a stable public HTTPS URL and replace
-the contact placeholder. Both stores should use that public URL.
+Before submission, publish this policy at a stable public HTTPS URL. Both stores
+should use that public URL.

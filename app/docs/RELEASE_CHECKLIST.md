@@ -1,6 +1,6 @@
 # BEZY V1 Release Checklist
 
-Last updated: 26 September 2026
+Last updated: 28 September 2026
 
 ## Already prepared in the repository
 
@@ -17,18 +17,19 @@ Last updated: 26 September 2026
 
 ## Owner actions required before a store build
 
-- [ ] Approve a final BEZY app icon. The repository still contains the default
-  Flutter launcher icon, which is not suitable for publication.
+- [x] Final BEZY master icon approved and generated for Android, iOS, and the
+  512×512 Play Store listing.
 - [ ] Produce truthful screenshots from stable builds (recommended: home,
   world map, normal board, Joker/teleport board, and victory). Apple accepts
   1–10 screenshots per device class; Google Play also requires preview assets.
 - [ ] Produce a Google Play feature graphic and localized screenshots if desired.
-- [ ] Replace the support-email placeholder in `PRIVACY_POLICY.md`, publish it
-  at a stable public HTTPS URL, and create a public support page/URL.
+- [ ] Publish `docs/privacy-policy.html` and `docs/support.html` at stable public
+  HTTPS URLs. The support email is `naraelapp@gmail.com`.
 - [ ] Confirm ownership/licensing for every image and sound asset.
 - [ ] Decide whether the app is listed as “Made for Kids”. Do not select it
   casually: Apple treats this as a lasting category commitment. Complete both
-  stores' target-audience and content-rating questionnaires truthfully.
+  stores' target-audience and content-rating questionnaires truthfully. See
+  `docs/CHILDREN_AND_AGE_RATING.md`.
 
 ## Android / Google Play
 
@@ -37,9 +38,10 @@ Last updated: 26 September 2026
 2. Reserve package `com.ezylevy.bezy`. A package name cannot be changed after
    the first Play release.
 3. Generate a private upload keystore whose certificate remains valid beyond
-   22 October 2033. Back it up securely outside the repository.
-4. Copy `android/key.properties.example` to `android/key.properties`, fill in
-   the local path, alias, and passwords, then run:
+   22 October 2033. Run `powershell -ExecutionPolicy Bypass -File
+   .\tool\create_android_upload_key.ps1`, choose a password of at least 12
+   characters, and back up both generated files securely outside the repository.
+4. After `android/key.properties` and the keystore exist, run:
 
    ```powershell
    flutter clean

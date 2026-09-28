@@ -100,3 +100,8 @@
 - Normalized the Android production identity to `com.ezylevy.bezy`, added a
   release-keystore template, marked iOS as using no non-exempt encryption, and
   prepared store copy, privacy text, and release/submission checklists.
+- Replaced the default Flutter launcher artwork with the approved BEZY icon on
+  Android and iOS, and generated a dedicated 512×512 Play Store asset.
+- Added ready-to-host privacy/support pages for `naraelapp@gmail.com`, exact
+  Apple privacy answers, per-app children/age-rating guidance, a secure
+  upload-key creation tool, and a physical-device crash-capture tool.
