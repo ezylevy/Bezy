@@ -31,6 +31,12 @@ class AppLocalizations {
   String stars(int count) => _value(en: '$count stars', he: '$count כוכבים');
   String get haptics => _value(en: 'Haptic feedback', he: 'רטט הפטי');
   String get sounds => _value(en: 'Sounds', he: 'צלילים');
+  String get privacyPolicy =>
+      _value(en: 'Privacy policy', he: 'מדיניות פרטיות');
+  String get privacyOpenError => _value(
+    en: 'Could not open the privacy policy.',
+    he: 'לא ניתן לפתוח את מדיניות הפרטיות.',
+  );
   String get campaignTitle => _value(en: 'Journey', he: 'מסע השלבים');
   String get campaignSubtitle => _value(
     en: 'Explore worlds with walls, launch pads, and smart gates',

@@ -6,7 +6,7 @@ networking, or a new third-party SDK is added.
 
 ## App Store Connect → App Privacy
 
-- **Privacy Policy URL:** `[PUBLISH docs/privacy-policy.html AND INSERT HTTPS URL]`
+- **Privacy Policy URL:** `https://ezylevy.github.io/Bezy/privacy-policy.html`
 - **User Privacy Choices URL:** leave blank (optional; no remote user data exists)
 - **Does this app or its third-party partners collect data?** No
 - Select **“No, we do not collect data from this app”**, save, and publish the
@@ -20,7 +20,7 @@ not transmitted off the device.
 ## Other related App Store fields
 
 - **Support email:** `naraelapp@gmail.com`
-- **Support URL:** `[PUBLISH docs/support.html AND INSERT HTTPS URL]`
+- **Support URL:** `https://ezylevy.github.io/Bezy/support.html`
 - **Marketing URL:** optional; leave blank until a public site exists
 - **App access:** no login or review account required
 - **Export compliance:** the app does not implement non-exempt encryption;

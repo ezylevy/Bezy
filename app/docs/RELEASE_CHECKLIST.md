@@ -17,14 +17,15 @@ Last updated: 28 September 2026
 
 ## Owner actions required before a store build
 
-- [x] Final BEZY master icon approved and generated for Android, iOS, and the
-  512×512 Play Store listing.
+- [ ] Replace the temporary launcher artwork with the final owner-supplied
+  Android, iOS, and 512×512 Play Store icons.
 - [ ] Produce truthful screenshots from stable builds (recommended: home,
   world map, normal board, Joker/teleport board, and victory). Apple accepts
   1–10 screenshots per device class; Google Play also requires preview assets.
 - [ ] Produce a Google Play feature graphic and localized screenshots if desired.
-- [ ] Publish `docs/privacy-policy.html` and `docs/support.html` at stable public
-  HTTPS URLs. The support email is `naraelapp@gmail.com`.
+- [ ] Push the Pages workflow, enable GitHub Pages with GitHub Actions, and
+  verify `https://ezylevy.github.io/Bezy/privacy-policy.html` and `/support.html`.
+  The support email is `naraelapp@gmail.com`.
 - [ ] Confirm ownership/licensing for every image and sound asset.
 - [ ] Decide whether the app is listed as “Made for Kids”. Do not select it
   casually: Apple treats this as a lasting category commitment. Complete both

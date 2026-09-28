@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/audio/sound_service.dart';
 import '../../../core/config/app_features.dart';
@@ -20,7 +21,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static final Uri _privacyPolicyUri = Uri.parse(
+    'https://ezylevy.github.io/Bezy/privacy-policy.html',
+  );
+
   void _refresh() => setState(() {});
+
+  Future<void> _openPrivacyPolicy(AppLocalizations strings) async {
+    final opened = await launchUrl(
+      _privacyPolicyUri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.privacyOpenError)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Row(
           children: [
+            IconButton(
+              icon: const Icon(
+                Icons.privacy_tip_outlined,
+                color: AppTheme.textMuted,
+              ),
+              tooltip: strings.privacyPolicy,
+              onPressed: () => _openPrivacyPolicy(strings),
+            ),
             IconButton(
               icon: Icon(
                 isHaptics ? Icons.vibration_rounded : Icons.smartphone_rounded,
