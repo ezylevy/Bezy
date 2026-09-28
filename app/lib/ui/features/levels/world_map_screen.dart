@@ -412,9 +412,13 @@ class _WorldMapScreenState extends State<WorldMapScreen>
                     ? InteractiveViewer(
                         transformationController: _mapController,
                         constrained: false,
-                        minScale: 0.18,
+                        // The canvas is already viewport-wide. Keeping the
+                        // minimum at 1 prevents shrinking it below the screen.
+                        minScale: 1,
                         maxScale: 3.5,
-                        boundaryMargin: EdgeInsets.all(viewport.longestSide),
+                        // Keep at least one edge of the full-width/tall canvas
+                        // pinned to every viewport edge while panning.
+                        boundaryMargin: EdgeInsets.zero,
                         child: _buildMapCanvas(
                           mapWidth,
                           mapHeight,

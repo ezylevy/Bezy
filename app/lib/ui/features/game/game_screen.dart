@@ -857,12 +857,15 @@ class _GameScreenState extends State<GameScreen>
   Future<void> _animateSolution(List<int> solution) async {
     if (solution.isEmpty) return;
     final playbackId = ++_solutionPlaybackId;
+    final level = _gameState.level;
+    _countdownTimer?.cancel();
     setState(() {
-      _gameState = _gameState.copyWith(
-        activeSolutionRoute: solution,
-        solverStepIndex: 0,
-        clearHint: true,
-      );
+      // A guided solution is a fresh demonstration. Clear the player's
+      // pressed path and every derived board effect before drawing it.
+      _gameState = GameState(
+        level: level,
+      ).copyWith(activeSolutionRoute: solution, solverStepIndex: 0);
+      _remainingSeconds = level.challengeTimeSeconds;
     });
 
     for (var step = 1; step < solution.length; step++) {
@@ -956,9 +959,12 @@ class _GameScreenState extends State<GameScreen>
   Widget build(BuildContext context) {
     final level = _gameState.level;
     final strings = AppLocalizations.of(context);
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: isLandscape ? 48 : null,
         title: Column(
           children: [
             Text(
@@ -967,11 +973,17 @@ class _GameScreenState extends State<GameScreen>
                 level.title,
                 gridSize: level.gridSize,
               ),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: isLandscape ? 17 : 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
               strings.worldTitle(level.worldId, level.worldTitle),
-              style: const TextStyle(fontSize: 16, color: AppTheme.textMuted),
+              style: TextStyle(
+                fontSize: isLandscape ? 12 : 16,
+                color: AppTheme.textMuted,
+              ),
             ),
           ],
         ),
@@ -994,14 +1006,10 @@ class _GameScreenState extends State<GameScreen>
             final isLandscape = constraints.maxWidth > constraints.maxHeight;
 
             if (isLandscape) {
-              final infoWidth = min(285.0, constraints.maxWidth * 0.34);
+              final infoWidth = min(270.0, constraints.maxWidth * 0.32);
               return Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [Expanded(child: _buildBoardArea())],
-                    ),
-                  ),
+                  Expanded(child: _buildBoardArea()),
                   SizedBox(
                     width: infoWidth,
                     child: Column(
@@ -1010,7 +1018,7 @@ class _GameScreenState extends State<GameScreen>
                           child: StatsBar(state: _panelState, landscape: true),
                         ),
                         if (_usesChallengeTimer) _buildChallengeStrip(),
-                        _buildBottomControls(wrap: true),
+                        _buildBottomControls(compact: true),
                       ],
                     ),
                   ),
@@ -1113,18 +1121,20 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  Widget _buildBottomControls({bool wrap = false}) {
+  Widget _buildBottomControls({bool compact = false}) {
     final strings = AppLocalizations.of(context);
     final controls = <Widget>[
       _ControlButton(
         icon: Icons.undo_rounded,
         label: strings.undo,
         onTap: _gameState.currentPath.isNotEmpty ? _undoStep : null,
+        compact: compact,
       ),
       _ControlButton(
         icon: Icons.restart_alt_rounded,
         label: strings.reset,
         onTap: _gameState.currentPath.isNotEmpty ? _resetGame : null,
+        compact: compact,
       ),
       if (widget.mode.allowsHints)
         _ControlButton(
@@ -1132,6 +1142,7 @@ class _GameScreenState extends State<GameScreen>
           label: strings.smartHint,
           color: AppTheme.gold,
           onTap: _requestHint,
+          compact: compact,
         ),
       if (widget.mode.allowsSolutions)
         _ControlButton(
@@ -1139,27 +1150,23 @@ class _GameScreenState extends State<GameScreen>
           label: strings.guidedSolution,
           color: AppTheme.pathCyan,
           onTap: _openSolver,
+          compact: compact,
         ),
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 4 : 16,
+        vertical: compact ? 4 : 12,
+      ),
       decoration: const BoxDecoration(
         color: AppTheme.surfaceDark,
         border: Border(top: BorderSide(color: AppTheme.cardBorder)),
       ),
-      child: wrap
-          ? Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              runAlignment: WrapAlignment.center,
-              spacing: 12,
-              runSpacing: 16,
-              children: controls,
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: controls,
-            ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: controls,
+      ),
     );
   }
 
@@ -1223,12 +1230,14 @@ class _ControlButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   final Color color;
+  final bool compact;
 
   const _ControlButton({
     required this.icon,
     required this.label,
     this.onTap,
     this.color = AppTheme.textPrimary,
+    this.compact = false,
   });
 
   @override
@@ -1240,18 +1249,28 @@ class _ControlButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 3 : 10,
+          vertical: compact ? 2 : 6,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: activeColor, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: activeColor,
+            Icon(icon, color: activeColor, size: compact ? 20 : 24),
+            SizedBox(height: compact ? 1 : 4),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: compact ? 54 : 90),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: compact ? 11 : 15,
+                    fontWeight: FontWeight.bold,
+                    color: activeColor,
+                  ),
+                ),
               ),
             ),
           ],

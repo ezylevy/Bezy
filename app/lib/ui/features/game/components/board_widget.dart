@@ -99,7 +99,9 @@ class _BoardWidgetState extends State<BoardWidget> {
             ? constraints.maxWidth
             : constraints.maxHeight;
 
-        final boardSize = maxSide.clamp(280.0, 480.0);
+        // Landscape phones can leave less than 280 logical pixels below the
+        // app bar. Never force the square beyond its actual constraints.
+        final boardSize = maxSide.clamp(0.0, 480.0);
 
         return Center(
           child: SizedBox(

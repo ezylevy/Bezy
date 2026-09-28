@@ -157,6 +157,8 @@ void main() {
     final viewer = tester.widget<InteractiveViewer>(
       find.byType(InteractiveViewer),
     );
+    expect(viewer.minScale, 1);
+    expect(viewer.boundaryMargin, EdgeInsets.zero);
     expect(
       viewer.transformationController!.value.getMaxScaleOnAxis(),
       greaterThan(1),
@@ -339,6 +341,10 @@ void main() {
       lessThan(tester.getCenter(find.byType(StatsBar)).dx),
     );
     expect(find.byKey(const ValueKey('bezy-board-mark')), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(BoardWidget)).height,
+      lessThanOrEqualTo(tester.view.physicalSize.height),
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -729,10 +735,16 @@ void main() {
     );
     await tester.pump();
 
+    final attemptedStart = level.startIndices.first;
+    await tester.tap(find.byKey(ValueKey('tile-$attemptedStart')));
+    await tester.pump();
+    var boardState = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
+    expect(boardState.currentPath, isNotEmpty);
+
     await tester.tap(find.text('Solution'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    var boardState = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
+    boardState = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
     expect(boardState.activeSolutionRoute, isNotNull);
     expect(boardState.solverStepIndex, 0);
     var panelState = tester.widget<StatsBar>(find.byType(StatsBar)).state;
@@ -747,6 +759,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     boardState = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
+    expect(boardState.currentPath, isEmpty);
     expect(boardState.activeSolutionRoute, isNotNull);
     expect(
       boardState.solverStepIndex,

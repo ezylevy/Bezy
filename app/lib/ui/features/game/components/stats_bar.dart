@@ -130,7 +130,9 @@ class StatsBar extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = math.min(constraints.maxWidth - 8, 280.0);
-        final height = math.max(190.0, constraints.maxHeight);
+        // Respect the height supplied by the landscape layout. A hard minimum
+        // here used to overflow and stretch the panel on short phone screens.
+        final height = constraints.maxHeight.clamp(0.0, 520.0);
         return Center(
           child: SizedBox(
             width: width,

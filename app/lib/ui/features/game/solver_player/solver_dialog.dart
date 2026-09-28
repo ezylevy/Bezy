@@ -270,191 +270,197 @@ class _SolverDialogState extends State<SolverDialog> {
         borderRadius: BorderRadius.circular(20),
         side: const BorderSide(color: AppTheme.cardBorder, width: 1.5),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.gold.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome_rounded,
-                    color: AppTheme.gold,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    strings.solverTitle,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: AppTheme.textMuted),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Step Progress Indicator
-            LinearProgressIndicator(
-              value: (_currentStepIndex + 1) / _breakdowns.length,
-              backgroundColor: AppTheme.surfaceElevated,
-              color: AppTheme.gold,
-              minHeight: 6,
-              borderRadius: BorderRadius.circular(3),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              strings.stepProgress(_currentStepIndex + 1, _breakdowns.length),
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppTheme.textMuted,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Active Step Math Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceElevated,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: currentBreakdown.color.withValues(alpha: 0.6),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: currentBreakdown.color.withValues(alpha: 0.15),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        currentBreakdown.icon,
-                        color: currentBreakdown.color,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        currentBreakdown.actionName,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: currentBreakdown.color,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        strings.sumValue(currentBreakdown.runningSum),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    currentBreakdown.formula,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.gold.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: AppTheme.gold,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      strings.solverTitle,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppTheme.textMuted),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-            // Media Controls
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.skip_previous_rounded, size: 30),
-                  color: _currentStepIndex > 0
-                      ? AppTheme.textPrimary
-                      : AppTheme.textMuted,
-                  onPressed: _currentStepIndex > 0 ? _stepBackward : null,
+              // Step Progress Indicator
+              LinearProgressIndicator(
+                value: (_currentStepIndex + 1) / _breakdowns.length,
+                backgroundColor: AppTheme.surfaceElevated,
+                color: AppTheme.gold,
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                strings.stepProgress(_currentStepIndex + 1, _breakdowns.length),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppTheme.textMuted,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: AppTheme.gold,
-                    shape: BoxShape.circle,
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 16),
+
+              // Active Step Math Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceElevated,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: currentBreakdown.color.withValues(alpha: 0.6),
+                    width: 1.5,
                   ),
-                  child: IconButton(
-                    icon: Icon(
-                      _isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      color: AppTheme.bgDark,
-                      size: 32,
+                  boxShadow: [
+                    BoxShadow(
+                      color: currentBreakdown.color.withValues(alpha: 0.15),
+                      blurRadius: 10,
                     ),
-                    onPressed: _togglePlay,
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                IconButton(
-                  icon: const Icon(Icons.skip_next_rounded, size: 30),
-                  color: _currentStepIndex < _breakdowns.length - 1
-                      ? AppTheme.textPrimary
-                      : AppTheme.textMuted,
-                  onPressed: _currentStepIndex < _breakdowns.length - 1
-                      ? _stepForward
-                      : null,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Action Buttons
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-                widget.onApplySolution(_solutionPath!);
-              },
-              icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-              label: Text(strings.applySolution),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.pathCyan,
-                foregroundColor: AppTheme.bgDark,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          currentBreakdown.icon,
+                          color: currentBreakdown.color,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          currentBreakdown.actionName,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: currentBreakdown.color,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          strings.sumValue(currentBreakdown.runningSum),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      currentBreakdown.formula,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 20),
+
+              // Media Controls
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.skip_previous_rounded, size: 30),
+                    color: _currentStepIndex > 0
+                        ? AppTheme.textPrimary
+                        : AppTheme.textMuted,
+                    onPressed: _currentStepIndex > 0 ? _stepBackward : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: AppTheme.gold,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        _isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        color: AppTheme.bgDark,
+                        size: 32,
+                      ),
+                      onPressed: _togglePlay,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    icon: const Icon(Icons.skip_next_rounded, size: 30),
+                    color: _currentStepIndex < _breakdowns.length - 1
+                        ? AppTheme.textPrimary
+                        : AppTheme.textMuted,
+                    onPressed: _currentStepIndex < _breakdowns.length - 1
+                        ? _stepForward
+                        : null,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Action Buttons
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  widget.onApplySolution(_solutionPath!);
+                },
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                label: Text(strings.applySolution),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.pathCyan,
+                  foregroundColor: AppTheme.bgDark,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
