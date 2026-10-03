@@ -226,3 +226,32 @@
 - Verified `flutter test` (47 passing tests), the route-generator test, and
   `flutter analyze --no-pub` (no issues).
 - Added `docs/CLAUDE_HANDOFF.md` as the authoritative continuation guide.
+
+## 2026-10-03 — Release-prep pass (Claude)
+
+- Moved the owner's untracked `assets/stages/map-old.png` to
+  `_local_backup/`, because `pubspec.yaml` bundles the whole `assets/stages/`
+  folder and the backup was being packaged into local builds.
+- Downscaled oversized raster art (same file names and aspect ratios; every
+  usage is constrained with `BoxFit`): special cells and map markers
+  1254px → 512px, runner figures → max 768px, `msg.png` → 1024px wide,
+  `panel.png` → 1600px wide. `map.png` and `panel_landscape.png` keep their
+  dimensions (map marker centers stay valid). Raster art went from 39.4 MB to
+  13.3 MB; total `assets/` from ~47 MB to ~19 MB. Full-resolution originals are
+  kept locally in `_original_assets/` (git-ignored).
+- Stopped tracking `dist/BEZY-Test.apk` (the file stays on disk); `/dist/`,
+  `/_local_backup/` and `/_original_assets/` are now git-ignored.
+- `android/app/build.gradle.kts`: `bundleRelease` now fails when
+  `android/key.properties` is missing, so a debug-signed App Bundle cannot be
+  uploaded by mistake. Local release APKs still fall back to the debug key.
+- Docs updated to the Product Owner's decisions: no Learning/Challenge modes in
+  V1 (linear stage map only), not designated for children, API 36 requirement,
+  Play account status check, GitHub Pages 404.
+- Not verified here: `flutter test` / `flutter analyze` could not be run in
+  this environment. Run both, then visually check tiles, map markers, the
+  runner figure and message dialogs on a phone after the image downscale.
+- Product Owner approved hiding both world-map controls: the
+  Learning/Challenge toggle is off for V1 (`AppFeatures.modeToggleEnabled =
+  false`, campaign stays in the Learning mode Home already passed) and the
+  "Admin testing pass" button is shown only when `!kReleaseMode`. No tests
+  referenced either control.

@@ -67,3 +67,15 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Google Play rejects debug-signed bundles. Local QA APKs may still fall back
+// to the debug key, but a release App Bundle must use the private upload key.
+gradle.taskGraph.whenReady {
+    val buildsReleaseBundle = allTasks.any { it.name == "bundleRelease" }
+    if (buildsReleaseBundle && !hasReleaseSigning) {
+        throw GradleException(
+            "Missing android/key.properties: refusing to build a debug-signed " +
+                "release App Bundle. Run tool/create_android_upload_key.ps1 first."
+        )
+    }
+}

@@ -1,53 +1,54 @@
 # BEZY V1 Scope
 
-Status: approved working scope. The Product Owner approved proceeding to the
-next phase with the recommended visual direction on 2026-09-16.
+Status: approved working scope. Updated 2026-10-03 by Product Owner decision.
+
+## Product decision history
+
+- 2026-09-16: Scope approved with Learning and Challenge modes and Free Play.
+- 2026-10-03: **Modes removed from V1.** V1 is a single campaign: an
+  illustrated stage map with linear progression (each stage unlocks the next).
+  Free Play stays hidden in release builds. The app is not designated for
+  children (general audience 13+).
 
 ## Included
 
-- Android and iOS release builds.
+- Android release build for Google Play (iOS follows after Android).
 - Offline-only gameplay with no account, cloud database, advertising, or
   analytics.
 - Local progress and settings stored on the device.
-- Localization-ready architecture.
-- Complete Hebrew and English copy for V1.
-- Correct RTL and LTR behavior.
-- Learning mode with staged hints and explanatory feedback.
-- Challenge mode with no hints, solution playback, or solution shortcuts.
-- A 50-level campaign. Existing levels may be retained after gameplay and
-  quality review; missing levels must be authored, validated, and balanced.
-- Free Play using the existing level generator.
+- Complete Hebrew and English copy with correct RTL and LTR behavior.
+- One campaign of 50 stages on an illustrated world map, unlocked linearly.
+- Special cells introduced gradually (Joker, teleport, ice, mirror, clone,
+  zero, bomb, black hole and others), each verified solvable by automated tests.
+- Original procedurally generated sound effects with a persisted mute switch;
+  haptic feedback for movement.
 - Phone and tablet support in portrait and landscape.
-- Accessibility, offline, persistence, localization, gameplay, widget, and
-  integration tests appropriate to each phase.
-- Store-ready metadata, privacy declarations, icons, screenshots, and release
-  builds.
+- Store-ready metadata, privacy declarations, icons, screenshots, and a signed
+  App Bundle.
 
-## Deferred
+## Not in V1
 
-- Spanish and Arabic translations. Their addition must not require an
-  architectural rewrite.
-- Teacher area.
-- Parent area.
-- Accounts, cloud synchronization, remote analytics, advertising, and online
-  services.
-- Downloadable worlds and other network-dependent features.
+- Learning/Challenge mode selection. The mode code remains compiled and
+  tested, but the world-map toggle is hidden (`AppFeatures.modeToggleEnabled`
+  is `false`); the campaign always runs in the mode Home passes (Learning).
+- The "Admin testing pass" unlock-all button (`AppFeatures.adminPassEnabled`
+  shows it only in debug/profile builds).
+- Free Play (kept behind `AppFeatures.freePlayEnabled`, debug Web only).
+- Spanish and Arabic translations.
+- Teacher and parent areas.
+- Accounts, cloud sync, remote analytics, advertising, online services.
+- Background music.
 
-## Design gate
+## Design direction
 
-No production visual design, final component system, mascot, illustration set,
-or redesigned gameplay screen begins before a consultation with the Product
-Owner and explicit approval of the chosen direction.
-
-Gate result: passed on 2026-09-16. The approved direction is a colorful,
-modern adventure with distinct worlds, a clear high-contrast board, concise
-rewarding motion, visible progression, and a child-friendly tone that does not
-feel childish.
+Colorful, modern adventure with distinct worlds, a clear high-contrast board,
+concise rewarding motion, visible progression, and a tone that is friendly
+without feeling childish.
 
 ## Definition of done
 
-V1 is done only when all 50 levels are verified solvable, Hebrew and English
-are complete, the two modes enforce their distinct rules, local progress
-survives restarts, portrait and landscape layouts pass on the target device
-matrix, automated checks pass, and signed Android and iOS candidates are ready
-for store submission.
+V1 is done when all 50 stages are verified solvable, Hebrew and English are
+complete, stages unlock strictly in order, no mode toggle or admin control is
+visible in the release build, local progress survives restarts and updates,
+portrait and landscape layouts pass on real devices, automated checks pass, and
+a signed Android App Bundle is ready for Play submission.

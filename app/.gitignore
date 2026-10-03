@@ -49,3 +49,8 @@ app.*.map.json
 /android/key.properties
 /android/*.jks
 /android/*.keystore
+
+# Local-only folders: test APKs, owner backups, full-resolution source art.
+/dist/
+/_local_backup/
+/_original_assets/

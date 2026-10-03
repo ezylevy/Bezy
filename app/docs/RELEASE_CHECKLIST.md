@@ -1,6 +1,6 @@
 # BEZY V1 Release Checklist
 
-Last updated: 28 September 2026
+Last updated: 3 October 2026
 
 ## Already prepared in the repository
 
@@ -27,15 +27,23 @@ Last updated: 28 September 2026
   verify `https://ezylevy.github.io/Bezy/privacy-policy.html` and `/support.html`.
   The support email is `naraelapp@gmail.com`.
 - [ ] Confirm ownership/licensing for every image and sound asset.
-- [ ] Decide whether the app is listed as “Made for Kids”. Do not select it
-  casually: Apple treats this as a lasting category commitment. Complete both
-  stores' target-audience and content-rating questionnaires truthfully. See
-  `docs/CHILDREN_AND_AGE_RATING.md`.
+- [x] Audience decided (2026-10-03): not designated for children; general
+  audience 13+. Complete both stores' content-rating questionnaires truthfully.
+  See `docs/CHILDREN_AND_AGE_RATING.md`.
+- [ ] Enable GitHub Pages (Settings → Pages → Source: GitHub Actions). On
+  3 October 2026 the privacy URL returned 404, and the in-app privacy link
+  points to it.
+- [x] World-map Learning/Challenge toggle hidden for V1 and the “Admin testing
+  pass” button hidden in release builds (`lib/core/config/app_features.dart`).
+  Verify on a release build that neither icon appears on the map.
 
 ## Android / Google Play
 
-1. Create or verify a Play Console developer account and complete developer
-   identity verification.
+1. Play Console account `naraelapp@gmail.com` exists (created about
+   19 September 2026) and is a **Personal** account (confirmed 2026-10-03).
+   Complete identity verification. Because it is a personal account created
+   after 13 November 2023, a closed test with at least 12 opted-in testers for
+   14 consecutive days is required before applying for production access.
 2. Reserve package `com.ezylevy.bezy`. A package name cannot be changed after
    the first Play release.
 3. Generate a private upload keystore whose certificate remains valid beyond
@@ -62,8 +70,12 @@ Last updated: 28 September 2026
 7. Add store listing text/assets, category, contact details, countries, and
    pricing. Start with Internal testing, promote to Closed/Open testing as
    required by the account, then Production.
-8. Verify the final AAB targets the Play-required API level. As of this checklist,
-   Google requires Android 15 / API 35 or higher for applicable phone apps.
+8. Verify the final AAB targets the Play-required API level. Since 31 August
+   2026 new apps and updates must target Android 16 / API 36; the current build
+   targets 36.
+9. `flutter build appbundle --release` now fails deliberately when
+   `android/key.properties` is missing, so a debug-signed bundle cannot be
+   produced by mistake. Local `flutter build apk --release` still works for QA.
 
 Official references:
 

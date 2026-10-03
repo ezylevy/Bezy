@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/audio/sound_service.dart';
+import '../../../core/config/app_features.dart';
 import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/campaign/campaign_levels.dart';
@@ -356,35 +357,39 @@ class _WorldMapScreenState extends State<WorldMapScreen>
           ],
         ),
         actions: [
-          IconButton(
-            tooltip: _mode == GameMode.learning
-                ? strings.learningMode
-                : strings.challengeMode,
-            onPressed: () {
-              widget.sound.uiTap();
-              setState(() {
-                _mode = _mode == GameMode.learning
-                    ? GameMode.challenge
-                    : GameMode.learning;
-              });
-            },
-            icon: Icon(
-              _mode == GameMode.learning
-                  ? Icons.school_rounded
-                  : Icons.emoji_events_rounded,
-              color: _mode == GameMode.learning
-                  ? AppTheme.startGreen
-                  : AppTheme.gold,
+          if (AppFeatures.modeToggleEnabled)
+            IconButton(
+              tooltip: _mode == GameMode.learning
+                  ? strings.learningMode
+                  : strings.challengeMode,
+              onPressed: () {
+                widget.sound.uiTap();
+                setState(() {
+                  _mode = _mode == GameMode.learning
+                      ? GameMode.challenge
+                      : GameMode.learning;
+                });
+              },
+              icon: Icon(
+                _mode == GameMode.learning
+                    ? Icons.school_rounded
+                    : Icons.emoji_events_rounded,
+                color: _mode == GameMode.learning
+                    ? AppTheme.startGreen
+                    : AppTheme.gold,
+              ),
             ),
-          ),
-          IconButton(
-            tooltip: 'Admin testing pass',
-            onPressed: _adminAccess ? null : _requestAdminAccess,
-            icon: Icon(
-              _adminAccess ? Icons.lock_open_rounded : Icons.key_rounded,
-              color: _adminAccess ? AppTheme.startGreen : AppTheme.textPrimary,
+          if (AppFeatures.adminPassEnabled)
+            IconButton(
+              tooltip: 'Admin testing pass',
+              onPressed: _adminAccess ? null : _requestAdminAccess,
+              icon: Icon(
+                _adminAccess ? Icons.lock_open_rounded : Icons.key_rounded,
+                color: _adminAccess
+                    ? AppTheme.startGreen
+                    : AppTheme.textPrimary,
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 12),
             child: Center(

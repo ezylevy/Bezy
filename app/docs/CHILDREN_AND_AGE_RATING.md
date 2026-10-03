@@ -2,7 +2,14 @@
 
 These declarations are made per app, not once for the entire developer account.
 
-## Recommended V1 position
+## Decision (Product Owner, 2026-10-03)
+
+BEZY V1 is **not** designated for children. Google Play target audience: select
+only age groups 13+ (do not select any group under 13). Apple: do not select
+“Made for Kids”; choose “Not Applicable” under Age Categories. Store copy and
+screenshots must stay consistent with a general-audience puzzle game.
+
+## Background: recommended V1 position
 
 Unless BEZY is intentionally marketed primarily to children and the product
 owner specifically wants placement in Apple's Kids category, publish V1 as a
