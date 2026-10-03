@@ -329,9 +329,14 @@ class _GameScreenState extends State<GameScreen>
       if (!mounted) return;
       final next = (_remainingSeconds ?? 0) - 1;
       setState(() => _remainingSeconds = next.clamp(0, 999));
+      if (next == 10) {
+        widget.sound.timerWarning();
+      } else if (next > 0 && next <= 3) {
+        widget.sound.timerFinalTick();
+      }
       if (next <= 0) {
         timer.cancel();
-        widget.sound.invalidMove();
+        widget.sound.timeUp();
         setState(() => _gameState = _gameState.copyWith(isFailed: true));
         _showTimeoutDialog();
       }
@@ -400,6 +405,7 @@ class _GameScreenState extends State<GameScreen>
   Future<int?> _chooseJoker(TileModel tile, int currentSum) {
     final options = tile.jokerOptions;
     if (options.isEmpty) return Future<int?>.value(0);
+    widget.sound.jokerReveal();
     return showDialog<int>(
       context: context,
       barrierDismissible: false,
@@ -417,7 +423,10 @@ class _GameScreenState extends State<GameScreen>
           ],
         ),
       ),
-    );
+    ).then((choice) {
+      if (choice != null) widget.sound.jokerChoose();
+      return choice;
+    });
   }
 
   List<int> _iceSlide({
@@ -465,7 +474,7 @@ class _GameScreenState extends State<GameScreen>
     // 1. Initial Start Point Selection
     if (currentPath.isEmpty) {
       if (clickedTile.isStart) {
-        widget.sound.tileTap();
+        widget.sound.startTile();
         final initialSum = clickedTile.applyValue(0);
         setState(() {
           _gameState = _gameState.copyWith(
@@ -544,19 +553,19 @@ class _GameScreenState extends State<GameScreen>
 
     // 4. Validate Tile Walkability / Special Rules
     if (!clickedTile.isWalkable) {
-      widget.sound.invalidMove();
+      widget.sound.wallBlocked();
       _showStatusSnackbar(AppLocalizations.of(context).wallBlocked);
       return;
     }
 
     if (!clickedTile.canEnter(_gameState.currentSum)) {
-      widget.sound.invalidMove();
+      widget.sound.gateBlocked();
       _showStatusSnackbar(AppLocalizations.of(context).gateBlocked);
       return;
     }
 
     if (!level.isLonelyUnlocked(clickedIndex, _gameState.visitedIndices)) {
-      widget.sound.invalidMove();
+      widget.sound.lonelyBlocked();
       _showStatusSnackbar(AppLocalizations.of(context).lonelyBlocked);
       return;
     }
@@ -604,6 +613,22 @@ class _GameScreenState extends State<GameScreen>
       widget.sound.trampolineBounce();
     } else if (clickedTile.isSmartGate) {
       widget.sound.gatePass();
+    } else if (clickedTile.isJoker) {
+      // Reveal/choice sounds are emitted by the chooser dialog.
+    } else if (clickedTile.isIce) {
+      widget.sound.iceSlide();
+    } else if (clickedTile.isMirror) {
+      widget.sound.mirror();
+    } else if (clickedTile.isClone) {
+      widget.sound.clone();
+    } else if (clickedTile.isZero) {
+      widget.sound.zero();
+    } else if (clickedTile.isBlackHole) {
+      widget.sound.blackHole();
+    } else if (clickedTile.isBomb) {
+      widget.sound.bomb();
+    } else if (clickedTile.isLonely) {
+      widget.sound.lonelyUnlock();
     } else {
       widget.sound.tileTap();
     }
@@ -680,6 +705,7 @@ class _GameScreenState extends State<GameScreen>
     // Check center destination condition
     if (landingIndex == centerIndex) {
       _countdownTimer?.cancel();
+      widget.sound.targetReached();
       widget.sound.victory();
       setState(() {
         _gameState = _gameState.copyWith(
@@ -803,7 +829,7 @@ class _GameScreenState extends State<GameScreen>
 
   void _resetGame() {
     _solutionPlaybackId++;
-    widget.sound.tileBacktrack();
+    widget.sound.reset();
     _resetCountdown();
     setState(() {
       _gameState = GameState(level: _gameState.level);
@@ -820,10 +846,15 @@ class _GameScreenState extends State<GameScreen>
       visitedIndices: _gameState.visitedIndices,
     );
 
-    if (nextHint != null) {
-      widget.sound.tileTap();
+    final backtrackHint = nextHint == null && _gameState.currentPath.length > 1
+        ? _gameState.currentPath[_gameState.currentPath.length - 2]
+        : null;
+    final effectiveHint = nextHint ?? backtrackHint;
+
+    if (effectiveHint != null) {
+      widget.sound.hint();
       setState(() {
-        _gameState = _gameState.copyWith(nextHintIndex: nextHint);
+        _gameState = _gameState.copyWith(nextHintIndex: effectiveHint);
       });
       _showStatusSnackbar(AppLocalizations.of(context).hintShown);
     } else {
@@ -834,6 +865,8 @@ class _GameScreenState extends State<GameScreen>
 
   void _openSolver() {
     if (!widget.mode.allowsSolutions) return;
+
+    widget.sound.solutionReveal();
 
     showDialog(
       context: context,
@@ -877,6 +910,7 @@ class _GameScreenState extends State<GameScreen>
           solverStepIndex: step,
         );
       });
+      widget.sound.solutionStep();
     }
     if (!mounted || playbackId != _solutionPlaybackId) return;
     await _showSolutionFinishedDialog();
@@ -926,7 +960,11 @@ class _GameScreenState extends State<GameScreen>
     if (_messageDialogVisible) return;
     _messageDialogVisible = true;
     unawaited(
-      showBezyMessageDialog(context, message: message).whenComplete(() {
+      showBezyMessageDialog(
+        context,
+        message: message,
+        sound: widget.sound,
+      ).whenComplete(() {
         _messageDialogVisible = false;
       }),
     );

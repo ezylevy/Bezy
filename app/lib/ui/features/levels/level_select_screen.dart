@@ -66,7 +66,7 @@ class _LevelSelectScreenState extends State<LevelSelectScreen> {
               borderRadius: BorderRadius.circular(16),
               onTap: isUnlocked
                   ? () async {
-                      widget.sound.tileTap();
+                      widget.sound.uiTap();
                       await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => GameScreen(

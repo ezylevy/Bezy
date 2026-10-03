@@ -246,6 +246,58 @@ void main() {
       }
     });
 
+    test('Stages 25-50 expose three valid and stage-unique solutions', () {
+      final advanced = CampaignLevels.getAllLevels().skip(24).toList();
+      final primarySignatures = <String>{};
+      int? previousStart;
+
+      for (var offset = 0; offset < advanced.length; offset++) {
+        final level = advanced[offset];
+        expect(
+          level.solutionRoutes.length,
+          greaterThanOrEqualTo(3),
+          reason: 'Stage ${offset + 25} needs at least three solutions',
+        );
+        for (final route in level.solutionRoutes.take(3)) {
+          expect(
+            PathSolver.isValidSolution(level, route),
+            isTrue,
+            reason: 'Stage ${offset + 25} contains an invalid solution: $route',
+          );
+        }
+        expect(
+          level.solutionRoutes.first.first,
+          isNot(previousStart),
+          reason: 'Consecutive advanced stages should rotate their gate',
+        );
+        previousStart = level.solutionRoutes.first.first;
+        primarySignatures.add(level.solutionRoutes.first.join(','));
+      }
+
+      expect(
+        primarySignatures.length,
+        advanced.length,
+        reason: 'Every advanced stage needs a distinct primary route',
+      );
+    });
+
+    test('Stages 25-50 minimum is based on the actual shortest route', () {
+      final levels = CampaignLevels.getAllLevels();
+      for (var stageNumber = 25; stageNumber <= 50; stageNumber++) {
+        final level = levels[stageNumber - 1];
+        final shortest = PathSolver.findShortestSolution(
+          level,
+          maxDepth: level.solutionRoutes.first.length,
+        );
+        expect(shortest, isNotNull, reason: 'Stage $stageNumber must solve');
+        expect(
+          PathSolver.countUserMoves(level, shortest!),
+          level.optimalMoves,
+          reason: 'Stage $stageNumber displays an incorrect minimum',
+        );
+      }
+    });
+
     test(
       'DFS can rediscover solutions without the campaign solution cache',
       () {

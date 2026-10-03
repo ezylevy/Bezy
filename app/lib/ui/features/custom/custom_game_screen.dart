@@ -31,7 +31,7 @@ class _CustomGameDialogState extends State<CustomGameDialog> {
 
   void _startGame() async {
     setState(() => _isGenerating = true);
-    widget.sound.tileTap();
+    widget.sound.uiTap();
 
     // Small microtask to let spinner show if generation takes a frame
     await Future.delayed(const Duration(milliseconds: 100));

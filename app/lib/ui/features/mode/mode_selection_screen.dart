@@ -18,7 +18,7 @@ class ModeSelectionScreen extends StatelessWidget {
   final SoundService sound;
 
   void _openMode(BuildContext context, GameMode mode) {
-    sound.tileTap();
+    sound.uiTap();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>

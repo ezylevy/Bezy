@@ -2,13 +2,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/audio/sound_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
 
 Future<void> showBezyMessageDialog(
   BuildContext context, {
   required String message,
+  SoundService? sound,
 }) {
+  sound?.messageReport();
   final strings = AppLocalizations.of(context);
   return showDialog<void>(
     context: context,

@@ -3,6 +3,7 @@ import 'dart:math';
 import '../models/level_model.dart';
 import '../models/tile_model.dart';
 import 'extra_campaign_levels.dart';
+import 'generated_solution_routes.dart';
 import 'world_info.dart';
 
 export 'world_info.dart';
@@ -603,7 +604,6 @@ class CampaignLevels {
       blackHoleIndices: [50],
       bombIndices: [60],
       zeroIndices: [70],
-      lonelyIndices: [1],
       values: List.generate(81, (i) {
         if (i == 40) return 85;
         return (i * 4 + 5) % 9 + 1;
@@ -816,7 +816,7 @@ class CampaignLevels {
       }
     }
 
-    return LevelModel(
+    final level = LevelModel(
       id: id,
       worldId: worldId,
       levelNumber: levelNumber,
@@ -829,6 +829,10 @@ class CampaignLevels {
       description: description,
       hints: hints,
     );
+    final cachedRoutes = generatedCampaignRoutes[id];
+    return cachedRoutes == null
+        ? level
+        : level.copyWith(solutionRoutes: cachedRoutes);
   }
 
   /// Uses a stable shuffle so special cells look randomly distributed while

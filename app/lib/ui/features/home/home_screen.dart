@@ -151,11 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: strings.haptics,
               onPressed: () async {
                 await widget.storage.setHapticsEnabled(!isHaptics);
-                widget.sound.tileTap();
+                widget.sound.uiTap();
                 _refresh();
               },
             ),
             IconButton(
+              key: const ValueKey('sound-toggle'),
               icon: Icon(
                 isSound ? Icons.volume_up_rounded : Icons.volume_off_rounded,
                 color: isSound ? AppTheme.pathCyan : AppTheme.textMuted,
@@ -163,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: strings.sounds,
               onPressed: () async {
                 await widget.storage.setSoundEnabled(!isSound);
-                widget.sound.tileTap();
+                widget.sound.toggleChanged(!isSound);
                 _refresh();
               },
             ),
@@ -245,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.map_rounded,
           accentColor: AppTheme.startGreen,
           onTap: () async {
-            widget.sound.tileTap();
+            widget.sound.uiTap();
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => WorldMapScreen(
@@ -266,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.casino_rounded,
             accentColor: AppTheme.pathCyan,
             onTap: () {
-              widget.sound.tileTap();
+              widget.sound.uiTap();
               showDialog(
                 context: context,
                 builder: (context) => CustomGameDialog(
@@ -284,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icons.lightbulb_outline_rounded,
           accentColor: AppTheme.gold,
           onTap: () {
-            widget.sound.tileTap();
+            widget.sound.uiTap();
             _showHowToPlay();
           },
         ),

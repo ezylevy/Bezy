@@ -2,9 +2,14 @@
 
 ## Current state
 
-There are no audio assets or playback dependency in the project. Despite its
-name, `SoundService` currently provides haptic feedback only. The saved “Sound”
-preference does not control any audible output yet.
+The app now ships with 36 original, procedurally synthesized BEZY effects and
+plays them through the centralized `SoundService`. The saved Sound switch on
+the home screen mutes every effect immediately and persists across launches.
+No third-party sound recordings or external sound licenses are used.
+
+The source-of-truth generator is `tool/generate_original_sfx.dart`. Run it with
+the Dart SDK executable (or `dart run` after dependencies are available) to
+rebuild the complete WAV set deterministically.
 
 ## Creative direction
 
@@ -20,18 +25,19 @@ understand game state.
 
 | File | Trigger | Purpose | Existing hook |
 |---|---|---|---|
-| `ui_tap.wav` | Primary button, mode, world, stage | Responsive UI confirmation | `tileTap()` is already called in navigation |
-| `tile_enter_01.wav`–`03.wav` | Enter ordinary number tile | Progress rhythm; rotate/pitch variants | `tileTap()` in gameplay |
-| `tile_backtrack.wav` | Remove last path tile | Clear reversal feedback | `tileBacktrack()` |
+| `ui_tap.wav` | Primary button, mode, world, stage | Responsive UI confirmation | `uiTap()` |
+| `tile_enter_01.wav`–`03.wav` | Reserved; ordinary movement is currently silent | Optional future progress rhythm | assets retained, not played |
+| `tile_backtrack.wav` | Reserved; backtracking is currently silent | Optional future reversal feedback | asset retained, not played |
 | `move_invalid.wav` | Wall, illegal entry, overshoot | Short, soft warning—not punitive | `invalidMove()` |
 | `teleport.wav` | Teleport departure/arrival | Spatial transition | `trampolineBounce()` |
 | `gate_open.wav` | Gate becomes passable / entered | Ability confirmation | `gatePass()` |
-| `target_reached.wav` | Exact total enters target | Immediate success confirmation | add before victory sequence |
+| `target_reached.wav` | Exact total enters target | Immediate success confirmation | `targetReached()` |
 | `victory_sting.wav` | Stage solved | 1–2 second branded celebration | `victory()` |
-| `stage_unlock.wav` | Next stage becomes available | Reward and progression | add to world-map unlock sequence |
-| `timer_warning.wav` | 10 seconds remaining | Urgency without anxiety | add to challenge timer |
-| `timer_final_tick.wav` | Last 3 seconds | Precise countdown | add to challenge timer |
-| `time_up.wav` | Timer reaches zero | Clear neutral failure | add to challenge timer |
+| `stage_unlock.wav` | Next stage becomes available | Energetic surprise and progression reward | `stageUnlock()` |
+| `message_report.wav` | Illustrated status/message dialog appears | Funny, concise reporting flourish | `messageReport()` |
+| `timer_warning.wav` | 10 seconds remaining | Urgency without anxiety | `timerWarning()` |
+| `timer_final_tick.wav` | Last 3 seconds | Precise countdown | `timerFinalTick()` |
+| `time_up.wav` | Timer reaches zero | Clear neutral failure | `timeUp()` |
 
 ## Special-cell layer
 
@@ -69,7 +75,7 @@ sound-enabled release, `P1` is the next polish pass, and `P2` is optional.
 | P1 | Sound or haptics setting disabled | Muted/downward toggle; do not play after SFX has been disabled |
 | P1 | Open the campaign map / focus into the large map | Soft directional whoosh |
 | P0 | Locked stage tapped | Gentle locked/error cue |
-| P0 | Stage lock changes to unlock/free | Unlock rise followed by the BEZY motif |
+| P0 | Stage lock changes to unlock/free | Energetic surprise rise followed by a bright four-note burst |
 | P1 | Learning/Challenge mode changes | Two related but distinct mode accents |
 | P2 | External privacy page opens or fails | Neutral open cue / soft warning |
 
@@ -78,8 +84,8 @@ sound-enabled release, `P1` is the next polish pass, and `P2` is optional.
 | Priority | Location / event | Cue |
 |---|---|---|
 | P0 | Valid start tile selected | Start pulse, stronger than an ordinary tile |
-| P0 | Ordinary tile entered | One of 3 subtle click/note variants; pitch may follow the running sum |
-| P0 | Finger backtracks or Undo is pressed | Short reverse click |
+| P0 | Ordinary tile entered | Silent; haptic confirmation only |
+| P0 | Finger backtracks or Undo is pressed | Silent; haptic confirmation only |
 | P0 | Reset pressed | Fast descending reset sweep |
 | P0 | Illegal non-adjacent move | Soft invalid tick |
 | P0 | Wall touched | Dry blocked knock, distinct from arithmetic failure |
@@ -120,7 +126,7 @@ sound-enabled release, `P1` is the next polish pass, and `P2` is optional.
 | P1 | Previous/next solution step | Low-volume step tick |
 | P1 | Automatic solution playback starts, pauses, or finishes | Start/pause transport cues and a completion accent |
 | P0 | “Apply this solution” pressed | Reset sweep first, then quiet route-step cues during playback |
-| P2 | Status/message dialog appears | One unobtrusive notification tone; never repeat on rebuild |
+| P2 | Status/message dialog appears | Funny four-note reporting flourish; never repeat on rebuild |
 
 ### Challenge and lifecycle
 
@@ -175,17 +181,13 @@ assets/audio/music/
 
 ## Implementation plan
 
-1. Product owner supplies/approves the core sound set and confirms licenses.
-2. Add a mobile audio package with low-latency asset playback and pooling.
-3. Extend `SoundService` so every existing method plays its mapped asset while
-   preserving haptics.
-4. Add new explicit methods for special cells, timer events, hints, unlocks,
-   and music lifecycle.
-5. Split stored settings into `sfxEnabled` and `musicEnabled`, migrate the old
-   Sound preference, and add two localized controls.
-6. Preload frequently used effects at startup; never block gameplay on audio.
-7. Test Bluetooth, device silent mode, background/foreground, interruptions,
-   rapid tile entry, low-end Android devices, and iOS hardware.
+1. Listen-test and tune the generated effects on a real phone speaker.
+2. Replace any effect by keeping its filename under `assets/audio/sfx/`; no
+   gameplay code changes are required.
+3. If background music is added later, introduce a separate Music preference;
+   the current switch intentionally controls effects only.
+4. Test Bluetooth, device silent mode, interruptions, rapid tile entry,
+   low-end Android devices, and iOS hardware.
 
 ## Acceptance criteria
 

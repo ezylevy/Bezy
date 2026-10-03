@@ -107,3 +107,122 @@
   public deployment remains gated on an explicit push/Pages approval.
 - Returned launcher-icon ownership to the product owner and removed the
   generated icon variants while preserving the supplied source image.
+
+## 2026-09-29 — Session handoff: audio, corrected map, and campaign DFS
+
+> Historical snapshot. Its DFS blocker was resolved on 2026-10-03. The current
+> continuation guide is `docs/CLAUDE_HANDOFF.md`.
+
+### Product decisions and current scope
+
+- Free Play remains implemented but hidden from the V1 navigation through
+  `AppFeatures.freePlayEnabled`.
+- The product owner supplied a corrected `assets/stages/map.png`. Preserve this
+  file. `assets/stages/map-old.png` is an untracked personal backup and must not
+  be committed unless the product owner explicitly asks for it.
+- Sounds should be original/invented for BEZY rather than downloaded from
+  third-party libraries. Background music has not been added.
+- The home screen needs one persistent sound on/off control. Muting must silence
+  all effects immediately and survive app restarts.
+- Stages 25-50 must be normal, open puzzles rather than wall corridors. Their
+  challenge should come from route choice and special-cell combinations, with
+  no more than one newly introduced special-cell type in each five-stage group.
+- For stages 27-50, the intended generation rule is to find at least three DFS
+  solutions, vary both route geometry and starting gate between stages, and
+  freeze a selected valid solution in the generated route cache.
+
+### Implemented in the working tree, not yet finalized
+
+- Added `audioplayers` and a centralized `SoundService` with safe playback
+  failure handling and separate low-latency players for overlapping effects.
+- Added `tool/generate_original_sfx.dart`, which deterministically synthesizes
+  35 original 48 kHz PCM WAV effects. Generated files live under
+  `assets/audio/sfx/` and can be replaced individually while keeping their
+  filenames. The sound inventory and replacement process are documented in
+  `docs/SOUND_DESIGN.md`.
+- Connected sound cues to home/navigation, board movement and rejection,
+  walls/gates/Lonely Cell, teleport, ice, mirror, clone, zero, black hole,
+  bomb, Joker, target, victory, reset, hints, solver playback, challenge timer,
+  map opening, locked stages, and stage unlocking.
+- Connected the existing home sound icon to real persisted mute state and added
+  a widget test keyed by `sound-toggle`.
+- Measured the corrected 941 x 1672 map image and updated all 50 overlay centers
+  in `world_map_screen.dart` to the artwork's circle centers. The existing
+  serpentine-to-chronological reorder remains responsible for labels 1-50.
+- Added Android backup/data-extraction rules for shared preferences. Ordinary
+  app updates retain progress. Reinstall restoration can work through Android
+  Auto Backup when the device/account supports it, but guaranteed cross-device
+  restoration will still require a signed-in cloud-save feature.
+- Extended `PathSolver` with multi-solution and shortest-solution APIs,
+  ice-aware search, excluded route signatures, state pruning, and stable
+  level-specific candidate ordering.
+- Added generated-route tooling and cache files:
+  `tool/generate_campaign_routes.dart`,
+  `tool/generate_campaign_routes_test.dart`, and
+  `lib/domain/campaign/generated_solution_routes.dart`.
+- Updated campaign data toward the requested special-cell pacing, removed the
+  stage-20 Lonely Cell issue, added mid-route smart-hint fallback behavior, and
+  raised misleadingly low-value shortcuts in later boards.
+- Added regression tests for route diversity, alternating starting gates,
+  stage 33-35 minimum-move values, and the sound preference.
+
+### Current blocker / exact continuation point
+
+- The latest command was:
+  `flutter test tool\\generate_campaign_routes_test.dart --reporter expanded`.
+- It searched stages 27 onward for three fresh DFS routes and stopped after
+  approximately three minutes at stage 39 (`w6_l9`):
+  `Bad state: Stage 39 has only 0 DFS routes.`
+- Therefore the generated route cache, focused tests, full test suite, analyzer,
+  release APK, phone installation, and Git commit are **not yet complete**.
+- Continue by diagnosing stage 39's board/search-budget interaction. Prefer a
+  bounded fix to its level data or DFS ordering/budget; do not reduce the
+  requirement that stages 27-50 have varied, valid solutions. Regenerate the
+  cache only after stage 39 succeeds.
+
+### Verification and release steps still required
+
+1. Regenerate the frozen campaign route cache successfully for all 50 stages.
+2. Run `flutter test test\\game_logic_test.dart --reporter expanded`; confirm
+   stages 27-50 expose at least three solutions, consecutive stages vary their
+   starting gate, primary route signatures are not repeated, and stages 33-35
+   show the true shortest move count.
+3. Run the complete `flutter test` suite and `flutter analyze`.
+4. Build a release APK with `flutter build apk --release`. If Windows blocks
+   plugin symlinks, enable Developer Mode or use the already-configured build
+   environment before retrying.
+5. Copy the verified APK to `app/dist/BEZY-Test.apk`, install with `adb install
+   -r` (do not uninstall, because that may discard local progress), launch it,
+   and capture `adb logcat` if it crashes. Confirm the APK contains `arm64-v8a`
+   `libflutter.so`; the previous phone crash was caused by an x86_64-only APK.
+6. Physically verify portrait and landscape layouts, corrected map-circle
+   alignment, map pan/zoom bounds, stage 20 solver playback, mid-route hints,
+   sound mute persistence, and representative special-cell sounds.
+7. Review `git status` and commit the requested work, including the corrected
+   `assets/stages/map.png`, but excluding `assets/stages/map-old.png` and any
+   unrelated user files.
+
+### Repository state at handoff
+
+- Branch: `codex/v1-localization`.
+- The working tree is intentionally dirty with the audio, map, solver, campaign,
+  Android-backup, tests, generated plugin-registration, and documentation
+  changes described above.
+- Do not discard or overwrite the product owner's new PNG map.
+- No emulator was used during this work.
+
+## 2026-10-03 — Final Git/Claude handoff
+
+- Completed the bounded build-time DFS generation for stages 25-50. Every
+  stage now has three frozen solutions from different entry gates; primary
+  routes vary across stages and consecutive stages vary their primary gate.
+- Generated and cached independently verified minimum player-move counts. Ice
+  continuation and teleport arrival count as part of the initiating gesture.
+- Campaign runtime now consumes `generated_solution_routes.dart`; it does not
+  search for the late-stage route when opening a level.
+- Kept Free Play available only for local debug Web testing.
+- Removed forward/back movement sounds while retaining haptics, added the funny
+  message-report cue, and replaced stage unlock with an energetic surprise cue.
+- Verified `flutter test` (47 passing tests), the route-generator test, and
+  `flutter analyze --no-pub` (no issues).
+- Added `docs/CLAUDE_HANDOFF.md` as the authoritative continuation guide.

@@ -42,56 +42,56 @@ class _WorldMapScreenState extends State<WorldMapScreen>
 
   // Centers of the numbered stones in map.png, normalized to its source size.
   static const _physicalStageCenters = <Offset>[
-    Offset(310 / 941, 145 / 1672),
-    Offset(416 / 941, 166 / 1672),
-    Offset(522 / 941, 184 / 1672),
-    Offset(627 / 941, 205 / 1672),
-    Offset(731 / 941, 237 / 1672),
-    Offset(291 / 941, 345 / 1672),
-    Offset(383 / 941, 311 / 1672),
-    Offset(484 / 941, 313 / 1672),
-    Offset(592 / 941, 329 / 1672),
-    Offset(689 / 941, 301 / 1672),
-    Offset(330 / 941, 418 / 1672),
-    Offset(433 / 941, 455 / 1672),
-    Offset(540 / 941, 473 / 1672),
-    Offset(650 / 941, 495 / 1672),
-    Offset(760 / 941, 522 / 1672),
-    Offset(291 / 941, 604 / 1672),
-    Offset(393 / 941, 582 / 1672),
-    Offset(505 / 941, 607 / 1672),
-    Offset(616 / 941, 622 / 1672),
-    Offset(726 / 941, 603 / 1672),
-    Offset(326 / 941, 695 / 1672),
-    Offset(436 / 941, 719 / 1672),
-    Offset(550 / 941, 742 / 1672),
-    Offset(662 / 941, 765 / 1672),
-    Offset(773 / 941, 799 / 1672),
-    Offset(278 / 941, 872 / 1672),
-    Offset(386 / 941, 883 / 1672),
-    Offset(501 / 941, 908 / 1672),
-    Offset(615 / 941, 919 / 1672),
-    Offset(728 / 941, 901 / 1672),
-    Offset(325 / 941, 1006 / 1672),
-    Offset(438 / 941, 1021 / 1672),
-    Offset(551 / 941, 1051 / 1672),
-    Offset(660 / 941, 1080 / 1672),
-    Offset(765 / 941, 1107 / 1672),
-    Offset(287 / 941, 1160 / 1672),
-    Offset(400 / 941, 1170 / 1672),
-    Offset(516 / 941, 1175 / 1672),
-    Offset(631 / 941, 1196 / 1672),
-    Offset(748 / 941, 1185 / 1672),
-    Offset(328 / 941, 1260 / 1672),
-    Offset(438 / 941, 1300 / 1672),
-    Offset(551 / 941, 1331 / 1672),
-    Offset(660 / 941, 1358 / 1672),
-    Offset(770 / 941, 1382 / 1672),
-    Offset(272 / 941, 1447 / 1672),
-    Offset(379 / 941, 1405 / 1672),
-    Offset(488 / 941, 1442 / 1672),
-    Offset(601 / 941, 1467 / 1672),
-    Offset(725 / 941, 1501 / 1672),
+    Offset(320 / 941, 152 / 1672),
+    Offset(417 / 941, 172 / 1672),
+    Offset(520 / 941, 193 / 1672),
+    Offset(620 / 941, 215 / 1672),
+    Offset(719 / 941, 245 / 1672),
+    Offset(287 / 941, 335 / 1672),
+    Offset(383 / 941, 310 / 1672),
+    Offset(487 / 941, 314 / 1672),
+    Offset(595 / 941, 327 / 1672),
+    Offset(697 / 941, 319 / 1672),
+    Offset(332 / 941, 412 / 1672),
+    Offset(433 / 941, 437 / 1672),
+    Offset(539 / 941, 465 / 1672),
+    Offset(650 / 941, 487 / 1672),
+    Offset(761 / 941, 520 / 1672),
+    Offset(286 / 941, 605 / 1672),
+    Offset(392 / 941, 581 / 1672),
+    Offset(499 / 941, 605 / 1672),
+    Offset(613 / 941, 635 / 1672),
+    Offset(722 / 941, 610 / 1672),
+    Offset(325 / 941, 694 / 1672),
+    Offset(433 / 941, 723 / 1672),
+    Offset(545 / 941, 759 / 1672),
+    Offset(659 / 941, 781 / 1672),
+    Offset(765 / 941, 813 / 1672),
+    Offset(253 / 941, 857 / 1672),
+    Offset(373 / 941, 872 / 1672),
+    Offset(497 / 941, 903 / 1672),
+    Offset(620 / 941, 922 / 1672),
+    Offset(739 / 941, 902 / 1672),
+    Offset(326 / 941, 1005 / 1672),
+    Offset(452 / 941, 1021 / 1672),
+    Offset(560 / 941, 1060 / 1672),
+    Offset(671 / 941, 1088 / 1672),
+    Offset(776 / 941, 1112 / 1672),
+    Offset(266 / 941, 1161 / 1672),
+    Offset(385 / 941, 1159 / 1672),
+    Offset(507 / 941, 1178 / 1672),
+    Offset(626 / 941, 1207 / 1672),
+    Offset(749 / 941, 1190 / 1672),
+    Offset(316 / 941, 1259 / 1672),
+    Offset(419 / 941, 1298 / 1672),
+    Offset(531 / 941, 1337 / 1672),
+    Offset(646 / 941, 1360 / 1672),
+    Offset(754 / 941, 1387 / 1672),
+    Offset(267 / 941, 1455 / 1672),
+    Offset(376 / 941, 1426 / 1672),
+    Offset(490 / 941, 1431 / 1672),
+    Offset(599 / 941, 1463 / 1672),
+    Offset(721 / 941, 1495 / 1672),
   ];
 
   // The illustrated road snakes across each row. Keep campaign numbering in
@@ -231,6 +231,7 @@ class _WorldMapScreenState extends State<WorldMapScreen>
       return;
     }
     setState(() => _mapFocused = true);
+    widget.sound.mapOpen();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focusMapStart();
     });
@@ -239,7 +240,7 @@ class _WorldMapScreenState extends State<WorldMapScreen>
   Future<void> _handleStageTap(int index) async {
     final level = _levels[index];
     if (!_isUnlocked(level)) {
-      widget.sound.invalidMove();
+      widget.sound.lockedStage();
       await showBezyMessageDialog(
         context,
         message: AppLocalizations.of(context).stageLocked,
@@ -256,7 +257,7 @@ class _WorldMapScreenState extends State<WorldMapScreen>
   }
 
   Future<void> _openLevel(LevelModel level) async {
-    widget.sound.tileTap();
+    widget.sound.uiTap();
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => GameScreen(
@@ -277,11 +278,12 @@ class _WorldMapScreenState extends State<WorldMapScreen>
 
   Future<void> _playUnlock(int index, LevelModel level) async {
     if (_unlockPhases[index] != null) return;
-    widget.sound.tileTap();
+    widget.sound.uiTap();
     setState(() => _unlockPhases[index] = _UnlockPhase.unlocking);
     await Future<void>.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     setState(() => _unlockPhases[index] = _UnlockPhase.free);
+    widget.sound.stageUnlock();
     await Future<void>.delayed(const Duration(milliseconds: 500));
     await widget.storage.revealLevel(level.id);
     if (!mounted) return;
@@ -359,7 +361,7 @@ class _WorldMapScreenState extends State<WorldMapScreen>
                 ? strings.learningMode
                 : strings.challengeMode,
             onPressed: () {
-              widget.sound.tileTap();
+              widget.sound.uiTap();
               setState(() {
                 _mode = _mode == GameMode.learning
                     ? GameMode.challenge

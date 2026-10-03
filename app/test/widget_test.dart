@@ -18,6 +18,28 @@ import 'package:bezy/ui/features/game/components/stats_bar.dart';
 import 'package:bezy/ui/features/game/components/tile_factory.dart';
 
 void main() {
+  testWidgets('Home sound button persists mute and unmute', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'pref_locale_code': 'en'});
+    final prefs = await SharedPreferences.getInstance();
+    final storage = ProgressStorage(prefs);
+    final sound = SoundService(storage);
+
+    await tester.pumpWidget(BezyApp(storage: storage, sound: sound));
+    await tester.pumpAndSettle();
+
+    final toggle = find.byKey(const ValueKey('sound-toggle'));
+    expect(toggle, findsOneWidget);
+    expect(storage.isSoundEnabled, isTrue);
+    await tester.tap(toggle);
+    await tester.pump();
+    expect(storage.isSoundEnabled, isFalse);
+    await tester.tap(toggle);
+    await tester.pump();
+    expect(storage.isSoundEnabled, isTrue);
+  });
+
   testWidgets('Framed messages grow vertically without leaking content', (
     WidgetTester tester,
   ) async {
@@ -1247,15 +1269,19 @@ void main() {
       ),
     );
     await tester.pump();
-    for (final index in [3, 2, 9, 8, 15, 14, 21]) {
+    final route = level.solutionRoutes.first;
+    final icePosition = route.indexWhere((index) => level.tiles[index].isIce);
+    expect(icePosition, greaterThan(0));
+    expect(icePosition, lessThan(route.length - 1));
+    for (final index in route.take(icePosition + 1)) {
       await tester.tap(find.byKey(ValueKey('tile-$index')));
       await tester.pump();
     }
 
     final state = tester.widget<BoardWidget>(find.byType(BoardWidget)).state;
-    expect(state.currentPath, [3, 2, 9, 8, 15, 14, 21, 28]);
-    expect(state.currentCellIndex, 28);
-    expect(state.moves, 7);
+    expect(state.currentPath, route.take(icePosition + 2).toList());
+    expect(state.currentCellIndex, route[icePosition + 1]);
+    expect(state.moves, icePosition + 1);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
