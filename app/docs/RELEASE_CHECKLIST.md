@@ -34,9 +34,8 @@ Last updated: 3 October 2026
 - [x] Audience decided (2026-10-03): not designated for children; general
   audience 13+. Complete both stores' content-rating questionnaires truthfully.
   See `docs/CHILDREN_AND_AGE_RATING.md`.
-- [ ] Enable GitHub Pages (Settings → Pages → Source: GitHub Actions). On
-  3 October 2026 the privacy URL returned 404, and the in-app privacy link
-  points to it.
+- [x] GitHub Pages enabled (4 October 2026). Live:
+  `https://ezylevy.github.io/Bezy/privacy-policy.html` and `/support.html`.
 - [x] World-map Learning/Challenge toggle hidden for V1 and the “Admin testing
   pass” button hidden in release builds (`lib/core/config/app_features.dart`).
   Verify on a release build that neither icon appears on the map.
