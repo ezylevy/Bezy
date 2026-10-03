@@ -17,8 +17,12 @@ Last updated: 3 October 2026
 
 ## Owner actions required before a store build
 
-- [ ] Replace the temporary launcher artwork with the final owner-supplied
-  Android, iOS, and 512×512 Play Store icons.
+- [x] Android launcher icon (legacy + adaptive, background `#121826`) and the
+  512×512 Play Store icon generated from the owner's `assets/logos/icon.png`
+  (`store_assets/play_icon_512.png`). iOS icons still pending.
+- [x] Play feature graphic draft: `store_assets/feature_graphic_1024x500.png`.
+- [ ] Run `tool\run_release_checks.cmd` (analyze, tests, route generator,
+  release APK, ABI check); results go to `diagnostics/release-checks.log`.
 - [ ] Produce truthful screenshots from stable builds (recommended: home,
   world map, normal board, Joker/teleport board, and victory). Apple accepts
   1–10 screenshots per device class; Google Play also requires preview assets.
