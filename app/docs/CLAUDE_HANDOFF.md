@@ -109,6 +109,11 @@ the repository's existing local Web workflow when it is needed for testing.
    x86_64-only artifact rather than the current Dart code.
 5. Background music and guaranteed cross-device cloud saves are not implemented.
 
+`app/dist/BEZY-Test.apk` is currently tracked and is about 89 MB. It predates
+the final route/sound changes, so do not treat it as the verified current build.
+GitHub accepts it but warns that it exceeds the recommended 50 MB limit; use a
+release attachment or Git LFS for future binary distribution if appropriate.
+
 ## Guardrails
 
 - Treat `generated_solution_routes.dart` as generated output.
