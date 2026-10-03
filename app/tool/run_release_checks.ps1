@@ -9,7 +9,7 @@ Start-Transcript -Path $log -Force | Out-Null
 
 function Step($name, [scriptblock]$cmd) {
     Write-Host "`n===== $name ====="
-    & $cmd
+    & $cmd 2>&1 | Out-Host
     $code = $LASTEXITCODE
     Write-Host "===== RESULT: $name -> exit $code ====="
     return $code
