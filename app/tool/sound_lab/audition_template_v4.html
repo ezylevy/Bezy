@@ -1,0 +1,163 @@
+<title>BEZY Sound Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Secular+One&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: single-column console. Palette legend on top, cue rows grouped by
+   moment in the game, a fixed bar at the bottom that collects the picks. */
+:root{
+  --bg:#0b1020; --panel:#141d38; --panel-2:#1b2648; --line:#2a3767;
+  --fg:#eef2ff; --muted:#93a0c8;
+  --a:#22d3ee; --b:#fbbf24; --t1:#f0b47a; --t2:#8fd3e8; --t3:#c4b5fd;
+  --display:"Secular One","Rubik",system-ui,sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-inline:16px;padding-block:0 120px;
+  background:radial-gradient(ellipse at 50% -10%, #202c54 0%, var(--bg) 60%) fixed var(--bg)}
+.wrap{max-width:860px;margin-inline:auto;display:flex;flex-direction:column;gap:28px}
+header{padding-block:32px 4px;display:flex;flex-direction:column;gap:10px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,6vw,46px);line-height:1.05;margin:0;text-wrap:balance}
+h1 .motif{font-family:var(--mono);font-size:.38em;color:var(--muted);letter-spacing:.08em;display:block;margin-top:8px}
+.lede{color:var(--muted);margin:0;max-width:62ch}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pal[data-k="A"]{--k:var(--a)} .pal[data-k="B"]{--k:var(--b)} .pal[data-k="C"]{--k:var(--c)}
+.pal h2{margin:0;font-family:var(--display);font-weight:400;font-size:22px;display:flex;align-items:center;gap:10px}
+.badge{font-family:var(--mono);font-size:13px;color:var(--bg);background:var(--k);border-radius:6px;padding:1px 7px}
+.pal p{margin:0;color:var(--muted);font-size:14px}
+.pal .row{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--fg);padding:7px 12px}
+button:hover{border-color:var(--muted)}
+button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.ghost{background:transparent}
+section h3{font-family:var(--display);font-weight:400;font-size:20px;margin:0 0 10px;color:var(--muted)}
+.cues{display:flex;flex-direction:column;gap:8px}
+.cue{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.cue .name{min-width:0}
+.cue .he{font-weight:500}
+.cue .id{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.opts{display:flex;gap:6px}
+.opt{width:56px;display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 0;line-height:1.1}
+.opt .k{font-family:var(--mono);font-size:15px}
+.opt .s{font-size:11px;color:var(--muted)}
+.opt[data-k="A"]{--k:var(--a)} .opt[data-k="B"]{--k:var(--b)} .opt[data-k="C"]{--k:var(--c)}
+.opt.picked{background:var(--k);border-color:var(--k);color:var(--bg)}
+.opt.picked .s{color:var(--bg)}
+.opt.playing{box-shadow:0 0 0 3px color-mix(in srgb,var(--k) 45%,transparent)}
+.bar{position:fixed;inset-inline:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 92%,transparent);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+.bar .in{max-width:860px;margin-inline:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.count{font-variant-numeric:tabular-nums;color:var(--muted)}
+.count b{color:var(--fg)}
+.primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:700}
+.dist{display:flex;gap:10px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+#out{width:100%;min-height:70px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;font-family:var(--mono);font-size:12px;padding:8px}
+.how{color:var(--muted);font-size:14px;margin:0}
+@media (max-width:520px){.cue{grid-template-columns:1fr}.opts{justify-content:flex-start}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<style>
+.opt{width:auto;min-width:56px;padding:6px 10px}
+.opt[data-k="1"]{--k:var(--t1)} .opt[data-k="2"]{--k:var(--t2)} .opt[data-k="3"]{--k:var(--t3)}
+.opt[data-k="A"],.opt[data-k="B"],.opt[data-k="D"],.opt[data-k="E"]{--k:var(--fg)}
+.cue{grid-template-columns:minmax(0,1fr)}
+.takes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.take{display:flex;align-items:center;gap:10px;text-align:start;justify-content:flex-start}
+.take .d{font-size:14px;line-height:1.3}
+.kept-list{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;gap:8px;align-items:center;background:var(--panel);border:1px dashed var(--line);border-radius:999px;padding:4px 6px 4px 12px;font-size:14px}
+.chip button{padding:2px 10px;border-radius:999px;font-family:var(--mono);font-size:12px}
+.empty{color:var(--muted)}
+</style>
+<style>
+.older{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.older .lbl{font-size:12px;color:var(--muted);margin-inline-end:4px}
+.older .opt{min-width:44px;padding:3px 10px}
+.save{font-size:13px;color:var(--muted)}
+.save.ok{color:var(--t2)}
+</style>
+<div class="wrap" dir="rtl">
+  <header>
+    <h1>מעבדת הסאונד של BEZY
+      <span class="motif">ROUND 3 · צליל אחר לכל רגע</span>
+    </h1>
+    <p class="lede">לכל אירוע שלוש אפשרויות חדשות עם תיאור, ומתחתן הגרסאות מהסבבים הקודמים (A, B, D, E) למי שאהב אחת מהן. לחיצה משמיעה ובוחרת. הבחירות נשמרות אוטומטית בענן, כך שהן לא הולכות לאיבוד ו-Claude קורא אותן ישירות. אין צורך להעתיק.</p>
+  </header>
+  <div id="groups" class="wrap" style="gap:28px"></div>
+</div>
+
+<div class="bar" dir="rtl"><div class="in">
+  <span class="count">נבחרו <b id="n">0</b> מתוך <b id="total">0</b></span>
+  <span class="save" id="save">מתחבר לשמירה…</span>
+  <span style="flex:1"></span>
+  <button class="ghost" id="stop">עצור</button>
+</div></div>
+
+<script>
+/*DATA*/
+const GROUPS=[
+ ['רגעי שיא',['victory_sting','target_reached','star_earned','stage_unlock','app_launch']],
+ ['הודעות, רמז ופתרון',['message_report','hint','solution_preview','solution_step']],
+ ['ניווט וממשק',['ui_tap','toggle_on','map_open','locked_stage']],
+ ['משחק על הלוח',['tile_start','move_invalid','wall_blocked','gate_closed','gate_open','reset']],
+ ['תאים מיוחדים',['joker_reveal','joker_choose','teleport','ice_slide','mirror','clone','zero','black_hole','bomb','lonely_locked','lonely_unlock']]];
+const BY=Object.fromEntries(CUES.map(c=>[c.id,c]));
+const LKEY='bezy-sound-lab-final';
+const read=k=>{try{return JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){return {}}};
+// Whatever survived locally from earlier rounds, used only to seed an empty cloud record.
+function localPicks(){
+  const out=read(LKEY);if(Object.keys(out).length)return out;
+  const v1=read('bezy-sound-lab-picks'),v2=read('bezy-sound-lab-v2'),v3=read('bezy-sound-lab-v3'),r={};
+  CUES.forEach(c=>{const p=v2[c.id]||((v1[c.id]==='A'||v1[c.id]==='B')?v1[c.id]:null);
+    if(v3[c.id])r[c.id]='R3-'+v3[c.id];else if(p&&p!=='F')r[c.id]=p});
+  return r;
+}
+let picks=localPicks(), ref=null, chain=Promise.resolve();
+const audio=new Audio();
+const stopAll=()=>{audio.pause();document.querySelectorAll('.playing').forEach(e=>e.classList.remove('playing'))};
+function play(src,btn){stopAll();audio.src=src;audio.currentTime=0;audio.play().catch(()=>{});
+  if(btn){btn.classList.add('playing');audio.onended=()=>btn.classList.remove('playing')}}
+const srcOf=(id,p)=>p.startsWith('R3-')?AUDIO['R3/'+id+'_'+p.slice(3)]:AUDIO[p+'/'+id];
+function setSave(text,ok){const el=document.getElementById('save');el.textContent=text;el.classList.toggle('ok',!!ok)}
+function persist(){
+  try{localStorage.setItem(LKEY,JSON.stringify(picks))}catch(e){}
+  if(!ref){setSave('נשמר בדפדפן הזה בלבד');return}
+  const snapshot={...picks};
+  chain=chain.then(()=>ref.set(snapshot)).then(()=>setSave('נשמר בענן ✓',true)).catch(()=>setSave('השמירה בענן נכשלה, נשמר בדפדפן'));
+}
+function btn(id,p,label,cls){const on=picks[id]===p;
+  return `<button class="opt ${cls}${on?' picked':''}" data-k="${p.startsWith('R3-')?p.slice(3):p}" data-id="${id}" data-p="${p}">${label}</button>`}
+function render(){
+  document.getElementById('groups').innerHTML=GROUPS.map(([title,ids])=>`
+    <section><h3>${title}</h3><div class="cues">${ids.map(id=>{const c=BY[id];return `
+      <div class="cue${picks[id]?' done':''}"><div class="name"><div class="he">${c.he}</div><div class="id">${id}</div></div>
+        <div class="takes">${c.takes.map((d,i)=>btn(id,'R3-'+(i+1),`<span class="k">${i+1}</span><span class="d">${d}</span>`,'take')).join('')}</div>
+        <div class="older"><span class="lbl">גרסאות קודמות:</span>${['A','B','D','E'].map(p=>btn(id,p,p,'')).join('')}</div>
+      </div>`}).join('')}</div></section>`).join('');
+  document.getElementById('n').textContent=CUES.filter(c=>picks[c.id]).length;
+  document.getElementById('total').textContent=CUES.length;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.opt');if(!b)return;
+  const id=b.dataset.id,p=b.dataset.p;picks[id]=p;render();persist();
+  play(srcOf(id,p),document.querySelector(`.opt[data-id="${id}"][data-p="${p}"]`));
+});
+document.getElementById('stop').onclick=stopAll;
+render();
+(async()=>{
+  const db=window.claude?await window.claude.use('db'):null;
+  if(!db){setSave('נשמר בדפדפן הזה בלבד');return}
+  ref=db.doc('picks/current');
+  let first=true;
+  ref.onSnapshot(snap=>{
+    if(snap.exists){picks={...snap.data()};try{localStorage.setItem(LKEY,JSON.stringify(picks))}catch(e){};render();setSave('נשמר בענן ✓',true)}
+    else if(first&&Object.keys(picks).length){persist()}
+    else setSave('מחובר לשמירה בענן',true);
+    first=false;
+  },()=>setSave('אין חיבור לשמירה בענן, נשמר בדפדפן'));
+})();
+</script>

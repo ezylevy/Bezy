@@ -26,6 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
     'https://ezylevy.github.io/Bezy/privacy-policy.html',
   );
 
+  @override
+  void initState() {
+    super.initState();
+    // Launch motif, in sync with the animated logo intro (once per launch).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.sound.appLaunch();
+    });
+  }
+
   void _refresh() => setState(() {});
 
   Future<void> _openPrivacyPolicy(AppLocalizations strings) async {

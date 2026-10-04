@@ -765,6 +765,7 @@ class _GameScreenState extends State<GameScreen>
 
     if (!mounted) return;
 
+    widget.sound.starsEarned(stars);
     showDialog(
       context: context,
       barrierDismissible: false,

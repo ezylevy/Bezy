@@ -99,6 +99,19 @@ class SoundService {
   void bomb() => _sound('bomb', volume: 0.65);
   void lonelyUnlock() => _sound('lonely_unlock', volume: 0.58);
 
+  /// Plays once per cold launch, together with the animated home logo.
+  void appLaunch() => _sound('app_launch', volume: 0.7);
+
+  /// One short accent per awarded star, after the victory sting.
+  void starsEarned(int stars) {
+    for (var i = 0; i < stars; i++) {
+      Future.delayed(
+        Duration(milliseconds: 900 + i * 260),
+        () => _sound('star_earned', volume: 0.6),
+      );
+    }
+  }
+
   /// Celebratory vibration pattern when solving a puzzle
   void victory() {
     if (_storage.isHapticsEnabled) {

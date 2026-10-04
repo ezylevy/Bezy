@@ -11,6 +11,24 @@ The source-of-truth generator is `tool/generate_original_sfx.dart`. Run it with
 the Dart SDK executable (or `dart run` after dependencies are available) to
 rebuild the complete WAV set deterministically.
 
+## Current state (2026-10-04)
+
+The shipped effects were chosen by the product owner in the BEZY Sound Lab
+(`tool/sound_lab/`): three generated rounds, auditioned per cue. The final
+mapping is recorded in `tool/sound_lab/chosen_sounds.txt` and applied with
+`tool/sound_lab/apply_choices.py`. Direction after owner feedback: soft,
+pleasant, acoustic-sounding (xylophone, glockenspiel, harp, music box,
+marimba, wood, snare/bugle for the solution) rather than video-game bleeps,
+with a distinct idea per moment. All sounds are synthesized from scratch in
+this repository; no third-party recordings or licences.
+
+- Board movement stays silent (haptics only).
+- `app_launch` plays once per launch with the animated home logo.
+- `star_earned` plays once per awarded star after `victory_sting`.
+
+To change a sound: regenerate with the Sound Lab scripts, update
+`chosen_sounds.txt`, and re-run `apply_choices.py`.
+
 ## Creative direction
 
 BEZY should sound bright, precise, clever, and energetic—not childish or like a
