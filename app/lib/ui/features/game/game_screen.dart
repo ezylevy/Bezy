@@ -43,6 +43,7 @@ class _GameScreenState extends State<GameScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late GameState _gameState;
   late AnimationController _pulseController;
+  final List<Timer> _starTimers = [];
   bool _assetsPrecached = false;
   int _solutionPlaybackId = 0;
   final Random _random = Random();
@@ -302,6 +303,9 @@ class _GameScreenState extends State<GameScreen>
     _solutionPlaybackId++;
     WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
+    for (final timer in _starTimers) {
+      timer.cancel();
+    }
     _pulseController.dispose();
     super.dispose();
   }
@@ -765,7 +769,13 @@ class _GameScreenState extends State<GameScreen>
 
     if (!mounted) return;
 
-    widget.sound.starsEarned(stars);
+    // One accent per earned star after the victory sting. Timers are owned
+    // by this screen and cancelled in dispose().
+    for (var i = 0; i < stars; i++) {
+      _starTimers.add(
+        Timer(Duration(milliseconds: 900 + i * 260), widget.sound.starEarned),
+      );
+    }
     showDialog(
       context: context,
       barrierDismissible: false,

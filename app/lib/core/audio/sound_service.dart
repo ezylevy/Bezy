@@ -102,15 +102,8 @@ class SoundService {
   /// Plays once per cold launch, together with the animated home logo.
   void appLaunch() => _sound('app_launch', volume: 0.7);
 
-  /// One short accent per awarded star, after the victory sting.
-  void starsEarned(int stars) {
-    for (var i = 0; i < stars; i++) {
-      Future.delayed(
-        Duration(milliseconds: 900 + i * 260),
-        () => _sound('star_earned', volume: 0.6),
-      );
-    }
-  }
+  /// One short accent for an awarded star (scheduled by the game screen).
+  void starEarned() => _sound('star_earned', volume: 0.6);
 
   /// Celebratory vibration pattern when solving a puzzle
   void victory() {

@@ -182,8 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedBezyLogo(height: compact ? 150 : 210),
-          SizedBox(height: compact ? 8 : 14),
+          AnimatedBezyLogo(height: compact ? 118 : 210),
+          SizedBox(height: compact ? 4 : 14),
           Text(
             strings.appSubtitle,
             textAlign: TextAlign.center,

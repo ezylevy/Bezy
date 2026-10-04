@@ -224,7 +224,7 @@ void main() {
     await tester.pumpWidget(BezyApp(storage: storage, sound: sound));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Journey'));
-    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('campaign-map-overview')));
     await tester.pump();
     await tester.pump();
