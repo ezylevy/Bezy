@@ -7,6 +7,7 @@ import '../../../core/storage/progress_storage.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/game_mode.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../components/bezy_brand.dart';
 import '../custom/custom_game_screen.dart';
 import '../levels/world_map_screen.dart';
 
@@ -44,14 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final strings = AppLocalizations.of(context);
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F172A), AppTheme.bgDark],
-          ),
-        ),
+      body: BezyBackground(
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -114,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceDark,
+            color: const Color(0xFF111A33).withValues(alpha: 0.82),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppTheme.gold.withValues(alpha: 0.5)),
           ),
@@ -175,58 +169,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHero(AppLocalizations strings, {bool compact = false}) {
-    final iconSize = compact ? 70.0 : 90.0;
-
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: iconSize,
-            height: iconSize,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.startGreen, AppTheme.pathCyan],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(compact ? 22 : 26),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.pathCyan.withValues(alpha: 0.35),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.route_rounded,
-              size: compact ? 42 : 52,
-              color: AppTheme.bgDark,
-            ),
-          ),
-          SizedBox(height: compact ? 12 : 20),
+          AnimatedBezyLogo(height: compact ? 150 : 210),
+          SizedBox(height: compact ? 8 : 14),
           Text(
-            strings.appTitle,
+            strings.appSubtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: compact ? 33 : 38,
-              fontWeight: FontWeight.w900,
+            style: const TextStyle(
+              fontSize: 19,
               color: AppTheme.textPrimary,
-              letterSpacing: 0.5,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            strings.appSubtitle,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 19, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(height: 4),
-          Text(
             strings.createdBy,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               color: AppTheme.pathCyan,
               fontWeight: FontWeight.w500,
             ),
@@ -323,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _ruleItem(
                 Icons.play_circle_fill_rounded,
-                AppTheme.startGreen,
+                AppTheme.gold,
                 strings.startTile,
                 strings.startTileDescription,
               ),
@@ -426,13 +388,16 @@ class _MenuCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceDark,
+            color: const Color(0xFF111A33).withValues(alpha: 0.82),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppTheme.cardBorder),
+            border: Border.all(
+              color: accentColor.withValues(alpha: 0.55),
+              width: 1.4,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.bgDark.withValues(alpha: 0.3),
-                blurRadius: 10,
+                color: accentColor.withValues(alpha: 0.18),
+                blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
             ],

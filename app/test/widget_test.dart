@@ -99,7 +99,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(storage.localeCode, 'en');
-    expect(find.text('BEZY'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-bezy-logo')), findsOneWidget);
     expect(find.text('Journey'), findsOneWidget);
     expect(find.text('Free Play'), findsNothing);
     expect(
@@ -146,7 +146,7 @@ void main() {
     await tester.tap(find.text('How to play'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Start tile'), findsOneWidget);
+    expect(find.text('Entry gate'), findsOneWidget);
     expect(find.text('Move on the board'), findsOneWidget);
     expect(find.text('Reach the target'), findsOneWidget);
     expect(find.text('Stone walls'), findsNothing);
@@ -185,9 +185,11 @@ void main() {
       viewer.transformationController!.value.getMaxScaleOnAxis(),
       greaterThan(1),
     );
+    // The map is clamped to cover the viewport, so it starts flush with the
+    // top edge instead of leaving a gap of background above it.
     expect(
       viewer.transformationController!.value.getTranslation().y,
-      closeTo(10, 0.1),
+      closeTo(0, 0.1),
     );
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('stage-node-1'))).dy,
@@ -199,6 +201,48 @@ void main() {
         tester.getCenter(find.byKey(const ValueKey('stage-node-10'))).dx,
       ),
     );
+  });
+
+  testWidgets('Late-stage map focus never reveals space beyond the artwork', (
+    WidgetTester tester,
+  ) async {
+    final levels = CampaignLevels.getAllLevels();
+    final values = <String, Object>{
+      'pref_locale_code': 'en',
+      'seen_basic_instructions': true,
+    };
+    for (final level in levels.take(levels.length - 2)) {
+      values['unlocked_level_${level.id}'] = true;
+      values['level_stars_${level.id}'] = 3;
+    }
+    values['unlocked_level_${levels[levels.length - 2].id}'] = true;
+    SharedPreferences.setMockInitialValues(values);
+    final prefs = await SharedPreferences.getInstance();
+    final storage = ProgressStorage(prefs);
+    final sound = SoundService(storage);
+
+    await tester.pumpWidget(BezyApp(storage: storage, sound: sound));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Journey'));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.tap(find.byKey(const ValueKey('campaign-map-overview')));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+
+    final viewerFinder = find.byType(InteractiveViewer);
+    final viewer = tester.widget<InteractiveViewer>(viewerFinder);
+    final viewport = tester.getSize(viewerFinder);
+    final transform = viewer.transformationController!.value;
+    final scale = transform.getMaxScaleOnAxis();
+    final translation = transform.getTranslation();
+    final mapHeight = viewport.width / (941 / 1672) * scale;
+    final mapWidth = viewport.width * scale;
+
+    expect(translation.y, lessThanOrEqualTo(0.01));
+    expect(translation.x, lessThanOrEqualTo(0.01));
+    expect(translation.y + mapHeight, greaterThanOrEqualTo(viewport.height - 0.5));
+    expect(translation.x + mapWidth, greaterThanOrEqualTo(viewport.width - 0.5));
   });
 
   testWidgets('Newly approved stage plays unlock sequence before opening', (
@@ -271,7 +315,7 @@ void main() {
     await tester.pumpWidget(BezyApp(storage: storage, sound: sound));
     await tester.pumpAndSettle();
 
-    expect(find.text('BEZY'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-bezy-logo')), findsOneWidget);
     expect(find.text('Journey'), findsOneWidget);
     expect(find.text('Free Play'), findsNothing);
     expect(tester.takeException(), isNull);

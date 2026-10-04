@@ -255,3 +255,22 @@
   false`, campaign stays in the Learning mode Home already passed) and the
   "Admin testing pass" button is shown only when `!kReleaseMode`. No tests
   referenced either control.
+
+## 2026-10-04 — Owner bug-fix pass (Claude)
+
+- World map: focus/zoom transforms are clamped so the artwork always covers
+  the viewport (late stages 46–50 no longer reveal empty background); the
+  InteractiveViewer minimum scale is the smallest zoom that still fills the
+  screen. New widget test covers late-stage focus.
+- Portrait stats panel: moves/sum/target labels and values lifted 7 px.
+- Entry gates: green border/tint removed; bold gold border + gold glow; gold
+  start icon. Instructions renamed to "Entry gate / שער כניסה" with golden
+  wording (EN/HE) and the stage 1 description updated.
+- Branding: new `lib/ui/components/bezy_brand.dart` (BezyLogo,
+  AnimatedBezyLogo one-shot launch intro, BezyBackground icon-style navy
+  background with faint tile grid). Logo replaces the "BEZY" text on the
+  language screen, home hero and under every board. Logo asset downscaled to
+  900 px (original kept in `_original_assets/logos/`).
+- Home screen restyled on the icon background with translucent accent cards.
+- Version bumped to 1.0.0+2 for the next App Bundle.
+- Sounds: redesign deferred to the end of the polish pass (owner request).

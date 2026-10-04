@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../components/bezy_brand.dart';
 
 class LanguageSelectionScreen extends StatelessWidget {
   const LanguageSelectionScreen({super.key, required this.onLocaleSelected});
@@ -10,14 +11,7 @@ class LanguageSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F172A), AppTheme.bgDark],
-          ),
-        ),
+      body: BezyBackground(
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -27,23 +21,8 @@ class LanguageSelectionScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.route_rounded,
-                      size: 76,
-                      color: AppTheme.pathCyan,
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'BEZY',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 46,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
+                    const BezyLogo(height: 190),
+                    const SizedBox(height: 18),
                     const Text(
                       'Choose your language\nבחרו שפה',
                       textAlign: TextAlign.center,

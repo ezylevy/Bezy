@@ -37,8 +37,11 @@ class StatsBar extends StatelessWidget {
       builder: (context, constraints) {
         final width = math.min(constraints.maxWidth - 20, 720.0);
         final height = (width / 3).clamp(118.0, 175.0);
-        final valueTop = height * 0.26;
-        final labelTop = height * 0.12;
+        // Portrait only: lift the moves/sum/target labels and values 7 px so
+        // they sit centered in the panel artwork's upper windows.
+        const portraitLift = 7.0;
+        final valueTop = height * 0.26 - portraitLift;
+        final labelTop = height * 0.12 - portraitLift;
 
         return Center(
           child: SizedBox(

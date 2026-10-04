@@ -11,6 +11,7 @@ import '../../../domain/models/level_model.dart';
 import '../../../domain/models/tile_model.dart';
 import '../../../domain/solver/path_solver.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../components/bezy_brand.dart';
 import '../../components/bezy_message_dialog.dart';
 import '../victory/victory_dialog.dart';
 import 'components/board_widget.dart';
@@ -1237,28 +1238,11 @@ class _BezyMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'BEZY',
-      image: true,
-      child: Container(
-        key: const ValueKey('bezy-board-mark'),
-        margin: const EdgeInsets.only(bottom: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceElevated.withValues(alpha: 0.78),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.pathCyan, width: 1.2),
-        ),
-        child: const Text(
-          'BEZY',
-          style: TextStyle(
-            color: AppTheme.pathCyan,
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 2.2,
-          ),
-        ),
-      ),
+    // The BEZY logo artwork replaces the former text badge under the board.
+    return const Padding(
+      key: ValueKey('bezy-board-mark'),
+      padding: EdgeInsets.only(top: 2, bottom: 3),
+      child: BezyLogo(height: 38),
     );
   }
 }

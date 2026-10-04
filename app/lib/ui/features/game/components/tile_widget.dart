@@ -44,6 +44,10 @@ class ModularTileContainer extends StatelessWidget {
   final Color? customBgColor;
   final Color? customBorderColor;
 
+  /// Draws a thicker border and a glow in [customBorderColor]; used for the
+  /// golden entry gates so they catch the eye.
+  final bool emphasized;
+
   const ModularTileContainer({
     super.key,
     required this.tile,
@@ -52,6 +56,7 @@ class ModularTileContainer extends StatelessWidget {
     this.onTap,
     this.customBgColor,
     this.customBorderColor,
+    this.emphasized = false,
   });
 
   @override
@@ -78,7 +83,9 @@ class ModularTileContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: borderColor,
-          width: state.isHinted || state.isInPath ? 2.5 : 1.2,
+          width: state.isHinted || state.isInPath
+              ? 2.5
+              : (emphasized ? 2.6 : 1.2),
         ),
         boxShadow: [
           BoxShadow(
@@ -86,8 +93,12 @@ class ModularTileContainer extends StatelessWidget {
                 ? AppTheme.pathCyan.withValues(alpha: 0.4)
                 : (state.isHinted
                       ? AppTheme.gold.withValues(alpha: 0.45)
-                      : AppTheme.bgDark.withValues(alpha: 0.25)),
-            blurRadius: state.isInPath || state.isHinted ? 8 : 4,
+                      : (emphasized
+                            ? borderColor.withValues(alpha: 0.55)
+                            : AppTheme.bgDark.withValues(alpha: 0.25))),
+            blurRadius: state.isInPath || state.isHinted
+                ? 8
+                : (emphasized ? 10 : 4),
             offset: const Offset(0, 2),
           ),
         ],

@@ -222,14 +222,14 @@ class StartTileComponent extends StatelessWidget {
     final isSelected = state.isInPath || state.isSolutionStep;
     final showAsStart = state.isStart;
 
+    // Entry gates keep their golden artwork and get a bold gold frame and
+    // glow so they stand out on the board (the old green border faded away).
     return ModularTileContainer(
       tile: tile,
       state: state,
       onTap: onTap,
-      customBgColor: isSelected || !showAsStart
-          ? null
-          : AppTheme.startGreen.withValues(alpha: 0.2),
-      customBorderColor: showAsStart ? AppTheme.startGreen : null,
+      customBorderColor: showAsStart ? AppTheme.gold : null,
+      emphasized: showAsStart && !isSelected,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -246,8 +246,8 @@ class StartTileComponent extends StatelessWidget {
               left: 2,
               child: Icon(
                 Icons.play_circle_fill_rounded,
-                size: gridSize > 5 ? 10 : 14,
-                color: AppTheme.startGreen,
+                size: gridSize > 5 ? 11 : 15,
+                color: AppTheme.gold,
               ),
             ),
         ],

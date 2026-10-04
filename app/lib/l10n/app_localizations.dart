@@ -67,10 +67,10 @@ class AppLocalizations {
   );
   String get instructionsTitle =>
       _value(en: 'Game instructions', he: 'הוראות המשחק');
-  String get startTile => _value(en: 'Start tile', he: 'משבצת התחלה');
+  String get startTile => _value(en: 'Entry gate', he: 'שער כניסה');
   String get startTileDescription => _value(
-    en: 'Begin at one of the green start tiles around the board.',
-    he: 'התחילו מאחת ממשבצות ההתחלה הירוקות שבהיקף הלוח.',
+    en: 'Begin at one of the golden gate tiles around the board.',
+    he: 'התחילו מאחד משערי הכניסה המוזהבים שבהיקף הלוח.',
   );
   String get boardMovement => _value(en: 'Move on the board', he: 'תנועה בלוח');
   String get boardMovementDescription => _value(
@@ -167,8 +167,8 @@ class AppLocalizations {
   String get resetBoard => _value(en: 'Reset board', he: 'איפוס לוח');
   String get instructions => _value(en: 'Instructions', he: 'הוראות');
   String get startRequired => _value(
-    en: 'Start from one of the green start tiles.',
-    he: 'עליכם להתחיל מאחת ממשבצות ההתחלה הירוקות.',
+    en: 'Start from one of the golden gate tiles.',
+    he: 'עליכם להתחיל מאחד משערי הכניסה המוזהבים.',
   );
   String get adjacentOnly => _value(
     en: 'Move only to an adjacent tile: up, down, left, or right.',

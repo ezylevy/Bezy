@@ -20,7 +20,16 @@ $results['flutter --version'] = Step 'flutter --version' { flutter --version }
 $results['pub get']           = Step 'pub get' { flutter pub get }
 $results['analyze']           = Step 'analyze' { flutter analyze --no-pub }
 $results['test']              = Step 'test' { flutter test --no-pub }
+$routes = 'lib/domain/campaign/generated_solution_routes.dart'
 $results['route generator']   = Step 'route generator' { flutter test --no-pub tool/generate_campaign_routes_test.dart }
+# The generator test rewrites the frozen route cache and its bounded search is
+# not fully deterministic. A release check must not change shipped routes, so
+# restore the committed cache after verifying that generation still succeeds.
+git diff --quiet -- $routes
+if ($LASTEXITCODE -ne 0) {
+    git checkout -- $routes
+    Write-Host 'NOTE: route generator produced a different cache; restored the committed routes.'
+}
 $results['build apk']         = Step 'build apk --release' { flutter build apk --release }
 
 $apk = Join-Path $app 'build\app\outputs\flutter-apk\app-release.apk'

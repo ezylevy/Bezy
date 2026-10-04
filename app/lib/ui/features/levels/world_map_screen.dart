@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -186,10 +187,32 @@ class _WorldMapScreenState extends State<WorldMapScreen>
     final scale = viewport.height > viewport.width ? 1.55 : 1.18;
     final tx = viewport.width / 2 - center.dx * mapWidth * scale;
     final ty = 70 - top * mapHeight * scale;
-    final target = Matrix4.diagonal3Values(scale, scale, 1)
-      ..setTranslationRaw(tx, ty, 0);
+    final target = _coveringTransform(scale, tx, ty);
 
     _animateMapTo(target, animate: animate);
+  }
+
+  /// Smallest zoom at which the map still fills the whole viewport, so no
+  /// background can ever show beside or below the artwork.
+  double _minMapScale(Size viewport, double mapWidth) {
+    final mapHeight = mapWidth / _mapAspectRatio;
+    return math.max(1.0, viewport.height / mapHeight);
+  }
+
+  /// Builds a map transform clamped so the artwork always covers the screen.
+  /// Late stages sit near the bottom edge of the map; without this clamp the
+  /// focus animation scrolled past the artwork and revealed empty space.
+  Matrix4 _coveringTransform(double scale, double tx, double ty) {
+    final viewport = _viewportSize!;
+    final mapWidth = _mapWidth!;
+    final mapHeight = mapWidth / _mapAspectRatio;
+    final s = math.max(scale, _minMapScale(viewport, mapWidth));
+    final contentWidth = mapWidth * s;
+    final contentHeight = mapHeight * s;
+    final x = tx.clamp(math.min(0.0, viewport.width - contentWidth), 0.0);
+    final y = ty.clamp(math.min(0.0, viewport.height - contentHeight), 0.0);
+    return Matrix4.diagonal3Values(s, s, 1)
+      ..setTranslationRaw(x.toDouble(), y.toDouble(), 0);
   }
 
   void _focusMapStart({bool animate = true}) {
@@ -202,13 +225,13 @@ class _WorldMapScreenState extends State<WorldMapScreen>
         firstGroup.reduce((a, b) => a + b) / firstGroup.length.toDouble();
     final scale = viewport.height > viewport.width ? 1.28 : 1.1;
     final tx = viewport.width / 2 - center.dx * mapWidth * scale;
-    const ty = 10.0;
-    final target = Matrix4.diagonal3Values(scale, scale, 1)
-      ..setTranslationRaw(tx, ty, 0);
+    final target = _coveringTransform(scale, tx, 0);
+    final ty = target.getTranslation().y;
+    final appliedScale = target.getMaxScaleOnAxis();
 
     // Entering the detailed map should feel like a gentle glide to its top,
     // with stage 1 comfortably inside the viewport rather than clipped above it.
-    final firstStageY = ty + _stageCenters.first.dy * mapHeight * scale;
+    final firstStageY = ty + _stageCenters.first.dy * mapHeight * appliedScale;
     assert(firstStageY > 40);
     _animateMapTo(target, animate: animate);
   }
@@ -419,9 +442,9 @@ class _WorldMapScreenState extends State<WorldMapScreen>
                     ? InteractiveViewer(
                         transformationController: _mapController,
                         constrained: false,
-                        // The canvas is already viewport-wide. Keeping the
-                        // minimum at 1 prevents shrinking it below the screen.
-                        minScale: 1,
+                        // Never zoom out past the point where the artwork
+                        // stops covering the viewport (no empty background).
+                        minScale: _minMapScale(viewport, mapWidth),
                         maxScale: 3.5,
                         // Keep at least one edge of the full-width/tall canvas
                         // pinned to every viewport edge while panning.
