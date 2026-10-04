@@ -1,0 +1,26 @@
+"""Copies the chosen Sound Lab variants into assets/audio/sfx.
+
+    python apply_choices.py choices.txt
+
+choices.txt is the text from the Sound Lab "copy choices" button
+(lines like `ui_tap=C`). Cues marked `?` keep their current sound.
+"""
+import os
+import shutil
+import sys
+
+HERE = os.path.dirname(__file__)
+LAB = os.path.join(HERE, '..', '..', 'sound_lab')
+SFX = os.path.join(HERE, '..', '..', 'assets', 'audio', 'sfx')
+
+applied = 0
+for line in open(sys.argv[1], encoding='utf-8'):
+    if '=' not in line:
+        continue
+    cue, key = (part.strip() for part in line.split('=', 1))
+    if key not in ('A', 'B', 'C'):
+        print('skip', cue)
+        continue
+    shutil.copyfile(os.path.join(LAB, key, f'{cue}.wav'), os.path.join(SFX, f'{cue}.wav'))
+    applied += 1
+print('applied', applied, 'cues')

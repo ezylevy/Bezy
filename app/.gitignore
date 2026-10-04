@@ -54,3 +54,4 @@ app.*.map.json
 /dist/
 /_local_backup/
 /_original_assets/
+/sound_lab/
